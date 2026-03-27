@@ -809,7 +809,7 @@
     </section>
 
     <!-- Image break 1 -->
-    <div class="img-break" style="background-image: url('images/mise%20en%20page/3.jpg'); background-position: center 44%;"></div>
+    <div class="img-break" style="background-image: url('images/mise%20en%20page/1.jpg'); background-position: center 50%;"></div>
 
     <!-- ══ GALERIE ════════════════════════════════════════ -->
     <section id="galerie">
@@ -1018,7 +1018,7 @@
 
         /* ── Hero background ────────────────────────────── */
         const heroBg = document.getElementById('heroBg');
-        const heroImgSrc = "images/mise%20en%20page/1.jpg";
+        const heroImgSrc = "images/mise%20en%20page/3.jpg";
         const preload = new Image();
         preload.onload = () => {
             heroBg.style.backgroundImage = `url('${heroImgSrc}')`;
@@ -1179,7 +1179,7 @@
             // Image breaks
             addTitle('Photos pleine page');
             const breaks = document.querySelectorAll('.img-break');
-            const breakLabels = ['Paris (break 1)', 'Urbaine (break 2)'];
+            const breakLabels = ['Échafaudage (break 1)', 'Spectacle (break 2)'];
             breaks.forEach((el, i) => {
                 const m = el.style.backgroundPosition.match(/(\d+)%/);
                 const v = m ? parseInt(m[1]) : 50;
