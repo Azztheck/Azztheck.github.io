@@ -1104,6 +1104,52 @@
 
         document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
 
+        /* ── Edit mode (?edit in URL) ───────────────────── */
+        if (new URLSearchParams(window.location.search).has('edit')) {
+            const breaks = document.querySelectorAll('.img-break');
+            const labels = ['Photo Paris (break 1)', 'Photo urbaine (break 2)'];
+
+            const panel = document.createElement('div');
+            panel.style.cssText = `
+                position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+                background: rgba(8,8,8,0.95); border: 1px solid #E8C547;
+                padding: 1.5rem; min-width: 280px; font-family: monospace;
+                font-size: 13px; color: #F0EDE8; backdrop-filter: blur(12px);
+            `;
+            panel.innerHTML = `<div style="color:#E8C547;letter-spacing:0.15em;margin-bottom:1rem;font-size:11px;text-transform:uppercase">Mode Édition — Positions photos</div>`;
+
+            breaks.forEach((el, i) => {
+                const current = el.style.backgroundPosition || 'center center';
+                const yMatch = current.match(/(\d+)%/);
+                const yVal = yMatch ? parseInt(yMatch[1]) : 50;
+
+                const row = document.createElement('div');
+                row.style.cssText = 'margin-bottom:1.2rem;';
+                row.innerHTML = `
+                    <div style="margin-bottom:0.4rem;color:rgba(240,237,232,0.6);font-size:11px">${labels[i]}</div>
+                    <div style="display:flex;align-items:center;gap:0.8rem">
+                        <input type="range" min="0" max="100" value="${yVal}"
+                            style="flex:1;accent-color:#E8C547;cursor:pointer"
+                            id="slider${i}">
+                        <span id="val${i}" style="color:#E8C547;min-width:36px">${yVal}%</span>
+                    </div>
+                `;
+                panel.appendChild(row);
+
+                row.querySelector(`#slider${i}`).addEventListener('input', function() {
+                    const v = this.value;
+                    document.getElementById(`val${i}`).textContent = v + '%';
+                    el.style.backgroundPosition = `center ${v}%`;
+                });
+            });
+
+            const note = document.createElement('div');
+            note.style.cssText = 'color:rgba(240,237,232,0.4);font-size:10px;margin-top:0.5rem;line-height:1.5';
+            note.textContent = 'Ajuste les sliders puis donne les valeurs à Claude.';
+            panel.appendChild(note);
+            document.body.appendChild(panel);
+        }
+
     })();
     </script>
 </body>
