@@ -88,6 +88,19 @@
             transition: color 0.25s;
         }
         .nav-links a:hover { color: var(--text); }
+        .lang-btn {
+            background: none;
+            border: 1px solid rgba(240,237,232,0.18);
+            color: rgba(240,237,232,0.55);
+            font-family: var(--font-body);
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
+            padding: 0.28rem 0.65rem;
+            cursor: pointer;
+            transition: border-color 0.25s, color 0.25s;
+            margin-left: 1rem;
+        }
+        .lang-btn:hover { border-color: var(--accent); color: var(--text); }
 
         /* hamburger mobile */
         .nav-toggle {
@@ -740,11 +753,12 @@
             <span></span><span></span><span></span>
         </div>
         <ul class="nav-links" id="navLinks">
-            <li><a href="#videos" class="nav-item">Vidéos</a></li>
-            <li><a href="#galerie" class="nav-item">Galerie</a></li>
-            <li><a href="#parcours" class="nav-item">Parcours</a></li>
-            <li><a href="#contact" class="nav-item">Contact</a></li>
+            <li><a href="#videos" class="nav-item" data-i18n="nav.videos">Vidéos</a></li>
+            <li><a href="#galerie" class="nav-item" data-i18n="nav.galerie">Galerie</a></li>
+            <li><a href="#parcours" class="nav-item" data-i18n="nav.parcours">Parcours</a></li>
+            <li><a href="#contact" class="nav-item" data-i18n="nav.contact">Contact</a></li>
         </ul>
+        <button class="lang-btn" id="langBtn" aria-label="Switch language">EN</button>
     </nav>
 
     <!-- ══ HERO ══════════════════════════════════════════ -->
@@ -760,18 +774,18 @@
                 <div class="hero-rule-line"></div>
                 <div class="hero-rule-dot"></div>
             </div>
-            <p class="hero-tagline">Acrobate. Traceur. Le mouvement comme liberté.</p>
+            <p class="hero-tagline" data-i18n="hero.tagline">Acrobate. Traceur. Le mouvement comme liberté.</p>
         </div>
         <div class="hero-scroll" id="heroScroll" role="button" aria-label="Défiler vers le bas">
             <div class="scroll-bar"></div>
-            <span class="hero-scroll-label">Découvrir</span>
+            <span class="hero-scroll-label" data-i18n="hero.scroll">Découvrir</span>
         </div>
     </section>
 
     <!-- ══ VIDÉOS ═════════════════════════════════════════ -->
     <section id="videos">
-        <p class="section-label fade-in">Performance</p>
-        <h2 class="section-title fade-in">Vidéos</h2>
+        <p class="section-label fade-in" data-i18n="videos.label">Performance</p>
+        <h2 class="section-title fade-in" data-i18n="videos.title">Vidéos</h2>
         <div class="video-grid fade-in">
             <div class="video-card">
                 <div class="video-wrapper">
@@ -780,7 +794,7 @@
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen></iframe>
                 </div>
-                <span class="video-card-label">Acrobatie</span>
+                <span class="video-card-label" data-i18n="videos.acrobatie">Acrobatie</span>
             </div>
             <div class="video-card">
                 <div class="video-wrapper">
@@ -789,7 +803,7 @@
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen></iframe>
                 </div>
-                <span class="video-card-label">Parkour</span>
+                <span class="video-card-label" data-i18n="videos.parkour">Parkour</span>
             </div>
         </div>
     </section>
@@ -799,8 +813,8 @@
 
     <!-- ══ GALERIE ════════════════════════════════════════ -->
     <section id="galerie">
-        <p class="section-label fade-in">Portfolio</p>
-        <h2 class="section-title fade-in">Galerie</h2>
+        <p class="section-label fade-in" data-i18n="galerie.label">Portfolio</p>
+        <h2 class="section-title fade-in" data-i18n="galerie.title">Galerie</h2>
         <div class="gallery-grid" id="galleryGrid"></div>
     </section>
 
@@ -809,56 +823,56 @@
 
     <!-- ══ PARCOURS ═══════════════════════════════════════ -->
     <section id="parcours">
-        <p class="section-label fade-in">Expérience</p>
-        <h2 class="section-title fade-in">Parcours</h2>
+        <p class="section-label fade-in" data-i18n="parcours.label">Expérience</p>
+        <h2 class="section-title fade-in" data-i18n="parcours.title">Parcours</h2>
         <div class="parcours-grid">
             <!-- Expériences -->
             <div class="fade-in">
-                <p class="parcours-col-title">Expériences professionnelles</p>
+                <p class="parcours-col-title" data-i18n="parcours.col.exp">Expériences professionnelles</p>
                 <div class="timeline">
                     <div class="timeline-item">
                         <div class="timeline-date">2024 — Présent</div>
                         <div class="timeline-body">
-                            <h4>Danseur Traceur Acrobate — Ligne de Vie</h4>
-                            <span class="timeline-company">Compagnie Lézards Bleus · Chorégraphié par Antoine Le Menestrel</span>
+                            <h4 data-i18n="exp.1.title">Danseur Traceur Acrobate — Ligne de Vie</h4>
+                            <span class="timeline-company" data-i18n="exp.1.company">Compagnie Lézards Bleus · Chorégraphié par Antoine Le Menestrel</span>
                             <ul>
-                                <li>France, Maroc, Belgique — théâtres et bâtiments notables</li>
-                                <li>Déplacements en grande hauteur, techniques Parkour</li>
-                                <li>Chorégraphies collectives</li>
+                                <li data-i18n="exp.1.li1">France, Maroc, Belgique — théâtres et bâtiments notables</li>
+                                <li data-i18n="exp.1.li2">Déplacements en grande hauteur, techniques Parkour</li>
+                                <li data-i18n="exp.1.li3">Chorégraphies collectives</li>
                             </ul>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-date">2025</div>
                         <div class="timeline-body">
-                            <h4>Cascadeur — Contamination</h4>
-                            <span class="timeline-company">Parc Astérix</span>
+                            <h4 data-i18n="exp.2.title">Cascadeur — Contamination</h4>
+                            <span class="timeline-company" data-i18n="exp.2.company">Parc Astérix</span>
                             <ul>
-                                <li>Chorégraphies de combat et acrobaties</li>
-                                <li>Suspension en grande hauteur</li>
+                                <li data-i18n="exp.2.li1">Chorégraphies de combat et acrobaties</li>
+                                <li data-i18n="exp.2.li2">Suspension en grande hauteur</li>
                             </ul>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-date">2025</div>
                         <div class="timeline-body">
-                            <h4>Acrobate Traceur — No Limits</h4>
-                            <span class="timeline-company">Compagnie OnCore · Chorégraphié par Etty Eliot</span>
+                            <h4 data-i18n="exp.3.title">Acrobate Traceur — No Limits</h4>
+                            <span class="timeline-company" data-i18n="exp.3.company">Compagnie OnCore · Chorégraphié par Etty Eliot</span>
                             <ul>
-                                <li>Acrobaties et chorégraphies en lien avec le Parkour</li>
-                                <li>Grimpe en hauteur</li>
+                                <li data-i18n="exp.3.li1">Acrobaties et chorégraphies en lien avec le Parkour</li>
+                                <li data-i18n="exp.3.li2">Grimpe en hauteur</li>
                             </ul>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-date">Oct 2022 — Mai 2024</div>
                         <div class="timeline-body">
-                            <h4>Entraîneur Sportif Parkour</h4>
-                            <span class="timeline-company">Association Grenobloise de Parkour</span>
+                            <h4 data-i18n="exp.4.title">Entraîneur Sportif Parkour</h4>
+                            <span class="timeline-company" data-i18n="exp.4.company">Association Grenobloise de Parkour</span>
                             <ul>
-                                <li>Encadrement d'athlètes et groupes loisir</li>
-                                <li>Création et gestion de planification sportive</li>
-                                <li>Mise en place de séances ludiques</li>
+                                <li data-i18n="exp.4.li1">Encadrement d'athlètes et groupes loisir</li>
+                                <li data-i18n="exp.4.li2">Création et gestion de planification sportive</li>
+                                <li data-i18n="exp.4.li3">Mise en place de séances ludiques</li>
                             </ul>
                         </div>
                     </div>
@@ -868,39 +882,39 @@
             <!-- Formation + Compétences -->
             <div class="parcours-right fade-in">
                 <div>
-                    <p class="parcours-col-title">Formation</p>
+                    <p class="parcours-col-title" data-i18n="parcours.col.form">Formation</p>
                     <div class="formation-list">
                         <div class="formation-item">
                             <p class="formation-date">2020 — 2023</p>
-                            <h4>Licence STAPS — Entraînement Sportif</h4>
-                            <p>Université Grenoble Alpes</p>
+                            <h4 data-i18n="form.1.title">Licence STAPS — Entraînement Sportif</h4>
+                            <p data-i18n="form.1.school">Université Grenoble Alpes</p>
                         </div>
                         <div class="formation-item">
                             <p class="formation-date">2022</p>
-                            <h4>DEUG STAPS + Équivalence BPJEPS APT</h4>
-                            <p>Université Grenoble Alpes</p>
+                            <h4 data-i18n="form.2.title">DEUG STAPS + Équivalence BPJEPS APT</h4>
+                            <p data-i18n="form.2.school">Université Grenoble Alpes</p>
                         </div>
                         <div class="formation-item">
                             <p class="formation-date">2019</p>
-                            <h4>Baccalauréat Scientifique</h4>
-                            <p>Lycée Galilée</p>
+                            <h4 data-i18n="form.3.title">Baccalauréat Scientifique</h4>
+                            <p data-i18n="form.3.school">Lycée Galilée</p>
                         </div>
                     </div>
                 </div>
                 <div>
-                    <p class="parcours-col-title">Compétences</p>
+                    <p class="parcours-col-title" data-i18n="parcours.col.comp">Compétences</p>
                     <div class="competences-list">
-                        <div class="competence-item">Acrobate — Tricking · Tumbling · Gym</div>
-                        <div class="competence-item">Parkour — incluant grandes hauteurs</div>
-                        <div class="competence-item">Présence scénique · Jeu d'acteur</div>
+                        <div class="competence-item" data-i18n="comp.1">Acrobate — Tricking · Tumbling · Gym</div>
+                        <div class="competence-item" data-i18n="comp.2">Parkour — incluant grandes hauteurs</div>
+                        <div class="competence-item" data-i18n="comp.3">Présence scénique · Jeu d'acteur</div>
                     </div>
                     <div class="langues-block">
-                        <h5>Langues</h5>
+                        <h5 data-i18n="langues.title">Langues</h5>
                         <div class="langue-item">
-                            <span>Anglais</span><span>Courant</span>
+                            <span data-i18n="lang.1.name">Anglais</span><span data-i18n="lang.1.level">Courant</span>
                         </div>
                         <div class="langue-item">
-                            <span>Espagnol · Portugais</span><span>Débutant</span>
+                            <span data-i18n="lang.2.name">Espagnol · Portugais</span><span data-i18n="lang.2.level">Débutant</span>
                         </div>
                     </div>
                 </div>
@@ -910,40 +924,40 @@
 
     <!-- ══ CONTACT ════════════════════════════════════════ -->
     <section id="contact">
-        <p class="section-label fade-in">Collaboration</p>
-        <h2 class="section-title fade-in">Contact</h2>
+        <p class="section-label fade-in" data-i18n="contact.label">Collaboration</p>
+        <h2 class="section-title fade-in" data-i18n="contact.title">Contact</h2>
         <div class="contact-grid">
             <form class="contact-form fade-in"
                   action="https://formspree.io/f/xdapanyq"
                   method="POST">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="fname">Nom</label>
-                        <input type="text" id="fname" name="name" placeholder="Votre nom" required>
+                        <label for="fname" data-i18n="form.nom">Nom</label>
+                        <input type="text" id="fname" name="name" placeholder="Votre nom" data-i18n-placeholder="form.nom.ph" required>
                     </div>
                     <div class="form-group">
-                        <label for="femail">Email</label>
+                        <label for="femail" data-i18n="form.email">Email</label>
                         <input type="email" id="femail" name="email" placeholder="votre@email.com" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="fsubject">Sujet</label>
-                    <input type="text" id="fsubject" name="subject" placeholder="Proposition de spectacle, événement privé...">
+                    <label for="fsubject" data-i18n="form.sujet">Sujet</label>
+                    <input type="text" id="fsubject" name="subject" placeholder="Proposition de spectacle, événement privé..." data-i18n-placeholder="form.sujet.ph">
                 </div>
                 <div class="form-group">
-                    <label for="fmessage">Message</label>
-                    <textarea id="fmessage" name="message" placeholder="Décrivez votre projet, la date envisagée, le lieu..." required></textarea>
+                    <label for="fmessage" data-i18n="form.message">Message</label>
+                    <textarea id="fmessage" name="message" placeholder="Décrivez votre projet, la date envisagée, le lieu..." data-i18n-placeholder="form.message.ph" required></textarea>
                 </div>
-                <button type="submit" class="btn-submit">Envoyer</button>
+                <button type="submit" class="btn-submit" data-i18n="form.submit">Envoyer</button>
             </form>
 
             <div class="contact-side fade-in">
                 <div class="contact-block">
-                    <h3>Email</h3>
+                    <h3 data-i18n="contact.email.title">Email</h3>
                     <a href="mailto:dagonet.noe@gmail.com">dagonet.noe@gmail.com</a>
                 </div>
                 <div class="contact-block">
-                    <h3>Instagram</h3>
+                    <h3 data-i18n="contact.insta.title">Instagram</h3>
                     <a href="https://www.instagram.com/noe.parkur/"
                        target="_blank" rel="noopener noreferrer"
                        class="insta-link">
@@ -954,8 +968,8 @@
                     </a>
                 </div>
                 <div class="contact-block">
-                    <h3>Disponibilités</h3>
-                    <p class="contact-availability">Ouvert aux propositions en France et à l'international</p>
+                    <h3 data-i18n="contact.dispo.title">Disponibilités</h3>
+                    <p class="contact-availability" data-i18n="contact.dispo.text">Ouvert aux propositions en France et à l'international</p>
                 </div>
             </div>
         </div>
@@ -964,7 +978,7 @@
     <!-- Footer -->
     <footer>
         <p>© 2025 Noé Dagonet</p>
-        <p>Acrobate · Traceur · Performer</p>
+        <p data-i18n="footer.tagline">Acrobate · Traceur · Performer</p>
     </footer>
 
     <!-- Lightbox -->
@@ -1038,7 +1052,7 @@
 
             const overlay = document.createElement('div');
             overlay.className = 'gallery-item-overlay';
-            overlay.innerHTML = '<span>Voir</span>';
+            overlay.innerHTML = '<span data-i18n="galerie.voir">Voir</span>';
 
             item.append(img, overlay);
             item.addEventListener('click', () => openLightbox(i));
@@ -1190,6 +1204,135 @@
             panel.appendChild(note);
             document.body.appendChild(panel);
         }
+
+        /* ── i18n translation toggle ────────────────────── */
+        const TRANSLATIONS = {
+            fr: {
+                'nav.videos': 'Vidéos', 'nav.galerie': 'Galerie',
+                'nav.parcours': 'Parcours', 'nav.contact': 'Contact',
+                'hero.tagline': 'Acrobate. Traceur. Le mouvement comme liberté.',
+                'hero.scroll': 'Découvrir',
+                'videos.label': 'Performance', 'videos.title': 'Vidéos',
+                'videos.acrobatie': 'Acrobatie', 'videos.parkour': 'Parkour',
+                'galerie.label': 'Portfolio', 'galerie.title': 'Galerie', 'galerie.voir': 'Voir',
+                'parcours.label': 'Expérience', 'parcours.title': 'Parcours',
+                'parcours.col.exp': 'Expériences professionnelles',
+                'parcours.col.form': 'Formation', 'parcours.col.comp': 'Compétences',
+                'exp.1.title': 'Danseur Traceur Acrobate — Ligne de Vie',
+                'exp.1.company': 'Compagnie Lézards Bleus · Chorégraphié par Antoine Le Menestrel',
+                'exp.1.li1': 'France, Maroc, Belgique — théâtres et bâtiments notables',
+                'exp.1.li2': 'Déplacements en grande hauteur, techniques Parkour',
+                'exp.1.li3': 'Chorégraphies collectives',
+                'exp.2.title': 'Cascadeur — Contamination', 'exp.2.company': 'Parc Astérix',
+                'exp.2.li1': 'Chorégraphies de combat et acrobaties',
+                'exp.2.li2': 'Suspension en grande hauteur',
+                'exp.3.title': 'Acrobate Traceur — No Limits',
+                'exp.3.company': 'Compagnie OnCore · Chorégraphié par Etty Eliot',
+                'exp.3.li1': 'Acrobaties et chorégraphies en lien avec le Parkour',
+                'exp.3.li2': 'Grimpe en hauteur',
+                'exp.4.title': 'Entraîneur Sportif Parkour',
+                'exp.4.company': 'Association Grenobloise de Parkour',
+                'exp.4.li1': "Encadrement d'athlètes et groupes loisir",
+                'exp.4.li2': 'Création et gestion de planification sportive',
+                'exp.4.li3': 'Mise en place de séances ludiques',
+                'form.1.title': 'Licence STAPS — Entraînement Sportif',
+                'form.1.school': 'Université Grenoble Alpes',
+                'form.2.title': 'DEUG STAPS + Équivalence BPJEPS APT',
+                'form.2.school': 'Université Grenoble Alpes',
+                'form.3.title': 'Baccalauréat Scientifique', 'form.3.school': 'Lycée Galilée',
+                'comp.1': 'Acrobate — Tricking · Tumbling · Gym',
+                'comp.2': 'Parkour — incluant grandes hauteurs',
+                'comp.3': "Présence scénique · Jeu d'acteur",
+                'langues.title': 'Langues', 'lang.1.name': 'Anglais', 'lang.1.level': 'Courant',
+                'lang.2.name': 'Espagnol · Portugais', 'lang.2.level': 'Débutant',
+                'contact.label': 'Collaboration', 'contact.title': 'Contact',
+                'form.nom': 'Nom', 'form.email': 'Email',
+                'form.sujet': 'Sujet', 'form.message': 'Message',
+                'form.nom.ph': 'Votre nom',
+                'form.sujet.ph': 'Proposition de spectacle, événement privé...',
+                'form.message.ph': 'Décrivez votre projet, la date envisagée, le lieu...',
+                'form.submit': 'Envoyer',
+                'contact.email.title': 'Email', 'contact.insta.title': 'Instagram',
+                'contact.dispo.title': 'Disponibilités',
+                'contact.dispo.text': "Ouvert aux propositions en France et à l'international",
+                'footer.tagline': 'Acrobate · Traceur · Performer'
+            },
+            en: {
+                'nav.videos': 'Videos', 'nav.galerie': 'Gallery',
+                'nav.parcours': 'Background', 'nav.contact': 'Contact',
+                'hero.tagline': 'Acrobat. Traceur. Movement as language.',
+                'hero.scroll': 'Discover',
+                'videos.label': 'Performance', 'videos.title': 'Videos',
+                'videos.acrobatie': 'Acrobatics', 'videos.parkour': 'Parkour',
+                'galerie.label': 'Portfolio', 'galerie.title': 'Gallery', 'galerie.voir': 'View',
+                'parcours.label': 'Experience', 'parcours.title': 'Background',
+                'parcours.col.exp': 'Professional experience',
+                'parcours.col.form': 'Education', 'parcours.col.comp': 'Skills',
+                'exp.1.title': 'Dancer Traceur Acrobat — Ligne de Vie',
+                'exp.1.company': 'Compagnie Lézards Bleus · Choreographed by Antoine Le Menestrel',
+                'exp.1.li1': 'France, Morocco, Belgium — theatres and landmark buildings',
+                'exp.1.li2': 'High-altitude movement, Parkour techniques',
+                'exp.1.li3': 'Collective choreographies',
+                'exp.2.title': 'Stuntman — Contamination', 'exp.2.company': 'Parc Astérix',
+                'exp.2.li1': 'Combat choreographies and acrobatics',
+                'exp.2.li2': 'High-altitude suspension',
+                'exp.3.title': 'Acrobat Traceur — No Limits',
+                'exp.3.company': 'Compagnie OnCore · Choreographed by Etty Eliot',
+                'exp.3.li1': 'Acrobatics and choreographies linked to Parkour',
+                'exp.3.li2': 'Height climbing',
+                'exp.4.title': 'Parkour Sports Coach',
+                'exp.4.company': 'Association Grenobloise de Parkour',
+                'exp.4.li1': 'Coaching athletes and recreational groups',
+                'exp.4.li2': 'Creating and managing sports planning',
+                'exp.4.li3': 'Developing engaging training sessions',
+                'form.1.title': 'Bachelor of Sports Sciences — Athletic Training',
+                'form.1.school': 'Université Grenoble Alpes',
+                'form.2.title': 'DEUG STAPS + BPJEPS APT Equivalency',
+                'form.2.school': 'Université Grenoble Alpes',
+                'form.3.title': 'Scientific Baccalaureate', 'form.3.school': 'Lycée Galilée',
+                'comp.1': 'Acrobatics — Tricking · Tumbling · Gymnastics',
+                'comp.2': 'Parkour — including high-altitude',
+                'comp.3': 'Stage presence · Acting',
+                'langues.title': 'Languages', 'lang.1.name': 'English', 'lang.1.level': 'Fluent',
+                'lang.2.name': 'Spanish · Portuguese', 'lang.2.level': 'Beginner',
+                'contact.label': 'Collaborate', 'contact.title': 'Contact',
+                'form.nom': 'Name', 'form.email': 'Email',
+                'form.sujet': 'Subject', 'form.message': 'Message',
+                'form.nom.ph': 'Your name',
+                'form.sujet.ph': 'Show proposal, private event...',
+                'form.message.ph': 'Describe your project, the planned date, the venue...',
+                'form.submit': 'Send',
+                'contact.email.title': 'Email', 'contact.insta.title': 'Instagram',
+                'contact.dispo.title': 'Availability',
+                'contact.dispo.text': 'Open to proposals in France and internationally',
+                'footer.tagline': 'Acrobat · Traceur · Performer'
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'fr';
+
+        function applyLang(lang) {
+            const dict = TRANSLATIONS[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (dict[key] !== undefined) el.textContent = dict[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                if (dict[key] !== undefined) el.placeholder = dict[key];
+            });
+            document.getElementById('langBtn').textContent = lang === 'fr' ? 'EN' : 'FR';
+            document.documentElement.lang = lang;
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+        }
+
+        document.getElementById('langBtn').addEventListener('click', () => {
+            applyLang(currentLang === 'fr' ? 'en' : 'fr');
+        });
+
+        // Apply saved language on load (skip if FR to avoid redundant DOM writes)
+        if (currentLang === 'en') applyLang('en');
 
     })();
     </script>
