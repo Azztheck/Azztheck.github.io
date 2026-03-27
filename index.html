@@ -233,7 +233,29 @@
         }
 
         /* ── Videos ────────────────────────────────────── */
-        #videos { padding: 9rem 3rem; }
+        #videos {
+            padding: 9rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        #videos::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(ellipse 70% 60% at 50% 50%, rgba(232,197,71,0.045) 0%, transparent 70%),
+                radial-gradient(rgba(240,237,232,0.06) 1px, transparent 1px);
+            background-size: 100% 100%, 28px 28px;
+            pointer-events: none;
+        }
+        #videos::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 1px; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(232,197,71,0.12), transparent);
+            pointer-events: none;
+        }
         .video-grid {
             display: flex;
             gap: 3.5rem;
@@ -772,7 +794,7 @@
     </section>
 
     <!-- Image break 1 -->
-    <div class="img-break" style="background-image: url('images/mise%20en%20page/3.jpg');"></div>
+    <div class="img-break" style="background-image: url('images/mise%20en%20page/3.jpg'); background-position: center 15%;"></div>
 
     <!-- ══ GALERIE ════════════════════════════════════════ -->
     <section id="galerie">
@@ -782,7 +804,7 @@
     </section>
 
     <!-- Image break 2 -->
-    <div class="img-break" style="background-image: url('images/mise%20en%20page/4.jpg'); background-position: center 30%;"></div>
+    <div class="img-break" style="background-image: url('images/mise%20en%20page/4.jpg'); background-position: center 5%;"></div>
 
     <!-- ══ PARCOURS ═══════════════════════════════════════ -->
     <section id="parcours">
