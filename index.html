@@ -809,7 +809,7 @@
     </section>
 
     <!-- Image break 1 -->
-    <div class="img-break" style="background-image: url('images/mise%20en%20page/1.jpg'); background-position: center 50%;"></div>
+    <div class="img-break" style="background-image: url('images/mise%20en%20page/1.jpg'); background-position: center 19%;"></div>
 
     <!-- ══ GALERIE ════════════════════════════════════════ -->
     <section id="galerie">
@@ -1334,59 +1334,6 @@
         // Apply saved language on load (skip if FR to avoid redundant DOM writes)
         if (currentLang === 'en') applyLang('en');
 
-        /* ── Scaffolding crop slider ─────────────────────── */
-        (() => {
-            const breakEl = document.querySelectorAll('.img-break')[0];
-            const savedVal = parseInt(localStorage.getItem('scaffoldPos') ?? '50');
-            breakEl.style.backgroundPosition = `center ${savedVal}%`;
-
-            const btn = document.createElement('button');
-            btn.textContent = '↕';
-            btn.title = 'Recadrer l\'échafaudage';
-            btn.style.cssText = `
-                position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9990;
-                width: 36px; height: 36px; border-radius: 50%;
-                background: rgba(8,8,8,0.85); border: 1px solid rgba(232,197,71,0.35);
-                color: rgba(232,197,71,0.7); font-size: 1rem; cursor: pointer;
-                display: flex; align-items: center; justify-content: center;
-                transition: border-color 0.2s, color 0.2s; backdrop-filter: blur(8px);
-            `;
-            btn.onmouseenter = () => { btn.style.borderColor = '#E8C547'; btn.style.color = '#E8C547'; };
-            btn.onmouseleave = () => { btn.style.borderColor = 'rgba(232,197,71,0.35)'; btn.style.color = 'rgba(232,197,71,0.7)'; };
-
-            const panel = document.createElement('div');
-            panel.style.cssText = `
-                position: fixed; bottom: 4.5rem; right: 1.5rem; z-index: 9990;
-                background: rgba(8,8,8,0.92); border: 1px solid rgba(232,197,71,0.25);
-                padding: 1rem 1rem 0.8rem; width: 200px;
-                font-family: monospace; font-size: 11px; color: #F0EDE8;
-                backdrop-filter: blur(12px); display: none;
-            `;
-            panel.innerHTML = `
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.7rem">
-                    <span style="color:rgba(240,237,232,0.5);letter-spacing:0.1em;font-size:10px;text-transform:uppercase">Échafaudage</span>
-                    <span id="scaffoldVal" style="color:#E8C547">${savedVal}%</span>
-                </div>
-                <input id="scaffoldSlider" type="range" min="0" max="100" value="${savedVal}"
-                    style="width:100%;accent-color:#E8C547;cursor:pointer;margin-bottom:0.6rem">
-                <div style="color:rgba(240,237,232,0.28);font-size:9px;line-height:1.5">
-                    Valeur sauvegardée automatiquement
-                </div>
-            `;
-
-            document.body.append(btn, panel);
-
-            btn.addEventListener('click', () => {
-                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-            });
-
-            panel.querySelector('#scaffoldSlider').addEventListener('input', function() {
-                const v = parseInt(this.value);
-                breakEl.style.backgroundPosition = `center ${v}%`;
-                panel.querySelector('#scaffoldVal').textContent = v + '%';
-                localStorage.setItem('scaffoldPos', v);
-            });
-        })();
 
     })();
     </script>
