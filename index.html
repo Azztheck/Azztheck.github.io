@@ -32,7 +32,6 @@
             font-family: var(--font-body);
             font-weight: 300;
             overflow-x: hidden;
-            cursor: none;
         }
 
         /* ── Grain overlay ─────────────────────────────── */
@@ -46,26 +45,6 @@
             z-index: 9998;
         }
 
-        /* ── Custom cursor ─────────────────────────────── */
-        #cursor {
-            position: fixed;
-            width: 22px;
-            height: 22px;
-            pointer-events: none;
-            z-index: 9999;
-            mix-blend-mode: difference;
-            transform: translate(-50%, -50%);
-            transition: transform 0.08s ease;
-        }
-        #cursor::before, #cursor::after {
-            content: '';
-            position: absolute;
-            background: white;
-        }
-        #cursor::before { width: 1px; height: 100%; left: 50%; top: 0; }
-        #cursor::after  { height: 1px; width: 100%; top: 50%; left: 0; }
-        body:has(a:hover) #cursor,
-        body:has(button:hover) #cursor { transform: translate(-50%, -50%) scale(1.8); }
 
         /* ── Navigation ────────────────────────────────── */
         nav {
@@ -103,7 +82,7 @@
             font-size: 0.68rem;
             letter-spacing: 0.22em;
             text-transform: uppercase;
-            color: var(--text-dim);
+            color: rgba(240,237,232,0.75);
             text-decoration: none;
             font-weight: 400;
             transition: color 0.25s;
@@ -291,7 +270,7 @@
 
         /* ── Image break ───────────────────────────────── */
         .img-break {
-            height: 65vh;
+            height: 92vh;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -731,9 +710,6 @@
 </head>
 <body>
 
-    <!-- Cursor -->
-    <div id="cursor"></div>
-
     <!-- Navigation -->
     <nav id="nav">
         <a href="#hero" class="nav-logo">ND</a>
@@ -761,7 +737,7 @@
                 <div class="hero-rule-line"></div>
                 <div class="hero-rule-dot"></div>
             </div>
-            <p class="hero-tagline">Acrobate. Traceur. Le mouvement comme langage.</p>
+            <p class="hero-tagline">Acrobate. Traceur. Le mouvement comme liberté.</p>
         </div>
         <div class="hero-scroll" id="heroScroll" role="button" aria-label="Défiler vers le bas">
             <div class="scroll-bar"></div>
@@ -818,6 +794,18 @@
                 <p class="parcours-col-title">Expériences professionnelles</p>
                 <div class="timeline">
                     <div class="timeline-item">
+                        <div class="timeline-date">2024 — Présent</div>
+                        <div class="timeline-body">
+                            <h4>Danseur Traceur Acrobate — Ligne de Vie</h4>
+                            <span class="timeline-company">Compagnie Lézards Bleus · Chorégraphié par Antoine Le Menestrel</span>
+                            <ul>
+                                <li>France, Maroc, Belgique — théâtres et bâtiments notables</li>
+                                <li>Déplacements en grande hauteur, techniques Parkour</li>
+                                <li>Chorégraphies collectives</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
                         <div class="timeline-date">2025</div>
                         <div class="timeline-body">
                             <h4>Cascadeur — Contamination</h4>
@@ -836,18 +824,6 @@
                             <ul>
                                 <li>Acrobaties et chorégraphies en lien avec le Parkour</li>
                                 <li>Grimpe en hauteur</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-date">2024 — Présent</div>
-                        <div class="timeline-body">
-                            <h4>Danseur Traceur Acrobate — Ligne de Vie</h4>
-                            <span class="timeline-company">Compagnie Lézards Bleus · Chorégraphié par Antoine Le Menestrel</span>
-                            <ul>
-                                <li>France, Maroc, Belgique — théâtres et bâtiments notables</li>
-                                <li>Déplacements en grande hauteur, techniques Parkour</li>
-                                <li>Chorégraphies collectives</li>
                             </ul>
                         </div>
                     </div>
@@ -1068,16 +1044,6 @@
             if (e.key === 'ArrowLeft')   lbGo(-1);
         });
 
-        /* ── Custom cursor ──────────────────────────────── */
-        const cursor = document.getElementById('cursor');
-        let mx = 0, my = 0;
-        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-        function animCursor() {
-            cursor.style.left = mx + 'px';
-            cursor.style.top  = my + 'px';
-            requestAnimationFrame(animCursor);
-        }
-        animCursor();
 
         /* ── Nav scroll state ───────────────────────────── */
         const nav = document.getElementById('nav');
