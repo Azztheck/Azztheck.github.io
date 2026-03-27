@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Noé Dagonet — Acrobate et Traceur. Spectacles sur mesure pour organisateurs et événements privés.">
+    <title>Noé Dagonet — Acrobate & Traceur</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #080808;
+            --bg-soft:   #101010;
+            --text:      #F0EDE8;
+            --text-dim:  #666660;
+            --accent:    #E8C547;
+            --border:    #1C1C1C;
+            --font-disp: 'Bebas Neue', cursive;
+            --font-body: 'Cormorant Garamond', serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-weight: 300;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* ── Grain overlay ─────────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.025;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* ── Custom cursor ─────────────────────────────── */
+        #cursor {
+            position: fixed;
+            width: 22px;
+            height: 22px;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: transform 0.08s ease;
+        }
+        #cursor::before, #cursor::after {
+            content: '';
+            position: absolute;
+            background: white;
+        }
+        #cursor::before { width: 1px; height: 100%; left: 50%; top: 0; }
+        #cursor::after  { height: 1px; width: 100%; top: 50%; left: 0; }
+        body:has(a:hover) #cursor,
+        body:has(button:hover) #cursor { transform: translate(-50%, -50%) scale(1.8); }
+
+        /* ── Navigation ────────────────────────────────── */
+        nav {
+            position: fixed;
+            inset: 0 0 auto 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.6rem 3rem;
+            transition: background 0.4s, backdrop-filter 0.4s;
+        }
+        nav.scrolled {
+            background: rgba(8,8,8,0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        nav::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 3rem; right: 3rem;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+        }
+        .nav-logo {
+            font-family: var(--font-disp);
+            font-size: 1.5rem;
+            letter-spacing: 0.08em;
+            color: var(--text);
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            font-family: var(--font-body);
+            font-size: 0.68rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.25s;
+        }
+        .nav-links a:hover { color: var(--text); }
+
+        /* hamburger mobile */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .nav-toggle span {
+            display: block; width: 22px; height: 1px;
+            background: var(--text);
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        .nav-toggle.open span:nth-child(2) { opacity: 0; }
+        .nav-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+        /* ── Hero ──────────────────────────────────────── */
+        #hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transform: scale(1.06);
+            transition: transform 14s cubic-bezier(0.0, 0, 0.2, 1);
+        }
+        .hero-bg.loaded { transform: scale(1); }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                170deg,
+                rgba(8,8,8,0.08) 0%,
+                rgba(8,8,8,0.0) 35%,
+                rgba(8,8,8,0.55) 70%,
+                rgba(8,8,8,0.97) 100%
+            );
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 0 3rem 5.5rem;
+            width: 100%;
+        }
+        .hero-name {
+            font-family: var(--font-disp);
+            font-size: clamp(5.5rem, 14vw, 15rem);
+            line-height: 0.88;
+            letter-spacing: 0.015em;
+            display: block;
+            overflow: hidden;
+        }
+        .hero-name-line {
+            display: block;
+            transform: translateY(110%);
+            animation: slideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .hero-name-line:nth-child(1) { animation-delay: 0.2s; }
+        .hero-name-line:nth-child(2) {
+            animation-delay: 0.32s;
+            color: transparent;
+            -webkit-text-stroke: 1.5px rgba(240,237,232,0.6);
+        }
+        .hero-rule {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.8rem 0 1.4rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 1s forwards;
+        }
+        .hero-rule-line {
+            width: 60px; height: 1px;
+            background: var(--accent);
+        }
+        .hero-rule-dot {
+            width: 3px; height: 3px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .hero-tagline {
+            font-style: italic;
+            font-size: clamp(1rem, 1.6vw, 1.25rem);
+            font-weight: 300;
+            color: rgba(240,237,232,0.65);
+            letter-spacing: 0.04em;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 1.1s forwards;
+        }
+        .hero-scroll {
+            position: absolute;
+            bottom: 3rem; right: 3rem;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0.6rem;
+            opacity: 0;
+            animation: fadeUp 1s ease 1.8s forwards;
+            cursor: pointer;
+        }
+        .hero-scroll-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+        }
+        .scroll-bar {
+            width: 1px; height: 64px;
+            background: rgba(136,136,128,0.25);
+            position: relative; overflow: hidden;
+        }
+        .scroll-bar::after {
+            content: '';
+            position: absolute;
+            top: -100%; left: 0;
+            width: 100%; height: 50%;
+            background: linear-gradient(to bottom, transparent, var(--accent));
+            animation: scrollDrop 2.2s ease-in-out 2.5s infinite;
+        }
+
+        /* ── Section commons ───────────────────────────── */
+        .section-label {
+            font-size: 0.63rem;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 400;
+            margin-bottom: 0.8rem;
+        }
+        .section-title {
+            font-family: var(--font-disp);
+            font-size: clamp(2.8rem, 6vw, 6.5rem);
+            line-height: 1;
+            color: var(--text);
+            margin-bottom: 4rem;
+        }
+
+        /* ── Videos ────────────────────────────────────── */
+        #videos { padding: 9rem 3rem; }
+        .video-grid {
+            display: flex;
+            gap: 3.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .video-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        .video-wrapper {
+            width: 300px;
+            height: 534px;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+        }
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .video-card-label {
+            font-size: 0.63rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        /* ── Image break ───────────────────────────────── */
+        .img-break {
+            height: 65vh;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+        .img-break::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: rgba(8,8,8,0.28);
+        }
+
+        /* ── Galerie ───────────────────────────────────── */
+        #galerie { padding: 9rem 3rem; }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 240px;
+            grid-auto-flow: dense;
+            gap: 3px;
+        }
+        .gallery-item {
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .gallery-item:nth-child(5n+1) { grid-row: span 2; }
+        .gallery-item:nth-child(9n+1) { grid-column: span 2; }
+        .gallery-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), filter 0.4s ease;
+            filter: brightness(0.82) saturate(0.85);
+        }
+        .gallery-item:hover img {
+            transform: scale(1.07);
+            filter: brightness(1) saturate(1.05);
+        }
+        .gallery-item-overlay {
+            position: absolute; inset: 0;
+            background: rgba(8,8,8,0.5);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .gallery-item:hover .gallery-item-overlay { opacity: 1; }
+        .gallery-item-overlay span {
+            font-size: 0.62rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        /* ── Lightbox ──────────────────────────────────── */
+        #lightbox {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.97);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        #lightbox.active { opacity: 1; pointer-events: all; }
+        #lightboxImg {
+            max-width: 88vw; max-height: 88vh;
+            object-fit: contain;
+            display: block;
+        }
+        .lb-close {
+            position: absolute; top: 2rem; right: 2rem;
+            width: 40px; height: 40px;
+            cursor: pointer; background: none; border: none;
+            opacity: 0.6; transition: opacity 0.2s;
+        }
+        .lb-close:hover { opacity: 1; }
+        .lb-close::before, .lb-close::after {
+            content: ''; position: absolute;
+            width: 26px; height: 1px;
+            background: var(--text);
+            top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(45deg);
+        }
+        .lb-close::after { transform: translate(-50%,-50%) rotate(-45deg); }
+        .lb-nav {
+            position: absolute; top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: 1px solid rgba(240,237,232,0.15);
+            color: var(--text); cursor: pointer;
+            width: 44px; height: 44px;
+            font-size: 1.3rem; font-family: var(--font-body);
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .lb-nav:hover { border-color: var(--accent); background: rgba(232,197,71,0.06); }
+        #lbPrev { left: 2rem; }
+        #lbNext { right: 2rem; }
+        .lb-counter {
+            position: absolute; bottom: 2rem; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.62rem; letter-spacing: 0.2em;
+            color: var(--text-dim);
+        }
+
+        /* ── Parcours ──────────────────────────────────── */
+        #parcours { padding: 9rem 3rem; }
+        .parcours-grid {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 6rem;
+        }
+        .parcours-col-title {
+            font-size: 0.62rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .timeline { display: flex; flex-direction: column; gap: 0; }
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 2rem;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .timeline-item:first-child { padding-top: 0; }
+        .timeline-date {
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            font-weight: 400;
+            padding-top: 0.2rem;
+            font-family: var(--font-body);
+        }
+        .timeline-body h4 {
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.02em;
+        }
+        .timeline-body .timeline-company {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+            font-style: italic;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+        .timeline-body ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .timeline-body ul li {
+            font-size: 0.9rem;
+            color: rgba(240,237,232,0.55);
+            padding-left: 1rem;
+            position: relative;
+            line-height: 1.5;
+        }
+        .timeline-body ul li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 0.7rem;
+        }
+        .parcours-right { display: flex; flex-direction: column; gap: 3.5rem; }
+        .formation-list { display: flex; flex-direction: column; gap: 0; }
+        .formation-item {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .formation-item:first-child { padding-top: 0; }
+        .formation-date {
+            font-size: 0.62rem;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+            font-weight: 400;
+        }
+        .formation-item h4 {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.4;
+            margin-bottom: 0.2rem;
+        }
+        .formation-item p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+        .competences-list { display: flex; flex-direction: column; gap: 0.8rem; }
+        .competence-item {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+            color: rgba(240,237,232,0.75);
+        }
+        .competence-item::before {
+            content: '';
+            width: 4px; height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 0.5rem;
+        }
+        .langues-block { margin-top: 1.5rem; }
+        .langues-block h5 {
+            font-size: 0.62rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-bottom: 0.8rem;
+        }
+        .langue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
+        }
+        .langue-item span:last-child {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            font-style: italic;
+        }
+
+        /* ── Contact ───────────────────────────────────── */
+        #contact {
+            padding: 9rem 3rem;
+            border-top: 1px solid var(--border);
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 7rem;
+            margin-top: 0;
+        }
+        .contact-form {
+            display: flex; flex-direction: column;
+            gap: 2rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .form-group {
+            display: flex; flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            font-size: 0.62rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 0;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 1.05rem;
+            font-weight: 300;
+            outline: none;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            border-radius: 0;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus { border-bottom-color: var(--accent); }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: rgba(136,136,128,0.35); }
+        .form-group textarea { resize: none; height: 110px; }
+        .btn-submit {
+            align-self: flex-start;
+            background: transparent;
+            border: 1px solid rgba(240,237,232,0.3);
+            color: var(--text);
+            padding: 0.9rem 2.8rem;
+            font-family: var(--font-body);
+            font-size: 0.72rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+            font-weight: 400;
+        }
+        .btn-submit:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+        .contact-side {
+            display: flex; flex-direction: column;
+            justify-content: center;
+            gap: 3rem;
+            padding-top: 0.5rem;
+        }
+        .contact-block h3 {
+            font-size: 0.62rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-bottom: 0.7rem;
+        }
+        .contact-block a,
+        .contact-block p {
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.25s;
+        }
+        .contact-block a:hover { color: var(--accent); }
+        .insta-link {
+            display: inline-flex;
+            align-items: center; gap: 1rem;
+            padding: 1.1rem 1.6rem;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text);
+            transition: border-color 0.3s, background 0.3s;
+            margin-top: 0.4rem;
+        }
+        .insta-link:hover {
+            border-color: var(--accent);
+            background: rgba(232,197,71,0.04);
+            color: var(--accent) !important;
+        }
+        .insta-link svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+        .insta-link span {
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+        .contact-availability {
+            color: var(--text-dim) !important;
+            font-style: italic;
+            font-size: 0.95rem !important;
+        }
+
+        /* ── Footer ────────────────────────────────────── */
+        footer {
+            padding: 2rem 3rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        footer p {
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+        }
+
+        /* ── Fade-in on scroll ─────────────────────────── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.85s ease, transform 0.85s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── Keyframes ─────────────────────────────────── */
+        @keyframes slideUp {
+            from { transform: translateY(110%); }
+            to   { transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scrollDrop {
+            0%   { top: -50%; opacity: 0; }
+            20%  { opacity: 1; }
+            80%  { opacity: 1; }
+            100% { top: 150%; opacity: 0; }
+        }
+
+        /* ── Mobile ────────────────────────────────────── */
+        @media (max-width: 900px) {
+            nav { padding: 1.2rem 1.5rem; }
+            nav::after { left: 1.5rem; right: 1.5rem; }
+            .nav-links {
+                display: none;
+                position: fixed; inset: 0; top: 0;
+                background: rgba(8,8,8,0.97);
+                flex-direction: column; align-items: center; justify-content: center;
+                gap: 2.5rem; z-index: 999;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { font-size: 1rem; letter-spacing: 0.2em; }
+            .nav-toggle { display: flex; z-index: 1001; }
+            .hero-content { padding: 0 1.5rem 4.5rem; }
+            #videos, #galerie, #parcours, #contact { padding: 5.5rem 1.5rem; }
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: 180px;
+            }
+            .gallery-item:nth-child(5n+1) { grid-row: span 1; }
+            .gallery-item:nth-child(9n+1) { grid-column: span 1; }
+            .parcours-grid { grid-template-columns: 1fr; gap: 3rem; }
+            .timeline-item { grid-template-columns: 90px 1fr; gap: 1rem; }
+            .contact-grid { grid-template-columns: 1fr; gap: 3.5rem; }
+            .form-row { grid-template-columns: 1fr; }
+            footer { flex-direction: column; gap: 0.8rem; text-align: center; }
+            .img-break { background-attachment: scroll; height: 50vw; }
+            .hero-scroll { right: 1.5rem; }
+            #lbPrev { left: 0.5rem; }
+            #lbNext { right: 0.5rem; }
+            .video-wrapper { width: min(280px, 80vw); height: calc(min(280px, 80vw) * 16 / 9); }
+        }
+
+        @media (max-width: 480px) {
+            .hero-name { font-size: clamp(4rem, 18vw, 6rem); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cursor -->
+    <div id="cursor"></div>
+
+    <!-- Navigation -->
+    <nav id="nav">
+        <a href="#hero" class="nav-logo">ND</a>
+        <div class="nav-toggle" id="navToggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#videos" class="nav-item">Vidéos</a></li>
+            <li><a href="#galerie" class="nav-item">Galerie</a></li>
+            <li><a href="#parcours" class="nav-item">Parcours</a></li>
+            <li><a href="#contact" class="nav-item">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- ══ HERO ══════════════════════════════════════════ -->
+    <section id="hero">
+        <div class="hero-bg" id="heroBg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-name" aria-label="Noé Dagonet">
+                <span class="hero-name-line">NOÉ</span>
+                <span class="hero-name-line">DAGONET</span>
+            </h1>
+            <div class="hero-rule">
+                <div class="hero-rule-line"></div>
+                <div class="hero-rule-dot"></div>
+            </div>
+            <p class="hero-tagline">Acrobate. Traceur. Le mouvement comme langage.</p>
+        </div>
+        <div class="hero-scroll" id="heroScroll" role="button" aria-label="Défiler vers le bas">
+            <div class="scroll-bar"></div>
+            <span class="hero-scroll-label">Découvrir</span>
+        </div>
+    </section>
+
+    <!-- ══ VIDÉOS ═════════════════════════════════════════ -->
+    <section id="videos">
+        <p class="section-label fade-in">Performance</p>
+        <h2 class="section-title fade-in">Vidéos</h2>
+        <div class="video-grid fade-in">
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/6gLyatwY5k8"
+                            title="Acrobatie — Noé Dagonet"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+                <span class="video-card-label">Acrobatie</span>
+            </div>
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/2Ex6SD9DYTY"
+                            title="Parkour & Acrobatie — Noé Dagonet"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+                <span class="video-card-label">Parkour + Acrobatie</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image break 1 -->
+    <div class="img-break" style="background-image: url('images/mise%20en%20page/3.jpg');"></div>
+
+    <!-- ══ GALERIE ════════════════════════════════════════ -->
+    <section id="galerie">
+        <p class="section-label fade-in">Portfolio</p>
+        <h2 class="section-title fade-in">Galerie</h2>
+        <div class="gallery-grid" id="galleryGrid"></div>
+    </section>
+
+    <!-- Image break 2 -->
+    <div class="img-break" style="background-image: url('images/mise%20en%20page/4.jpg'); background-position: center 30%;"></div>
+
+    <!-- ══ PARCOURS ═══════════════════════════════════════ -->
+    <section id="parcours">
+        <p class="section-label fade-in">Expérience</p>
+        <h2 class="section-title fade-in">Parcours</h2>
+        <div class="parcours-grid">
+            <!-- Expériences -->
+            <div class="fade-in">
+                <p class="parcours-col-title">Expériences professionnelles</p>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">2025</div>
+                        <div class="timeline-body">
+                            <h4>Cascadeur — Contamination</h4>
+                            <span class="timeline-company">Parc Astérix</span>
+                            <ul>
+                                <li>Chorégraphies de combat et acrobaties</li>
+                                <li>Suspension en grande hauteur</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">2025</div>
+                        <div class="timeline-body">
+                            <h4>Acrobate Traceur — No Limits</h4>
+                            <span class="timeline-company">Compagnie OnCore · Chorégraphié par Etty Eliot</span>
+                            <ul>
+                                <li>Acrobaties et chorégraphies en lien avec le Parkour</li>
+                                <li>Grimpe en hauteur</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">2024 — Présent</div>
+                        <div class="timeline-body">
+                            <h4>Danseur Traceur Acrobate — Ligne de Vie</h4>
+                            <span class="timeline-company">Compagnie Lézards Bleus · Chorégraphié par Antoine Le Menestrel</span>
+                            <ul>
+                                <li>France, Maroc, Belgique — théâtres et bâtiments notables</li>
+                                <li>Déplacements en grande hauteur, techniques Parkour</li>
+                                <li>Chorégraphies collectives</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">Oct 2022 — Mai 2024</div>
+                        <div class="timeline-body">
+                            <h4>Entraîneur Sportif Parkour</h4>
+                            <span class="timeline-company">Association Grenobloise de Parkour</span>
+                            <ul>
+                                <li>Encadrement d'athlètes et groupes loisir</li>
+                                <li>Création et gestion de planification sportive</li>
+                                <li>Mise en place de séances ludiques</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formation + Compétences -->
+            <div class="parcours-right fade-in">
+                <div>
+                    <p class="parcours-col-title">Formation</p>
+                    <div class="formation-list">
+                        <div class="formation-item">
+                            <p class="formation-date">2020 — 2023</p>
+                            <h4>Licence STAPS — Entraînement Sportif</h4>
+                            <p>Université Grenoble Alpes</p>
+                        </div>
+                        <div class="formation-item">
+                            <p class="formation-date">2022</p>
+                            <h4>DEUG STAPS + Équivalence BPJEPS APT</h4>
+                            <p>Université Grenoble Alpes</p>
+                        </div>
+                        <div class="formation-item">
+                            <p class="formation-date">2019</p>
+                            <h4>Baccalauréat Scientifique</h4>
+                            <p>Lycée Galilée</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="parcours-col-title">Compétences</p>
+                    <div class="competences-list">
+                        <div class="competence-item">Acrobate — Tricking · Tumbling · Gym</div>
+                        <div class="competence-item">Parkour — incluant grandes hauteurs</div>
+                        <div class="competence-item">Présence scénique · Jeu d'acteur</div>
+                    </div>
+                    <div class="langues-block">
+                        <h5>Langues</h5>
+                        <div class="langue-item">
+                            <span>Anglais</span><span>Courant</span>
+                        </div>
+                        <div class="langue-item">
+                            <span>Espagnol · Portugais</span><span>Débutant</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ CONTACT ════════════════════════════════════════ -->
+    <section id="contact">
+        <p class="section-label fade-in">Collaboration</p>
+        <h2 class="section-title fade-in">Contact</h2>
+        <div class="contact-grid">
+            <form class="contact-form fade-in"
+                  action="https://formspree.io/f/xdapanyq"
+                  method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fname">Nom</label>
+                        <input type="text" id="fname" name="name" placeholder="Votre nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="femail">Email</label>
+                        <input type="email" id="femail" name="email" placeholder="votre@email.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="fsubject">Sujet</label>
+                    <input type="text" id="fsubject" name="subject" placeholder="Proposition de spectacle, événement privé...">
+                </div>
+                <div class="form-group">
+                    <label for="fmessage">Message</label>
+                    <textarea id="fmessage" name="message" placeholder="Décrivez votre projet, la date envisagée, le lieu..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Envoyer</button>
+            </form>
+
+            <div class="contact-side fade-in">
+                <div class="contact-block">
+                    <h3>Email</h3>
+                    <a href="mailto:dagonet.noe@gmail.com">dagonet.noe@gmail.com</a>
+                </div>
+                <div class="contact-block">
+                    <h3>Instagram</h3>
+                    <a href="https://www.instagram.com/noe.parkur/"
+                       target="_blank" rel="noopener noreferrer"
+                       class="insta-link">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                        <span>@noe.parkur</span>
+                    </a>
+                </div>
+                <div class="contact-block">
+                    <h3>Disponibilités</h3>
+                    <p class="contact-availability">Ouvert aux propositions en France et à l'international</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Noé Dagonet</p>
+        <p>Acrobate · Traceur · Performer</p>
+    </footer>
+
+    <!-- Lightbox -->
+    <div id="lightbox" role="dialog" aria-modal="true" aria-label="Visionneuse de photos">
+        <button class="lb-close" id="lbClose" aria-label="Fermer"></button>
+        <button class="lb-nav" id="lbPrev" aria-label="Photo précédente">‹</button>
+        <img id="lightboxImg" src="" alt="Photo de portfolio">
+        <button class="lb-nav" id="lbNext" aria-label="Photo suivante">›</button>
+        <p class="lb-counter" id="lbCounter"></p>
+    </div>
+
+    <script>
+    (() => {
+        'use strict';
+
+        /* ── Gallery images ─────────────────────────────── */
+        const GALLERY = [
+            'images/galerie/1.jpg',
+            'images/galerie/2.jpeg',
+            'images/galerie/3.jpg',
+            'images/galerie/4.jpeg',
+            'images/galerie/5.jpg',
+            'images/galerie/6.jpg',
+            'images/galerie/7.jpeg',
+            'images/galerie/8.jpeg',
+            'images/galerie/9.jpg',
+            'images/galerie/10.jpg',
+            'images/galerie/11.jpeg',
+            'images/galerie/12.jpeg',
+            'images/galerie/13.jpeg',
+            'images/galerie/14.jpeg',
+            'images/galerie/15.jpeg',
+            'images/galerie/16.JPG',
+            'images/galerie/17.jpeg'
+        ];
+
+        /* ── Hero background ────────────────────────────── */
+        const heroBg = document.getElementById('heroBg');
+        const heroImgSrc = "images/mise%20en%20page/1.jpg";
+        const preload = new Image();
+        preload.onload = () => {
+            heroBg.style.backgroundImage = `url('${heroImgSrc}')`;
+            heroBg.classList.add('loaded');
+        };
+        preload.src = heroImgSrc;
+
+        /* ── Build gallery ──────────────────────────────── */
+        const grid = document.getElementById('galleryGrid');
+        GALLERY.forEach((src, i) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item fade-in';
+            item.style.transitionDelay = `${(i % 4) * 0.08}s`;
+
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = `Photo ${i + 1}`;
+            img.loading = 'lazy';
+            img.decoding = 'async';
+
+            const overlay = document.createElement('div');
+            overlay.className = 'gallery-item-overlay';
+            overlay.innerHTML = '<span>Voir</span>';
+
+            item.append(img, overlay);
+            item.addEventListener('click', () => openLightbox(i));
+            grid.appendChild(item);
+        });
+
+        /* ── Lightbox ───────────────────────────────────── */
+        let current = 0;
+        const lb      = document.getElementById('lightbox');
+        const lbImg   = document.getElementById('lightboxImg');
+        const lbCount = document.getElementById('lbCounter');
+
+        function openLightbox(idx) {
+            current = idx;
+            lbImg.src = GALLERY[idx];
+            lbCount.textContent = `${idx + 1} / ${GALLERY.length}`;
+            lb.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            lb.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        function lbGo(dir) {
+            current = (current + dir + GALLERY.length) % GALLERY.length;
+            lbImg.src = GALLERY[current];
+            lbCount.textContent = `${current + 1} / ${GALLERY.length}`;
+        }
+
+        document.getElementById('lbClose').addEventListener('click', closeLightbox);
+        document.getElementById('lbPrev').addEventListener('click', () => lbGo(-1));
+        document.getElementById('lbNext').addEventListener('click', () => lbGo(1));
+        lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+        document.addEventListener('keydown', e => {
+            if (!lb.classList.contains('active')) return;
+            if (e.key === 'Escape')      closeLightbox();
+            if (e.key === 'ArrowRight')  lbGo(1);
+            if (e.key === 'ArrowLeft')   lbGo(-1);
+        });
+
+        /* ── Custom cursor ──────────────────────────────── */
+        const cursor = document.getElementById('cursor');
+        let mx = 0, my = 0;
+        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+        function animCursor() {
+            cursor.style.left = mx + 'px';
+            cursor.style.top  = my + 'px';
+            requestAnimationFrame(animCursor);
+        }
+        animCursor();
+
+        /* ── Nav scroll state ───────────────────────────── */
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 60);
+        }, { passive: true });
+
+        /* ── Mobile nav toggle ──────────────────────────── */
+        const toggle = document.getElementById('navToggle');
+        const links  = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('open');
+            links.classList.toggle('open');
+        });
+        document.querySelectorAll('.nav-item').forEach(a => {
+            a.addEventListener('click', () => {
+                toggle.classList.remove('open');
+                links.classList.remove('open');
+            });
+        });
+
+        /* ── Hero scroll button ─────────────────────────── */
+        document.getElementById('heroScroll').addEventListener('click', () => {
+            document.getElementById('videos').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        /* ── Intersection Observer (fade-in) ────────────── */
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(({ target, isIntersecting }) => {
+                if (isIntersecting) {
+                    target.classList.add('visible');
+                    io.unobserve(target);
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+    })();
+    </script>
+</body>
+</html>
