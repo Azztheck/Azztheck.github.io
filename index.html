@@ -18,7 +18,7 @@
             --bg-soft:   #101010;
             --text:      #F0EDE8;
             --text-dim:  #666660;
-            --accent:    #E8C547;
+            --accent:    #3ECFCF;
             --border:    #1C1C1C;
             --font-disp: 'Bebas Neue', cursive;
             --font-body: 'Cormorant Garamond', serif;
@@ -256,7 +256,7 @@
             position: absolute;
             inset: 0;
             background-image:
-                radial-gradient(ellipse 70% 60% at 50% 50%, rgba(232,197,71,0.045) 0%, transparent 70%),
+                radial-gradient(ellipse 70% 60% at 50% 50%, rgba(62,207,207,0.045) 0%, transparent 70%),
                 radial-gradient(rgba(240,237,232,0.06) 1px, transparent 1px);
             background-size: 100% 100%, 28px 28px;
             pointer-events: none;
@@ -266,7 +266,7 @@
             position: absolute;
             top: 0; left: 50%; transform: translateX(-50%);
             width: 1px; height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(232,197,71,0.12), transparent);
+            background: linear-gradient(to bottom, transparent, rgba(62,207,207,0.12), transparent);
             pointer-events: none;
         }
         .video-grid {
@@ -400,7 +400,7 @@
             display: flex; align-items: center; justify-content: center;
             transition: border-color 0.2s, background 0.2s;
         }
-        .lb-nav:hover { border-color: var(--accent); background: rgba(232,197,71,0.06); }
+        .lb-nav:hover { border-color: var(--accent); background: rgba(62,207,207,0.06); }
         #lbPrev { left: 2rem; }
         #lbNext { right: 2rem; }
         .lb-counter {
@@ -652,7 +652,7 @@
         }
         .insta-link:hover {
             border-color: var(--accent);
-            background: rgba(232,197,71,0.04);
+            background: rgba(62,207,207,0.04);
             color: var(--accent) !important;
         }
         .insta-link svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
@@ -1137,7 +1137,7 @@
             const panel = document.createElement('div');
             panel.style.cssText = `
                 position: fixed; top: 5rem; right: 1.5rem; z-index: 9999;
-                background: rgba(8,8,8,0.97); border: 1px solid #E8C547;
+                background: rgba(8,8,8,0.97); border: 1px solid #3ECFCF;
                 padding: 1.2rem; width: 260px; font-family: monospace;
                 font-size: 12px; color: #F0EDE8; backdrop-filter: blur(12px);
                 max-height: calc(100vh - 7rem); overflow-y: auto;
@@ -1150,10 +1150,10 @@
                 row.innerHTML = `
                     <div style="display:flex;justify-content:space-between;margin-bottom:3px">
                         <span style="color:rgba(240,237,232,0.55);font-size:10px">${label}</span>
-                        <span id="${id}" style="color:#E8C547">${initVal}%</span>
+                        <span id="${id}" style="color:#3ECFCF">${initVal}%</span>
                     </div>
                     <input type="range" min="0" max="100" value="${initVal}"
-                        style="width:100%;accent-color:#E8C547;cursor:pointer">
+                        style="width:100%;accent-color:#3ECFCF;cursor:pointer">
                 `;
                 row.querySelector('input').addEventListener('input', function() {
                     document.getElementById(id).textContent = this.value + '%';
@@ -1165,14 +1165,14 @@
             // Section title
             const addTitle = (txt) => {
                 const t = document.createElement('div');
-                t.style.cssText = 'color:#E8C547;letter-spacing:0.15em;font-size:10px;text-transform:uppercase;padding:0.6rem 0 0.8rem;border-top:1px solid #1C1C1C;margin-top:0.4rem';
+                t.style.cssText = 'color:#3ECFCF;letter-spacing:0.15em;font-size:10px;text-transform:uppercase;padding:0.6rem 0 0.8rem;border-top:1px solid #1C1C1C;margin-top:0.4rem';
                 t.textContent = txt;
                 panel.appendChild(t);
             };
 
             // Header
             const hdr = document.createElement('div');
-            hdr.style.cssText = 'color:#E8C547;letter-spacing:0.15em;font-size:10px;text-transform:uppercase;margin-bottom:1rem';
+            hdr.style.cssText = 'color:#3ECFCF;letter-spacing:0.15em;font-size:10px;text-transform:uppercase;margin-bottom:1rem';
             hdr.textContent = '⬡ Mode Édition — Recadrage';
             panel.appendChild(hdr);
 
