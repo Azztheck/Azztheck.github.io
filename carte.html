@@ -230,7 +230,7 @@ const loginError  = document.getElementById('login-error');
 async function tryLogin() {
   const hash = await sha256(pwdInput.value);
   if (hash === PWD_HASH) {
-    sessionStorage.setItem('auth', '1');
+    localStorage.setItem('auth', '1');
     loginScreen.style.display = 'none';
     appEl.style.display = 'flex';
     initMap();
@@ -244,11 +244,11 @@ async function tryLogin() {
 document.getElementById('login-btn').addEventListener('click', tryLogin);
 pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 document.getElementById('logout-btn').addEventListener('click', () => {
-  sessionStorage.removeItem('auth');
+  localStorage.removeItem('auth');
   location.reload();
 });
 
-if (sessionStorage.getItem('auth') === '1') {
+if (localStorage.getItem('auth') === '1') {
   loginScreen.style.display = 'none';
   appEl.style.display = 'flex';
   initMap();
