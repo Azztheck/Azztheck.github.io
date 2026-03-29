@@ -248,11 +248,13 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   location.reload();
 });
 
-if (localStorage.getItem('auth') === '1') {
-  loginScreen.style.display = 'none';
-  appEl.style.display = 'flex';
-  initMap();
-}
+window.addEventListener('load', () => {
+  if (localStorage.getItem('auth') === '1') {
+    loginScreen.style.display = 'none';
+    appEl.style.display = 'flex';
+    initMap();
+  }
+});
 
 // ── CSV PARSER ──────────────────────────────────────────
 function parseCSV(text) {
@@ -341,7 +343,7 @@ async function initMap() {
   // Chargement des CSV
   const rows = await Promise.all(SOURCES.map(async s => {
     try {
-      const res = await fetch(s.file);
+      const res = await fetch(s.file, { cache: 'no-cache' });
       if (!res.ok) throw new Error(res.status);
       const data = parseCSV(await res.text());
       return data.map(r => ({ ...r, _region: s.key, _regionLabel: s.label }));

@@ -433,12 +433,14 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   location.reload();
 });
 
-// Reprise de session
-if (localStorage.getItem('auth') === '1') {
-  loginScreen.style.display = 'none';
-  appEl.style.display = 'block';
-  initApp();
-}
+// Reprise de session — on attend que tout soit chargé
+window.addEventListener('load', () => {
+  if (localStorage.getItem('auth') === '1') {
+    loginScreen.style.display = 'none';
+    appEl.style.display = 'block';
+    initApp();
+  }
+});
 
 // ── CSV PARSER ──────────────────────────────────────────
 function parseCSV(text) {
@@ -501,7 +503,7 @@ let perPage = 50;
 async function initApp() {
   const rows = await Promise.all(SOURCES.map(async s => {
     try {
-      const res = await fetch(s.file);
+      const res = await fetch(s.file, { cache: 'no-cache' });
       if (!res.ok) throw new Error(res.status);
       const text = await res.text();
       // Retire le BOM UTF-8 si présent
