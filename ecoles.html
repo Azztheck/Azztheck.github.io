@@ -355,6 +355,14 @@
       <option value="100">100 / page</option>
       <option value="200">200 / page</option>
     </select>
+    <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:4px;padding:4px 10px;">
+      <span style="color:var(--cyan);font-size:.8rem;letter-spacing:1px;white-space:nowrap">⭐ Rayon</span>
+      <input type="number" id="filter-rayon" min="0" placeholder="km"
+        style="width:64px;background:transparent;border:none;color:var(--text);font-family:'Cormorant Garamond',serif;font-size:.95rem;outline:none;" />
+      <span style="color:var(--muted);font-size:.8rem">km</span>
+      <button id="clear-rayon" title="Effacer"
+        style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 2px;line-height:1;">✕</button>
+    </div>
   </div>
 
   <div id="stats"></div>
@@ -372,6 +380,7 @@
           <th data-col="departement">Département</th>
           <th data-col="adresse">Adresse</th>
           <th data-col="statut">Statut</th>
+          <th data-col="_dist" id="th-dist" style="display:none">Distance</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -466,6 +475,18 @@ const SOURCES = [
   { key: 'occitanie', file: 'data/ecoles_occitanie.csv',  label: 'Occitanie' },
 ];
 
+// Coordonnées de Pommier-de-Beaurepaire
+const ORIGIN = { lat: 45.40040530562972, lng: 5.1192795986267745 };
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 let allData = [];
 let filtered = [];
 let sortCol = 'commune', sortDir = 1;
@@ -488,7 +509,14 @@ async function initApp() {
     }
   }));
 
-  allData = rows.flat();
+  allData = rows.flat().map(r => {
+    const lat = parseFloat(r.latitude);
+    const lng = parseFloat(r.longitude);
+    const dist = (!isNaN(lat) && !isNaN(lng))
+      ? haversine(ORIGIN.lat, ORIGIN.lng, lat, lng)
+      : null;
+    return { ...r, _dist: dist };
+  });
   document.getElementById('loading').style.display = 'none';
   document.getElementById('table-wrap').style.display = '';
 
@@ -512,12 +540,18 @@ function applyFilters() {
   const dept    = document.getElementById('filter-dept').value;
   const type    = document.getElementById('filter-type').value;
   const statut  = document.getElementById('filter-statut').value;
+  const rayon   = parseFloat(document.getElementById('filter-rayon').value);
+  const hasRayon = !isNaN(rayon) && rayon > 0;
+
+  // Affiche/masque la colonne distance
+  document.getElementById('th-dist').style.display = hasRayon ? '' : 'none';
 
   filtered = allData.filter(r => {
     if (region  && r._region     !== region)  return false;
     if (dept    && r.departement !== dept)     return false;
     if (type    && r.type_ecole  !== type)     return false;
     if (statut  && r.statut      !== statut)   return false;
+    if (hasRayon && (r._dist === null || r._dist > rayon)) return false;
     if (search) {
       const hay = [r.nom_etablissement, r.commune, r.mail, r.departement, r.adresse].join(' ').toLowerCase();
       if (!hay.includes(search)) return false;
@@ -525,12 +559,17 @@ function applyFilters() {
     return true;
   });
 
-  // Tri
-  filtered.sort((a, b) => {
-    const va = (a[sortCol] || '').toLowerCase();
-    const vb = (b[sortCol] || '').toLowerCase();
-    return va < vb ? -sortDir : va > vb ? sortDir : 0;
-  });
+  // Tri : si rayon actif, trie par distance par défaut
+  if (hasRayon && sortCol === 'commune') {
+    filtered.sort((a, b) => (a._dist ?? 999) - (b._dist ?? 999));
+  } else {
+    filtered.sort((a, b) => {
+      if (sortCol === '_dist') return ((a._dist ?? 999) - (b._dist ?? 999)) * sortDir;
+      const va = (a[sortCol] || '').toLowerCase();
+      const vb = (b[sortCol] || '').toLowerCase();
+      return va < vb ? -sortDir : va > vb ? sortDir : 0;
+    });
+  }
 
   currentPage = 1;
   render();
@@ -567,6 +606,9 @@ function render() {
       <td>${esc(r.departement)}</td>
       <td>${esc(r.adresse)}</td>
       <td><span class="badge ${r.statut === 'Public' ? 'badge-public' : 'badge-prive'}">${esc(r.statut)}</span></td>
+      <td style="display:${document.getElementById('th-dist').style.display};color:var(--cyan);white-space:nowrap">
+        ${r._dist !== null ? r._dist.toFixed(1) + ' km' : '—'}
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -617,8 +659,13 @@ function renderPagination(totalPages) {
 
 // ── EVENTS ──────────────────────────────────────────────
 function bindEvents() {
-  ['search', 'filter-region', 'filter-dept', 'filter-type', 'filter-statut'].forEach(id => {
+  ['search', 'filter-region', 'filter-dept', 'filter-type', 'filter-statut', 'filter-rayon'].forEach(id => {
     document.getElementById(id).addEventListener('input', applyFilters);
+  });
+
+  document.getElementById('clear-rayon').addEventListener('click', () => {
+    document.getElementById('filter-rayon').value = '';
+    applyFilters();
   });
 
   document.getElementById('per-page').addEventListener('change', () => { currentPage = 1; render(); });
