@@ -335,7 +335,23 @@
       <option value="">Toutes les régions</option>
       <option value="aura">Auvergne-Rhône-Alpes</option>
       <option value="bfc">Bourgogne-Franche-Comté</option>
+      <option value="bretagne">Bretagne</option>
+      <option value="centre">Centre-Val de Loire</option>
+      <option value="corse">Corse</option>
+      <option value="grandest">Grand Est</option>
+      <option value="guadeloupe">Guadeloupe</option>
+      <option value="guyane">Guyane</option>
+      <option value="hautsdefrance">Hauts-de-France</option>
+      <option value="idf">Île-de-France</option>
+      <option value="reunion">La Réunion</option>
+      <option value="martinique">Martinique</option>
+      <option value="mayotte">Mayotte</option>
+      <option value="normandie">Normandie</option>
+      <option value="nouvelleaquitaine">Nouvelle-Aquitaine</option>
       <option value="occitanie">Occitanie</option>
+      <option value="pdl">Pays de la Loire</option>
+      <option value="paca">Provence-Alpes-Côte d'Azur</option>
+      <option value="tom">TOM et Collectivités territoriales</option>
     </select>
     <select id="filter-dept">
       <option value="">Tous les départements</option>
@@ -477,9 +493,25 @@ function parseLine(line) {
 
 // ── DATA ────────────────────────────────────────────────
 const SOURCES = [
-  { key: 'aura',      file: 'data/ecoles_aura.csv',      label: 'Auvergne-Rhône-Alpes' },
-  { key: 'bfc',       file: 'data/ecoles_bfc.csv',        label: 'Bourgogne-Franche-Comté' },
-  { key: 'occitanie', file: 'data/ecoles_occitanie.csv',  label: 'Occitanie' },
+  { key: 'aura',            file: 'data/ecoles_aura.csv',                   label: 'Auvergne-Rhône-Alpes' },
+  { key: 'bfc',             file: 'data/ecoles_bfc.csv',                    label: 'Bourgogne-Franche-Comté' },
+  { key: 'bretagne',        file: 'data/ecoles_bretagne.csv',               label: 'Bretagne' },
+  { key: 'centre',          file: 'data/ecoles_centre_val_de_loire.csv',    label: 'Centre-Val de Loire' },
+  { key: 'corse',           file: 'data/ecoles_corse.csv',                  label: 'Corse' },
+  { key: 'grandest',        file: 'data/ecoles_grand_est.csv',              label: 'Grand Est' },
+  { key: 'guadeloupe',      file: 'data/ecoles_guadeloupe.csv',             label: 'Guadeloupe' },
+  { key: 'guyane',          file: 'data/ecoles_guyane.csv',                 label: 'Guyane' },
+  { key: 'hautsdefrance',   file: 'data/ecoles_hauts_de_france.csv',        label: 'Hauts-de-France' },
+  { key: 'idf',             file: 'data/ecoles_ile_de_france.csv',          label: 'Île-de-France' },
+  { key: 'reunion',         file: 'data/ecoles_la_reunion.csv',             label: 'La Réunion' },
+  { key: 'martinique',      file: 'data/ecoles_martinique.csv',             label: 'Martinique' },
+  { key: 'mayotte',         file: 'data/ecoles_mayotte.csv',                label: 'Mayotte' },
+  { key: 'normandie',       file: 'data/ecoles_normandie.csv',              label: 'Normandie' },
+  { key: 'nouvelleaquitaine', file: 'data/ecoles_nouvelle_aquitaine.csv',   label: 'Nouvelle-Aquitaine' },
+  { key: 'occitanie',       file: 'data/ecoles_occitanie.csv',              label: 'Occitanie' },
+  { key: 'pdl',             file: 'data/ecoles_pays_de_la_loire.csv',       label: 'Pays de la Loire' },
+  { key: 'paca',            file: 'data/ecoles_paca.csv',                   label: "Provence-Alpes-Côte d'Azur" },
+  { key: 'tom',             file: 'data/ecoles_tom.csv',                    label: 'TOM et Collectivités territoriales' },
 ];
 
 // Coordonnées de Pommier-de-Beaurepaire
