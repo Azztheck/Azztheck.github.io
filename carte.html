@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carte — Annuaire Écoles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #080808;
+      --surface: #111111;
+      --border:  #1e1e1e;
+      --cyan:    #3ECFCF;
+      --cyan-dim:#2a9999;
+      --text:    #e0e0e0;
+      --muted:   #666;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── LOGIN ─────────────────────────────────────────── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 24px;
+    }
+    #login-screen h1 { font-family:'Bebas Neue',sans-serif; font-size:2.8rem; letter-spacing:4px; color:var(--cyan); }
+    #login-screen p  { color:var(--muted); font-size:.95rem; letter-spacing:1px; }
+    .login-box { display:flex; flex-direction:column; gap:12px; width:320px; }
+    .login-box input {
+      background:var(--surface); border:1px solid var(--border); border-radius:4px;
+      color:var(--text); font-family:'Cormorant Garamond',serif; font-size:1rem;
+      padding:12px 16px; outline:none; transition:border-color .2s;
+    }
+    .login-box input:focus { border-color:var(--cyan); }
+    .login-box button {
+      background:var(--cyan); border:none; border-radius:4px; color:#000;
+      cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:1.1rem;
+      letter-spacing:2px; padding:12px; transition:background .2s;
+    }
+    .login-box button:hover { background:var(--cyan-dim); }
+    #login-error { color:#e05555; font-size:.85rem; text-align:center; min-height:18px; }
+
+    /* ── TOPBAR ────────────────────────────────────────── */
+    #app { display:none; flex-direction:column; height:100vh; }
+
+    #topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 20px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      z-index: 1000;
+    }
+
+    #topbar h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      letter-spacing: 1px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 12px;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .nav-link:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    .sep { color: var(--border); }
+
+    #topbar select, #topbar input[type="search"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: .9rem;
+      padding: 5px 10px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #topbar select:focus, #topbar input:focus { border-color: var(--cyan); }
+    #topbar select option { background: #1a1a1a; }
+    #search-map { min-width: 200px; }
+
+    #stats-bar {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: .8rem;
+      white-space: nowrap;
+    }
+    #stats-bar span { color: var(--cyan); }
+
+    #logout-btn {
+      background:transparent; border:1px solid var(--border); border-radius:4px;
+      color:var(--muted); cursor:pointer; font-family:'Cormorant Garamond',serif;
+      font-size:.85rem; padding:5px 12px; transition:all .2s; white-space:nowrap;
+    }
+    #logout-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+
+    /* ── MAP ───────────────────────────────────────────── */
+    #map { flex: 1; }
+
+    /* Leaflet dark tiles override */
+    .leaflet-tile { filter: brightness(.85) saturate(.7) invert(1) hue-rotate(180deg); }
+    .leaflet-container { background: #1a1a1a; }
+
+    /* Clusters */
+    .marker-cluster-small  { background-color: rgba(62,207,207,.3); }
+    .marker-cluster-small div  { background-color: rgba(62,207,207,.6); color:#000; font-family:'Bebas Neue',sans-serif; font-size:.85rem; }
+    .marker-cluster-medium { background-color: rgba(62,207,207,.4); }
+    .marker-cluster-medium div { background-color: rgba(62,207,207,.7); color:#000; font-family:'Bebas Neue',sans-serif; font-size:.85rem; }
+    .marker-cluster-large  { background-color: rgba(62,207,207,.5); }
+    .marker-cluster-large div  { background-color: rgba(62,207,207,.85); color:#000; font-family:'Bebas Neue',sans-serif; font-size:.85rem; }
+
+    /* Popup */
+    .leaflet-popup-content-wrapper {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .leaflet-popup-tip { background: var(--surface); }
+    .leaflet-popup-content { margin: 14px 16px; font-size: .9rem; line-height: 1.6; }
+    .popup-name { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:1.5px; color:var(--cyan); }
+    .popup-mail a { color: var(--cyan); text-decoration:none; }
+    .popup-mail a:hover { text-decoration:underline; }
+    .popup-muted { color: var(--muted); font-size:.8rem; }
+
+    #loading-map {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ──────────────────────────────────────────── -->
+<div id="login-screen">
+  <h1>Annuaire Écoles</h1>
+  <p>Accès restreint</p>
+  <div class="login-box">
+    <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" />
+    <button id="login-btn">Accéder</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── APP ────────────────────────────────────────────── -->
+<div id="app">
+  <div id="topbar">
+    <h1>Carte Écoles</h1>
+    <a class="nav-link" href="ecoles.html">← Tableau</a>
+    <span class="sep">|</span>
+    <select id="filter-region">
+      <option value="">Toutes les régions</option>
+      <option value="aura">Auvergne-Rhône-Alpes</option>
+      <option value="bfc">Bourgogne-Franche-Comté</option>
+      <option value="occitanie">Occitanie</option>
+    </select>
+    <select id="filter-type">
+      <option value="">Mater + Elem</option>
+      <option value="Mater">Maternelle</option>
+      <option value="Elem">Élémentaire</option>
+    </select>
+    <input type="search" id="search-map" placeholder="Rechercher une école…" />
+    <div id="stats-bar">— écoles</div>
+    <button id="logout-btn">Déconnexion</button>
+  </div>
+
+  <div style="position:relative; flex:1; display:flex; flex-direction:column;">
+    <div id="loading-map">Chargement des données…</div>
+    <div id="map"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+// ── AUTH ────────────────────────────────────────────────
+const PWD_HASH = 'b0b998b00ea0ee906658fbf6bf911c275470c76c813c04706510d457be3d799b';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+const loginScreen = document.getElementById('login-screen');
+const appEl       = document.getElementById('app');
+const pwdInput    = document.getElementById('pwd-input');
+const loginError  = document.getElementById('login-error');
+
+async function tryLogin() {
+  const hash = await sha256(pwdInput.value);
+  if (hash === PWD_HASH) {
+    sessionStorage.setItem('auth', '1');
+    loginScreen.style.display = 'none';
+    appEl.style.display = 'flex';
+    initMap();
+  } else {
+    loginError.textContent = 'Mot de passe incorrect.';
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+
+document.getElementById('login-btn').addEventListener('click', tryLogin);
+pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('auth');
+  location.reload();
+});
+
+if (sessionStorage.getItem('auth') === '1') {
+  loginScreen.style.display = 'none';
+  appEl.style.display = 'flex';
+  initMap();
+}
+
+// ── CSV PARSER ──────────────────────────────────────────
+function parseCSV(text) {
+  const clean = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  const lines = clean.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const headers = parseLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx] ?? ''; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function parseLine(line) {
+  const result = []; let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (c === ';' && !inQuote) { result.push(cur); cur = ''; }
+    else cur += c;
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── MAP ─────────────────────────────────────────────────
+const SOURCES = [
+  { key: 'aura',      file: 'data/ecoles_aura.csv',     label: 'Auvergne-Rhône-Alpes' },
+  { key: 'bfc',       file: 'data/ecoles_bfc.csv',       label: 'Bourgogne-Franche-Comté' },
+  { key: 'occitanie', file: 'data/ecoles_occitanie.csv', label: 'Occitanie' },
+];
+
+let map, clusterGroup;
+let allMarkers = [];   // { marker, data }
+
+const redIcon = L.divIcon({
+  className: '',
+  html: `<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="6" cy="6" r="5" fill="#e05555" stroke="#ff8888" stroke-width="1"/>
+  </svg>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
+});
+
+async function initMap() {
+  map = L.map('map', { zoomControl: true }).setView([45.5, 3.5], 7);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19,
+  }).addTo(map);
+
+  clusterGroup = L.markerClusterGroup({
+    maxClusterRadius: 50,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    chunkedLoading: true,
+  });
+  map.addLayer(clusterGroup);
+
+  // Chargement des CSV
+  const rows = await Promise.all(SOURCES.map(async s => {
+    try {
+      const res = await fetch(s.file);
+      if (!res.ok) throw new Error(res.status);
+      const data = parseCSV(await res.text());
+      return data.map(r => ({ ...r, _region: s.key, _regionLabel: s.label }));
+    } catch(e) { console.warn('Erreur chargement', s.file, e); return []; }
+  }));
+
+  const all = rows.flat();
+  document.getElementById('loading-map').style.display = 'none';
+
+  all.forEach(r => {
+    const lat = parseFloat(r.latitude);
+    const lng = parseFloat(r.longitude);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    const marker = L.marker([lat, lng], { icon: redIcon });
+    marker.bindPopup(`
+      <div class="popup-name">${esc(r.nom_etablissement)}</div>
+      <div class="popup-muted">${esc(r.type_ecole)} · ${esc(r.statut)}</div>
+      <div>${esc(r.adresse)}</div>
+      <div>${esc(r.code_postal)} ${esc(r.commune)}</div>
+      <div class="popup-mail"><a href="mailto:${esc(r.mail)}">${esc(r.mail)}</a></div>
+      <div class="popup-muted">${esc(r._regionLabel)}</div>
+    `, { maxWidth: 280 });
+
+    allMarkers.push({ marker, data: r });
+  });
+
+  applyFilters();
+
+  // Events filtres
+  ['filter-region', 'filter-type'].forEach(id => {
+    document.getElementById(id).addEventListener('change', applyFilters);
+  });
+  document.getElementById('search-map').addEventListener('input', applyFilters);
+}
+
+function applyFilters() {
+  const region = document.getElementById('filter-region').value;
+  const type   = document.getElementById('filter-type').value;
+  const search = document.getElementById('search-map').value.toLowerCase().trim();
+
+  clusterGroup.clearLayers();
+  let count = 0;
+
+  allMarkers.forEach(({ marker, data: r }) => {
+    if (region && r._region !== region) return;
+    if (type   && r.type_ecole !== type) return;
+    if (search) {
+      const hay = [r.nom_etablissement, r.commune, r.mail, r.departement].join(' ').toLowerCase();
+      if (!hay.includes(search)) return;
+    }
+    clusterGroup.addLayer(marker);
+    count++;
+  });
+
+  document.getElementById('stats-bar').innerHTML =
+    `<span>${count.toLocaleString('fr-FR')}</span> école${count > 1 ? 's' : ''}`;
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

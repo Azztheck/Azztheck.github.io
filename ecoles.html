@@ -112,6 +112,19 @@
       color: var(--cyan);
     }
 
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      letter-spacing: 1px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 14px;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .nav-link:hover { border-color: var(--cyan); color: var(--cyan); }
+
     #logout-btn {
       background: transparent;
       border: 1px solid var(--border);
@@ -312,6 +325,7 @@
 <div id="app">
   <header>
     <h1>Annuaire Écoles</h1>
+    <a class="nav-link" href="carte.html">Carte →</a>
     <button id="logout-btn">Déconnexion</button>
   </header>
 
