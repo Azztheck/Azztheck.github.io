@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Écoles — Annuaire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #080808;
+      --surface:  #111111;
+      --border:   #1e1e1e;
+      --cyan:     #3ECFCF;
+      --cyan-dim: #2a9999;
+      --text:     #e0e0e0;
+      --muted:    #666;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ─────────────────────────────────────────── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 24px;
+    }
+
+    #login-screen h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.8rem;
+      letter-spacing: 4px;
+      color: var(--cyan);
+    }
+
+    #login-screen p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+    }
+
+    .login-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 320px;
+    }
+
+    .login-box input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .login-box input:focus { border-color: var(--cyan); }
+
+    .login-box button {
+      background: var(--cyan);
+      border: none;
+      border-radius: 4px;
+      color: #000;
+      cursor: pointer;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      padding: 12px;
+      transition: background .2s;
+    }
+
+    .login-box button:hover { background: var(--cyan-dim); }
+
+    #login-error {
+      color: #e05555;
+      font-size: 0.85rem;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    /* ── APP ───────────────────────────────────────────── */
+    #app { display: none; padding: 32px 24px; max-width: 1400px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      color: var(--cyan);
+    }
+
+    #logout-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      transition: all .2s;
+    }
+    #logout-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* ── FILTRES ───────────────────────────────────────── */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .filters input,
+    .filters select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .filters input:focus,
+    .filters select:focus { border-color: var(--cyan); }
+
+    .filters input { min-width: 220px; }
+
+    .filters select option { background: #1a1a1a; }
+
+    /* ── STATS ─────────────────────────────────────────── */
+    #stats {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      letter-spacing: .5px;
+    }
+
+    #stats span { color: var(--cyan); font-weight: 500; }
+
+    /* ── TABLE ─────────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead th {
+      background: #0f0f0f;
+      border-bottom: 1px solid var(--border);
+      color: var(--cyan);
+      cursor: pointer;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      padding: 12px 14px;
+      text-align: left;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    thead th:hover { color: #fff; }
+    thead th.asc::after  { content: ' ▲'; font-size: .65rem; }
+    thead th.desc::after { content: ' ▼'; font-size: .65rem; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #131313; }
+
+    tbody td {
+      padding: 10px 14px;
+      vertical-align: middle;
+    }
+
+    .badge {
+      border-radius: 3px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+    }
+
+    .badge-mater { background: #1a3a3a; color: var(--cyan); }
+    .badge-elem  { background: #2a1a3a; color: #b06ef0; }
+
+    .badge-public { background: #1a2a1a; color: #6ec46e; }
+    .badge-prive  { background: #2a1a1a; color: #e07070; }
+
+    .mail-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mail-cell a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .mail-cell a:hover { text-decoration: underline; }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .copy-btn.copied { border-color: #6ec46e; color: #6ec46e; }
+
+    .region-badge {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── PAGINATION ────────────────────────────────────── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      transition: all .15s;
+    }
+    .pagination button:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
+    .pagination button:disabled { opacity: .3; cursor: default; }
+    .pagination button.active { background: var(--cyan); border-color: var(--cyan); color: #000; }
+
+    #page-info { color: var(--muted); font-size: 0.85rem; }
+
+    /* ── LOADING ───────────────────────────────────────── */
+    #loading {
+      text-align: center;
+      padding: 60px;
+      color: var(--muted);
+      font-size: 1rem;
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 700px) {
+      #app { padding: 16px 12px; }
+      .filters input { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════ -->
+<div id="login-screen">
+  <h1>Annuaire Écoles</h1>
+  <p>Accès restreint</p>
+  <div class="login-box">
+    <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" />
+    <button id="login-btn">Accéder</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════ -->
+<div id="app">
+  <header>
+    <h1>Annuaire Écoles</h1>
+    <button id="logout-btn">Déconnexion</button>
+  </header>
+
+  <div class="filters">
+    <input type="search" id="search" placeholder="Rechercher (nom, commune, mail…)" />
+    <select id="filter-region">
+      <option value="">Toutes les régions</option>
+      <option value="aura">Auvergne-Rhône-Alpes</option>
+      <option value="bfc">Bourgogne-Franche-Comté</option>
+      <option value="occitanie">Occitanie</option>
+    </select>
+    <select id="filter-dept">
+      <option value="">Tous les départements</option>
+    </select>
+    <select id="filter-type">
+      <option value="">Mater + Elem</option>
+      <option value="Mater">Maternelle</option>
+      <option value="Elem">Élémentaire</option>
+    </select>
+    <select id="filter-statut">
+      <option value="">Public + Privé</option>
+      <option value="Public">Public</option>
+      <option value="Privé">Privé</option>
+    </select>
+    <select id="per-page">
+      <option value="50">50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="200">200 / page</option>
+    </select>
+  </div>
+
+  <div id="stats"></div>
+  <div id="loading">Chargement des données…</div>
+
+  <div class="table-wrap" id="table-wrap" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th data-col="commune">Commune</th>
+          <th data-col="type_ecole">Type</th>
+          <th data-col="mail">Mail</th>
+          <th data-col="code_postal">CP</th>
+          <th data-col="nom_etablissement">Établissement</th>
+          <th data-col="departement">Département</th>
+          <th data-col="adresse">Adresse</th>
+          <th data-col="statut">Statut</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+// ── HASH SHA-256 ────────────────────────────────────────
+const PWD_HASH = 'b0b998b00ea0ee906658fbf6bf911c275470c76c813c04706510d457be3d799b';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ── LOGIN ───────────────────────────────────────────────
+const loginScreen = document.getElementById('login-screen');
+const appEl       = document.getElementById('app');
+const pwdInput    = document.getElementById('pwd-input');
+const loginBtn    = document.getElementById('login-btn');
+const loginError  = document.getElementById('login-error');
+
+async function tryLogin() {
+  const hash = await sha256(pwdInput.value);
+  if (hash === PWD_HASH) {
+    sessionStorage.setItem('auth', '1');
+    loginScreen.style.display = 'none';
+    appEl.style.display = 'block';
+    initApp();
+  } else {
+    loginError.textContent = 'Mot de passe incorrect.';
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+
+loginBtn.addEventListener('click', tryLogin);
+pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('auth');
+  location.reload();
+});
+
+// Reprise de session
+if (sessionStorage.getItem('auth') === '1') {
+  loginScreen.style.display = 'none';
+  appEl.style.display = 'block';
+  initApp();
+}
+
+// ── CSV PARSER ──────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const headers = parseLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx] ?? ''; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function parseLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuote && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (c === ';' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── DATA ────────────────────────────────────────────────
+const SOURCES = [
+  { key: 'aura',      file: 'data/ecoles_aura.csv',      label: 'Auvergne-Rhône-Alpes' },
+  { key: 'bfc',       file: 'data/ecoles_bfc.csv',        label: 'Bourgogne-Franche-Comté' },
+  { key: 'occitanie', file: 'data/ecoles_occitanie.csv',  label: 'Occitanie' },
+];
+
+let allData = [];
+let filtered = [];
+let sortCol = 'commune', sortDir = 1;
+let currentPage = 1;
+let perPage = 50;
+
+async function initApp() {
+  const rows = await Promise.all(SOURCES.map(async s => {
+    try {
+      const res = await fetch(s.file);
+      if (!res.ok) throw new Error(res.status);
+      const text = await res.text();
+      // Retire le BOM UTF-8 si présent
+      const clean = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+      const data = parseCSV(clean);
+      return data.map(r => ({ ...r, _region: s.key, _regionLabel: s.label }));
+    } catch(e) {
+      console.warn(`Impossible de charger ${s.file}:`, e);
+      return [];
+    }
+  }));
+
+  allData = rows.flat();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('table-wrap').style.display = '';
+
+  // Peuple le filtre départements
+  const depts = [...new Set(allData.map(r => r.departement).filter(Boolean))].sort();
+  const deptSel = document.getElementById('filter-dept');
+  depts.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d; o.textContent = d;
+    deptSel.appendChild(o);
+  });
+
+  applyFilters();
+  bindEvents();
+}
+
+// ── FILTRES & RENDU ─────────────────────────────────────
+function applyFilters() {
+  const search  = document.getElementById('search').value.toLowerCase().trim();
+  const region  = document.getElementById('filter-region').value;
+  const dept    = document.getElementById('filter-dept').value;
+  const type    = document.getElementById('filter-type').value;
+  const statut  = document.getElementById('filter-statut').value;
+
+  filtered = allData.filter(r => {
+    if (region  && r._region     !== region)  return false;
+    if (dept    && r.departement !== dept)     return false;
+    if (type    && r.type_ecole  !== type)     return false;
+    if (statut  && r.statut      !== statut)   return false;
+    if (search) {
+      const hay = [r.nom_etablissement, r.commune, r.mail, r.departement, r.adresse].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // Tri
+  filtered.sort((a, b) => {
+    const va = (a[sortCol] || '').toLowerCase();
+    const vb = (b[sortCol] || '').toLowerCase();
+    return va < vb ? -sortDir : va > vb ? sortDir : 0;
+  });
+
+  currentPage = 1;
+  render();
+}
+
+function render() {
+  perPage = parseInt(document.getElementById('per-page').value);
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  currentPage = Math.min(currentPage, totalPages);
+  const start = (currentPage - 1) * perPage;
+  const page  = filtered.slice(start, start + perPage);
+
+  // Stats
+  document.getElementById('stats').innerHTML =
+    `<span>${total.toLocaleString('fr-FR')}</span> école${total > 1 ? 's' : ''} — page <span>${currentPage}</span>/<span>${totalPages}</span>`;
+
+  // Lignes
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  page.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${esc(r.commune)}</td>
+      <td><span class="badge ${r.type_ecole === 'Mater' ? 'badge-mater' : 'badge-elem'}">${esc(r.type_ecole)}</span></td>
+      <td>
+        <div class="mail-cell">
+          <a href="mailto:${esc(r.mail)}">${esc(r.mail)}</a>
+          <button class="copy-btn" data-mail="${esc(r.mail)}">Copier</button>
+        </div>
+      </td>
+      <td>${esc(r.code_postal)}</td>
+      <td>${esc(r.nom_etablissement)}</td>
+      <td>${esc(r.departement)}</td>
+      <td>${esc(r.adresse)}</td>
+      <td><span class="badge ${r.statut === 'Public' ? 'badge-public' : 'badge-prive'}">${esc(r.statut)}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // En-têtes triées
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('asc', 'desc');
+    if (th.dataset.col === sortCol) th.classList.add(sortDir === 1 ? 'asc' : 'desc');
+  });
+
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const el = document.getElementById('pagination');
+  el.innerHTML = '';
+
+  const btn = (label, page, active = false, disabled = false) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    if (active) b.classList.add('active');
+    b.disabled = disabled;
+    b.addEventListener('click', () => { currentPage = page; render(); window.scrollTo(0, 0); });
+    return b;
+  };
+
+  el.appendChild(btn('←', currentPage - 1, false, currentPage === 1));
+
+  // Pages visibles
+  const delta = 2;
+  const pages = new Set([1, totalPages]);
+  for (let i = Math.max(1, currentPage - delta); i <= Math.min(totalPages, currentPage + delta); i++) pages.add(i);
+  const sorted = [...pages].sort((a, b) => a - b);
+
+  let prev = 0;
+  sorted.forEach(p => {
+    if (p - prev > 1) {
+      const span = document.createElement('span');
+      span.id = 'page-info'; span.textContent = '…';
+      el.appendChild(span);
+    }
+    el.appendChild(btn(p, p, p === currentPage));
+    prev = p;
+  });
+
+  el.appendChild(btn('→', currentPage + 1, false, currentPage === totalPages));
+}
+
+// ── EVENTS ──────────────────────────────────────────────
+function bindEvents() {
+  ['search', 'filter-region', 'filter-dept', 'filter-type', 'filter-statut'].forEach(id => {
+    document.getElementById(id).addEventListener('input', applyFilters);
+  });
+
+  document.getElementById('per-page').addEventListener('change', () => { currentPage = 1; render(); });
+
+  document.querySelectorAll('thead th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      if (sortCol === th.dataset.col) sortDir *= -1;
+      else { sortCol = th.dataset.col; sortDir = 1; }
+      applyFilters();
+    });
+  });
+
+  document.getElementById('tbody').addEventListener('click', e => {
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    navigator.clipboard.writeText(btn.dataset.mail).then(() => {
+      btn.textContent = '✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 1500);
+    });
+  });
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
