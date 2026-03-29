@@ -3,308 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Écoles — Annuaire</title>
+  <title>Annuaire</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #080808;
-      --surface:  #111111;
-      --border:   #1e1e1e;
-      --cyan:     #3ECFCF;
-      --cyan-dim: #2a9999;
-      --text:     #e0e0e0;
-      --muted:    #666;
+      --bg:         #080808;
+      --surface:    #111111;
+      --border:     #1e1e1e;
+      --accent:     #3ECFCF;
+      --accent-dim: #2a9999;
+      --text:       #e0e0e0;
+      --muted:      #666;
     }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 15px;
-      min-height: 100vh;
+    body { background:var(--bg); color:var(--text); font-family:'Cormorant Garamond',Georgia,serif; font-size:15px; min-height:100vh; }
+
+    /* ── LOGIN ── */
+    #login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:24px; }
+    #login-screen h1 { font-family:'Bebas Neue',sans-serif; font-size:2.8rem; letter-spacing:4px; color:var(--accent); }
+    #login-screen p  { color:var(--muted); font-size:.95rem; letter-spacing:1px; }
+    .login-box { display:flex; flex-direction:column; gap:12px; width:320px; }
+    .login-box input { background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'Cormorant Garamond',serif; font-size:1rem; padding:12px 16px; outline:none; transition:border-color .2s; }
+    .login-box input:focus { border-color:var(--accent); }
+    .login-box button { background:var(--accent); border:none; border-radius:4px; color:#000; cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; padding:12px; transition:background .2s; }
+    .login-box button:hover { background:var(--accent-dim); }
+    #login-error { color:#e05555; font-size:.85rem; text-align:center; min-height:18px; }
+
+    /* ── APP ── */
+    #app { display:none; padding:32px 24px; max-width:1400px; margin:0 auto; }
+
+    header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:10px; }
+    header h1 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:3px; color:var(--accent); transition:color .3s; white-space:nowrap; }
+
+    /* ── MODE TABS ── */
+    .mode-tabs { display:flex; gap:4px; }
+    .mode-tab {
+      background:transparent; border:1px solid var(--border); border-radius:4px;
+      color:var(--muted); cursor:pointer; font-family:'Bebas Neue',sans-serif;
+      font-size:.9rem; letter-spacing:1.5px; padding:7px 16px; transition:all .2s; white-space:nowrap;
     }
+    .mode-tab:hover { border-color:var(--accent); color:var(--accent); }
+    .mode-tab[data-mode="all"].active       { background:#e0e0e0; border-color:#e0e0e0; color:#000; }
+    .mode-tab[data-mode="ecoles"].active    { background:#3ECFCF; border-color:#3ECFCF; color:#000; }
+    .mode-tab[data-mode="mairies"].active   { background:#E8A838; border-color:#E8A838; color:#000; }
+    .mode-tab[data-mode="spectacle"].active { background:#A855F7; border-color:#A855F7; color:#fff; }
 
-    /* ── LOGIN ─────────────────────────────────────────── */
-    #login-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      gap: 24px;
-    }
+    .nav-link { color:var(--muted); text-decoration:none; font-size:.85rem; letter-spacing:1px; border:1px solid var(--border); border-radius:4px; padding:6px 14px; transition:all .2s; white-space:nowrap; }
+    .nav-link:hover { border-color:var(--accent); color:var(--accent); }
+    #logout-btn { background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--muted); cursor:pointer; font-family:'Cormorant Garamond',serif; font-size:.85rem; padding:6px 14px; transition:all .2s; }
+    #logout-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-    #login-screen h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.8rem;
-      letter-spacing: 4px;
-      color: var(--cyan);
-    }
+    /* ── FILTERS ── */
+    .filters { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; align-items:center; }
+    .filters input, .filters select { background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'Cormorant Garamond',serif; font-size:.95rem; padding:8px 12px; outline:none; transition:border-color .2s; }
+    .filters input:focus, .filters select:focus { border-color:var(--accent); }
+    .filters input[type="search"] { min-width:220px; }
+    .filters select option { background:#1a1a1a; }
 
-    #login-screen p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      letter-spacing: 1px;
-    }
+    /* ── STATS ── */
+    #stats { color:var(--muted); font-size:.85rem; letter-spacing:.5px; }
+    #stats span { color:var(--accent); font-weight:500; transition:color .3s; }
 
-    .login-box {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 320px;
-    }
+    /* ── TABLE ── */
+    .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:6px; }
+    table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    thead th { background:#0f0f0f; border-bottom:1px solid var(--border); color:var(--accent); cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:.85rem; letter-spacing:1.5px; padding:12px 14px; text-align:left; user-select:none; white-space:nowrap; transition:color .3s; }
+    thead th:hover { color:#fff; }
+    thead th.asc::after  { content:' ▲'; font-size:.65rem; }
+    thead th.desc::after { content:' ▼'; font-size:.65rem; }
+    tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:#131313; }
+    tbody td { padding:10px 14px; vertical-align:middle; }
 
-    .login-box input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      color: var(--text);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      padding: 12px 16px;
-      outline: none;
-      transition: border-color .2s;
-    }
+    .badge { border-radius:3px; font-family:'Bebas Neue',sans-serif; font-size:.75rem; letter-spacing:1px; padding:2px 7px; }
+    .badge-mater       { background:#1a3a3a; color:#3ECFCF; }
+    .badge-elem        { background:#2a1a3a; color:#b06ef0; }
+    .badge-public      { background:#1a2a1a; color:#6ec46e; }
+    .badge-prive       { background:#2a1a1a; color:#e07070; }
+    .badge-valide      { background:#1a2a1a; color:#6ec46e; }
+    .badge-invalide    { background:#2a1a1a; color:#e07070; }
+    .badge-expire      { background:#2a2a1a; color:#c0a040; }
+    .badge-instruction { background:#1a1a2a; color:#7070e0; }
+    .badge-ecole       { background:#1a3a3a; color:#3ECFCF; }
+    .badge-mairie      { background:#2a1e0a; color:#E8A838; }
+    .badge-spectacle   { background:#1e0a2a; color:#A855F7; }
 
-    .login-box input:focus { border-color: var(--cyan); }
+    .mail-cell { display:flex; align-items:center; gap:8px; }
+    .mail-cell a { color:var(--accent); text-decoration:none; transition:color .3s; }
+    .mail-cell a:hover { text-decoration:underline; }
+    .copy-btn { background:transparent; border:1px solid var(--border); border-radius:3px; color:var(--muted); cursor:pointer; font-size:.7rem; padding:2px 6px; transition:all .15s; white-space:nowrap; }
+    .copy-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .copy-btn.copied { border-color:#6ec46e; color:#6ec46e; }
 
-    .login-box button {
-      background: var(--cyan);
-      border: none;
-      border-radius: 4px;
-      color: #000;
-      cursor: pointer;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.1rem;
-      letter-spacing: 2px;
-      padding: 12px;
-      transition: background .2s;
-    }
+    /* ── PAGINATION ── */
+    .pagination { display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap; }
+    .pagination button { background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text); cursor:pointer; font-family:'Cormorant Garamond',serif; font-size:.9rem; padding:6px 12px; transition:all .15s; }
+    .pagination button:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+    .pagination button:disabled { opacity:.3; cursor:default; }
+    .pagination button.active { background:var(--accent); border-color:var(--accent); color:#000; }
 
-    .login-box button:hover { background: var(--cyan-dim); }
+    #loading { text-align:center; padding:60px; color:var(--muted); font-size:1rem; letter-spacing:2px; }
 
-    #login-error {
-      color: #e05555;
-      font-size: 0.85rem;
-      text-align: center;
-      min-height: 18px;
-    }
-
-    /* ── APP ───────────────────────────────────────────── */
-    #app { display: none; padding: 32px 24px; max-width: 1400px; margin: 0 auto; }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    header h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      letter-spacing: 3px;
-      color: var(--cyan);
-    }
-
-    .nav-link {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: .85rem;
-      letter-spacing: 1px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 6px 14px;
-      transition: all .2s;
-      white-space: nowrap;
-    }
-    .nav-link:hover { border-color: var(--cyan); color: var(--cyan); }
-
-    #logout-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      color: var(--muted);
-      cursor: pointer;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.85rem;
-      padding: 6px 14px;
-      transition: all .2s;
-    }
-    #logout-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-
-    /* ── FILTRES ───────────────────────────────────────── */
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 16px;
-      align-items: center;
-    }
-
-    .filters input,
-    .filters select {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      color: var(--text);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem;
-      padding: 8px 12px;
-      outline: none;
-      transition: border-color .2s;
-    }
-
-    .filters input:focus,
-    .filters select:focus { border-color: var(--cyan); }
-
-    .filters input { min-width: 220px; }
-
-    .filters select option { background: #1a1a1a; }
-
-    /* ── STATS ─────────────────────────────────────────── */
-    #stats {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-bottom: 12px;
-      letter-spacing: .5px;
-    }
-
-    #stats span { color: var(--cyan); font-weight: 500; }
-
-    /* ── TABLE ─────────────────────────────────────────── */
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-
-    thead th {
-      background: #0f0f0f;
-      border-bottom: 1px solid var(--border);
-      color: var(--cyan);
-      cursor: pointer;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 1.5px;
-      padding: 12px 14px;
-      text-align: left;
-      user-select: none;
-      white-space: nowrap;
-    }
-
-    thead th:hover { color: #fff; }
-    thead th.asc::after  { content: ' ▲'; font-size: .65rem; }
-    thead th.desc::after { content: ' ▼'; font-size: .65rem; }
-
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background .15s;
-    }
-
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #131313; }
-
-    tbody td {
-      padding: 10px 14px;
-      vertical-align: middle;
-    }
-
-    .badge {
-      border-radius: 3px;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 1px;
-      padding: 2px 7px;
-    }
-
-    .badge-mater { background: #1a3a3a; color: var(--cyan); }
-    .badge-elem  { background: #2a1a3a; color: #b06ef0; }
-
-    .badge-public { background: #1a2a1a; color: #6ec46e; }
-    .badge-prive  { background: #2a1a1a; color: #e07070; }
-
-    .mail-cell {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .mail-cell a {
-      color: var(--cyan);
-      text-decoration: none;
-    }
-    .mail-cell a:hover { text-decoration: underline; }
-
-    .copy-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      transition: all .15s;
-      white-space: nowrap;
-    }
-    .copy-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-    .copy-btn.copied { border-color: #6ec46e; color: #6ec46e; }
-
-    .region-badge {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    /* ── PAGINATION ────────────────────────────────────── */
-    .pagination {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-
-    .pagination button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      color: var(--text);
-      cursor: pointer;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.9rem;
-      padding: 6px 12px;
-      transition: all .15s;
-    }
-    .pagination button:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
-    .pagination button:disabled { opacity: .3; cursor: default; }
-    .pagination button.active { background: var(--cyan); border-color: var(--cyan); color: #000; }
-
-    #page-info { color: var(--muted); font-size: 0.85rem; }
-
-    /* ── LOADING ───────────────────────────────────────── */
-    #loading {
-      text-align: center;
-      padding: 60px;
-      color: var(--muted);
-      font-size: 1rem;
-      letter-spacing: 2px;
-    }
-
-    @media (max-width: 700px) {
-      #app { padding: 16px 12px; }
-      .filters input { min-width: 100%; }
+    @media (max-width:700px) {
+      #app { padding:16px 12px; }
+      .filters input[type="search"] { min-width:100%; }
+      .mode-tab { font-size:.75rem; padding:5px 10px; letter-spacing:1px; }
     }
   </style>
 </head>
@@ -312,7 +119,7 @@
 
 <!-- ══ LOGIN ══════════════════════════════════════════════ -->
 <div id="login-screen">
-  <h1>Annuaire Écoles</h1>
+  <h1>Annuaire</h1>
   <p>Accès restreint</p>
   <div class="login-box">
     <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" />
@@ -324,14 +131,30 @@
 <!-- ══ APP ════════════════════════════════════════════════ -->
 <div id="app">
   <header>
-    <h1>Annuaire Écoles</h1>
+    <h1 id="page-title">Annuaire Écoles</h1>
+    <div class="mode-tabs">
+      <button class="mode-tab" data-mode="all">Tout</button>
+      <button class="mode-tab active" data-mode="ecoles">Écoles</button>
+      <button class="mode-tab" data-mode="mairies">Mairies</button>
+      <button class="mode-tab" data-mode="spectacle">Spectacle</button>
+    </div>
     <a class="nav-link" href="carte.html">Carte →</a>
     <button id="logout-btn">Déconnexion</button>
   </header>
 
   <div class="filters">
-    <input type="search" id="search" placeholder="Rechercher (nom, commune, mail…)" />
-    <select id="filter-region">
+    <input type="search" id="search" placeholder="Rechercher…" />
+
+    <!-- All -->
+    <select id="filter-source" style="display:none">
+      <option value="">Toutes les sources</option>
+      <option value="ecole">Écoles</option>
+      <option value="mairie">Mairies</option>
+      <option value="spectacle">Spectacle</option>
+    </select>
+
+    <!-- Écoles: région -->
+    <select id="filter-region-ecole">
       <option value="">Toutes les régions</option>
       <option value="aura">Auvergne-Rhône-Alpes</option>
       <option value="bfc">Bourgogne-Franche-Comté</option>
@@ -353,401 +176,546 @@
       <option value="paca">Provence-Alpes-Côte d'Azur</option>
       <option value="tom">TOM et Collectivités territoriales</option>
     </select>
-    <select id="filter-dept">
-      <option value="">Tous les départements</option>
+
+    <!-- Spectacle: région (peuplée dynamiquement) -->
+    <select id="filter-region-spectacle" style="display:none">
+      <option value="">Toutes les régions</option>
     </select>
+
+    <!-- Common: département -->
+    <select id="filter-dept"><option value="">Tous les départements</option></select>
+
+    <!-- Écoles -->
     <select id="filter-type">
       <option value="">Mater + Elem</option>
       <option value="Mater">Maternelle</option>
       <option value="Elem">Élémentaire</option>
     </select>
-    <select id="filter-statut">
+    <select id="filter-statut-ecole">
       <option value="">Public + Privé</option>
       <option value="Public">Public</option>
       <option value="Privé">Privé</option>
     </select>
+
+    <!-- Spectacle -->
+    <select id="filter-statut-spectacle" style="display:none">
+      <option value="Valide">Valide uniquement</option>
+      <option value="">Tous les statuts</option>
+      <option value="Invalide">Invalide</option>
+      <option value="Expiré">Expiré</option>
+      <option value="En instruction">En instruction</option>
+    </select>
+
+    <!-- Common -->
     <select id="per-page">
       <option value="50">50 / page</option>
       <option value="100">100 / page</option>
       <option value="200">200 / page</option>
     </select>
+
     <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:4px;padding:4px 10px;">
-      <span style="color:var(--cyan);font-size:.8rem;letter-spacing:1px;white-space:nowrap">⭐ Rayon</span>
+      <span style="color:var(--accent);font-size:.8rem;letter-spacing:1px;white-space:nowrap;transition:color .3s">⭐ Rayon</span>
       <input type="number" id="filter-rayon" min="0" placeholder="km"
         style="width:64px;background:transparent;border:none;color:var(--text);font-family:'Cormorant Garamond',serif;font-size:.95rem;outline:none;" />
       <span style="color:var(--muted);font-size:.8rem">km</span>
-      <button id="clear-rayon" title="Effacer"
-        style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 2px;line-height:1;">✕</button>
+      <button id="clear-rayon" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 2px;">✕</button>
     </div>
   </div>
 
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
     <div id="stats"></div>
-    <button id="copy-all-btn" style="display:none;background:var(--cyan);border:none;border-radius:4px;color:#000;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1.5px;padding:5px 14px;transition:all .2s;">
+    <button id="copy-all-btn" style="display:none;background:var(--accent);border:none;border-radius:4px;color:#000;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1.5px;padding:5px 14px;transition:all .2s;">
       Copier tous les mails
     </button>
   </div>
+
   <div id="loading">Chargement des données…</div>
 
   <div class="table-wrap" id="table-wrap" style="display:none">
     <table>
-      <thead>
-        <tr>
-          <th data-col="commune">Commune</th>
-          <th data-col="type_ecole">Type</th>
-          <th data-col="mail">Mail</th>
-          <th data-col="code_postal">CP</th>
-          <th data-col="nom_etablissement">Établissement</th>
-          <th data-col="departement">Département</th>
-          <th data-col="adresse">Adresse</th>
-          <th data-col="statut">Statut</th>
-          <th data-col="_dist" id="th-dist" style="display:none">Distance</th>
-        </tr>
-      </thead>
+      <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
-
   <div class="pagination" id="pagination"></div>
 </div>
 
 <script>
-// ── HASH SHA-256 ────────────────────────────────────────
+// ── AUTH ─────────────────────────────────────────────────
 const PWD_HASH = 'b0b998b00ea0ee906658fbf6bf911c275470c76c813c04706510d457be3d799b';
-
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-
-// ── LOGIN ───────────────────────────────────────────────
 const loginScreen = document.getElementById('login-screen');
 const appEl       = document.getElementById('app');
 const pwdInput    = document.getElementById('pwd-input');
-const loginBtn    = document.getElementById('login-btn');
 const loginError  = document.getElementById('login-error');
-
 async function tryLogin() {
   const hash = await sha256(pwdInput.value);
   if (hash === PWD_HASH) {
-    localStorage.setItem('auth', '1');
+    localStorage.setItem('auth','1');
     loginScreen.style.display = 'none';
     appEl.style.display = 'block';
     initApp();
   } else {
     loginError.textContent = 'Mot de passe incorrect.';
-    pwdInput.value = '';
-    pwdInput.focus();
+    pwdInput.value = ''; pwdInput.focus();
   }
 }
-
-loginBtn.addEventListener('click', tryLogin);
-pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
-
-document.getElementById('logout-btn').addEventListener('click', () => {
-  localStorage.removeItem('auth');
-  location.reload();
-});
-
-// Reprise de session — on attend que tout soit chargé
+document.getElementById('login-btn').addEventListener('click', tryLogin);
+pwdInput.addEventListener('keydown', e => { if (e.key==='Enter') tryLogin(); });
+document.getElementById('logout-btn').addEventListener('click', () => { localStorage.removeItem('auth'); location.reload(); });
 window.addEventListener('load', () => {
-  if (localStorage.getItem('auth') === '1') {
-    loginScreen.style.display = 'none';
-    appEl.style.display = 'block';
-    initApp();
-  }
+  if (localStorage.getItem('auth')==='1') { loginScreen.style.display='none'; appEl.style.display='block'; initApp(); }
 });
 
-// ── CSV PARSER ──────────────────────────────────────────
+// ── CSV PARSER ────────────────────────────────────────────
 function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
   const headers = parseLine(lines[0]);
   const rows = [];
-  for (let i = 1; i < lines.length; i++) {
+  for (let i=1; i<lines.length; i++) {
     if (!lines[i].trim()) continue;
     const vals = parseLine(lines[i]);
     const obj = {};
-    headers.forEach((h, idx) => { obj[h] = vals[idx] ?? ''; });
+    headers.forEach((h,idx) => { obj[h] = vals[idx] ?? ''; });
     rows.push(obj);
   }
   return rows;
 }
-
 function parseLine(line) {
-  const result = [];
-  let cur = '', inQuote = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') {
-      if (inQuote && line[i + 1] === '"') { cur += '"'; i++; }
-      else inQuote = !inQuote;
-    } else if (c === ';' && !inQuote) {
-      result.push(cur); cur = '';
-    } else {
-      cur += c;
-    }
+  const result=[]; let cur='', inQuote=false;
+  for (let i=0; i<line.length; i++) {
+    const c=line[i];
+    if (c==='"') { if (inQuote && line[i+1]==='"') { cur+='"'; i++; } else inQuote=!inQuote; }
+    else if (c===';' && !inQuote) { result.push(cur); cur=''; }
+    else cur+=c;
   }
-  result.push(cur);
-  return result;
+  result.push(cur); return result;
 }
 
-// ── DATA ────────────────────────────────────────────────
-const SOURCES = [
-  { key: 'aura',            file: 'data/ecoles_aura.csv',                   label: 'Auvergne-Rhône-Alpes' },
-  { key: 'bfc',             file: 'data/ecoles_bfc.csv',                    label: 'Bourgogne-Franche-Comté' },
-  { key: 'bretagne',        file: 'data/ecoles_bretagne.csv',               label: 'Bretagne' },
-  { key: 'centre',          file: 'data/ecoles_centre_val_de_loire.csv',    label: 'Centre-Val de Loire' },
-  { key: 'corse',           file: 'data/ecoles_corse.csv',                  label: 'Corse' },
-  { key: 'grandest',        file: 'data/ecoles_grand_est.csv',              label: 'Grand Est' },
-  { key: 'guadeloupe',      file: 'data/ecoles_guadeloupe.csv',             label: 'Guadeloupe' },
-  { key: 'guyane',          file: 'data/ecoles_guyane.csv',                 label: 'Guyane' },
-  { key: 'hautsdefrance',   file: 'data/ecoles_hauts_de_france.csv',        label: 'Hauts-de-France' },
-  { key: 'idf',             file: 'data/ecoles_ile_de_france.csv',          label: 'Île-de-France' },
-  { key: 'reunion',         file: 'data/ecoles_la_reunion.csv',             label: 'La Réunion' },
-  { key: 'martinique',      file: 'data/ecoles_martinique.csv',             label: 'Martinique' },
-  { key: 'mayotte',         file: 'data/ecoles_mayotte.csv',                label: 'Mayotte' },
-  { key: 'normandie',       file: 'data/ecoles_normandie.csv',              label: 'Normandie' },
-  { key: 'nouvelleaquitaine', file: 'data/ecoles_nouvelle_aquitaine.csv',   label: 'Nouvelle-Aquitaine' },
-  { key: 'occitanie',       file: 'data/ecoles_occitanie.csv',              label: 'Occitanie' },
-  { key: 'pdl',             file: 'data/ecoles_pays_de_la_loire.csv',       label: 'Pays de la Loire' },
-  { key: 'paca',            file: 'data/ecoles_paca.csv',                   label: "Provence-Alpes-Côte d'Azur" },
-  { key: 'tom',             file: 'data/ecoles_tom.csv',                    label: 'TOM et Collectivités territoriales' },
+// ── HAVERSINE ─────────────────────────────────────────────
+const ORIGIN = { lat:45.40040530562972, lng:5.1192795986267745 };
+function dist(lat, lng) {
+  const la=parseFloat(lat), lo=parseFloat(lng);
+  if (isNaN(la)||isNaN(lo)) return null;
+  const R=6371, dLat=(la-ORIGIN.lat)*Math.PI/180, dLng=(lo-ORIGIN.lng)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(ORIGIN.lat*Math.PI/180)*Math.cos(la*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ── CONFIG ────────────────────────────────────────────────
+const ACCENTS = {
+  all:['#e0e0e0','#aaaaaa'], ecoles:['#3ECFCF','#2a9999'],
+  mairies:['#E8A838','#b07f20'], spectacle:['#A855F7','#7C3ABF'],
+};
+const TITLES = { all:'Annuaire', ecoles:'Annuaire Écoles', mairies:'Annuaire Mairies', spectacle:'Spectacle Vivant' };
+const DEFAULT_SORT = { ecoles:'commune', mairies:'commune', spectacle:'nom_lieu', all:'_nom' };
+const PLACEHOLDERS = {
+  all:'Rechercher (nom, commune, mail, département…)',
+  ecoles:'Rechercher (nom, commune, mail…)',
+  mairies:'Rechercher (nom, commune, mail, téléphone…)',
+  spectacle:'Rechercher (lieu, organisation, CP, région…)',
+};
+
+const ECOLE_SOURCES = [
+  {key:'aura',file:'data/ecoles_aura.csv',label:'Auvergne-Rhône-Alpes'},
+  {key:'bfc',file:'data/ecoles_bfc.csv',label:'Bourgogne-Franche-Comté'},
+  {key:'bretagne',file:'data/ecoles_bretagne.csv',label:'Bretagne'},
+  {key:'centre',file:'data/ecoles_centre_val_de_loire.csv',label:'Centre-Val de Loire'},
+  {key:'corse',file:'data/ecoles_corse.csv',label:'Corse'},
+  {key:'grandest',file:'data/ecoles_grand_est.csv',label:'Grand Est'},
+  {key:'guadeloupe',file:'data/ecoles_guadeloupe.csv',label:'Guadeloupe'},
+  {key:'guyane',file:'data/ecoles_guyane.csv',label:'Guyane'},
+  {key:'hautsdefrance',file:'data/ecoles_hauts_de_france.csv',label:'Hauts-de-France'},
+  {key:'idf',file:'data/ecoles_ile_de_france.csv',label:'Île-de-France'},
+  {key:'reunion',file:'data/ecoles_la_reunion.csv',label:'La Réunion'},
+  {key:'martinique',file:'data/ecoles_martinique.csv',label:'Martinique'},
+  {key:'mayotte',file:'data/ecoles_mayotte.csv',label:'Mayotte'},
+  {key:'normandie',file:'data/ecoles_normandie.csv',label:'Normandie'},
+  {key:'nouvelleaquitaine',file:'data/ecoles_nouvelle_aquitaine.csv',label:'Nouvelle-Aquitaine'},
+  {key:'occitanie',file:'data/ecoles_occitanie.csv',label:'Occitanie'},
+  {key:'pdl',file:'data/ecoles_pays_de_la_loire.csv',label:'Pays de la Loire'},
+  {key:'paca',file:'data/ecoles_paca.csv',label:"Provence-Alpes-Côte d'Azur"},
+  {key:'tom',file:'data/ecoles_tom.csv',label:'TOM et Collectivités territoriales'},
 ];
 
-// Coordonnées de Pommier-de-Beaurepaire
-const ORIGIN = { lat: 45.40040530562972, lng: 5.1192795986267745 };
+// ── STATE ─────────────────────────────────────────────────
+let mode = 'ecoles';
+let ecolesData=[], mairiesData=[], spectacleData=[];
+let filtered=[], sortCol='commune', sortDir=1, currentPage=1, perPage=50;
 
-function haversine(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-let allData = [];
-let filtered = [];
-let sortCol = 'commune', sortDir = 1;
-let currentPage = 1;
-let perPage = 50;
-
+// ── LOAD ──────────────────────────────────────────────────
 async function initApp() {
-  const rows = await Promise.all(SOURCES.map(async s => {
-    try {
-      const res = await fetch(s.file, { cache: 'no-cache' });
-      if (!res.ok) throw new Error(res.status);
-      const text = await res.text();
-      // Retire le BOM UTF-8 si présent
-      const clean = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
-      const data = parseCSV(clean);
-      return data.map(r => ({ ...r, _region: s.key, _regionLabel: s.label }));
-    } catch(e) {
-      console.warn(`Impossible de charger ${s.file}:`, e);
-      return [];
-    }
-  }));
+  const [ec,ma,sp] = await Promise.all([loadEcoles(), loadMairies(), loadSpectacle()]);
+  ecolesData=ec; mairiesData=ma; spectacleData=sp;
 
-  allData = rows.flat().map(r => {
-    const lat = parseFloat(r.latitude);
-    const lng = parseFloat(r.longitude);
-    const dist = (!isNaN(lat) && !isNaN(lng))
-      ? haversine(ORIGIN.lat, ORIGIN.lng, lat, lng)
-      : null;
-    return { ...r, _dist: dist };
-  });
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('table-wrap').style.display = '';
+  // Peuple les régions spectacle
+  const regions = [...new Set(sp.map(r=>r.region).filter(Boolean))].sort();
+  const rSel = document.getElementById('filter-region-spectacle');
+  regions.forEach(r=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; rSel.appendChild(o); });
 
-  // Peuple le filtre départements
-  const depts = [...new Set(allData.map(r => r.departement).filter(Boolean))].sort();
-  const deptSel = document.getElementById('filter-dept');
-  depts.forEach(d => {
-    const o = document.createElement('option');
-    o.value = d; o.textContent = d;
-    deptSel.appendChild(o);
-  });
+  document.getElementById('loading').style.display='none';
+  document.getElementById('table-wrap').style.display='';
 
-  applyFilters();
+  switchMode('ecoles');
   bindEvents();
 }
 
-// ── FILTRES & RENDU ─────────────────────────────────────
+async function loadEcoles() {
+  const chunks = await Promise.all(ECOLE_SOURCES.map(async s=>{
+    try {
+      const res=await fetch(s.file,{cache:'no-cache'});
+      if (!res.ok) throw new Error();
+      const text=await res.text();
+      const clean=text.charCodeAt(0)===0xFEFF?text.slice(1):text;
+      return parseCSV(clean).map(r=>({
+        ...r, _source:'ecole', _region:s.key,
+        _nom:r.nom_etablissement, _commune:r.commune, _mail:r.mail,
+        _cp:r.code_postal, _dept:r.departement, _rlabel:s.label,
+        _dist:dist(r.latitude,r.longitude),
+      }));
+    } catch(e){ return []; }
+  }));
+  return chunks.flat();
+}
+
+async function loadMairies() {
+  try {
+    const res=await fetch('data/mairies.csv',{cache:'no-cache'});
+    if (!res.ok) throw new Error();
+    const text=await res.text();
+    const clean=text.charCodeAt(0)===0xFEFF?text.slice(1):text;
+    return parseCSV(clean).map(r=>({
+      ...r, _source:'mairie',
+      _nom:r.nom, _commune:r.commune, _mail:r.mail,
+      _cp:r.code_postal, _dept:r.departement, _rlabel:'',
+      _dist:dist(r.latitude,r.longitude),
+    }));
+  } catch(e){ return []; }
+}
+
+async function loadSpectacle() {
+  try {
+    const res=await fetch('data/spectacle_cat1.csv',{cache:'no-cache'});
+    if (!res.ok) throw new Error();
+    const text=await res.text();
+    const clean=text.charCodeAt(0)===0xFEFF?text.slice(1):text;
+    return parseCSV(clean).map(r=>({
+      ...r, _source:'spectacle',
+      _nom:r.nom_lieu||r.raison_sociale, _commune:'', _mail:'',
+      _cp:r.code_postal, _dept:r.departement, _rlabel:r.region,
+      _dist:dist(r.latitude,r.longitude),
+    }));
+  } catch(e){ return []; }
+}
+
+// ── MODE SWITCH ───────────────────────────────────────────
+function switchMode(m) {
+  mode=m;
+  const [ac,ad]=ACCENTS[m];
+  document.documentElement.style.setProperty('--accent',ac);
+  document.documentElement.style.setProperty('--accent-dim',ad);
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
+  document.getElementById('page-title').textContent=TITLES[m];
+  document.getElementById('search').placeholder=PLACEHOLDERS[m];
+
+  // Visibilité des filtres
+  const ids={
+    'filter-source':      m==='all',
+    'filter-region-ecole':m==='ecoles',
+    'filter-region-spectacle':m==='spectacle',
+    'filter-type':        m==='ecoles',
+    'filter-statut-ecole':m==='ecoles',
+    'filter-statut-spectacle':m==='spectacle',
+  };
+  Object.entries(ids).forEach(([id,show])=>{
+    document.getElementById(id).style.display=show?'':'none';
+  });
+
+  populateDeptFilter();
+  sortCol=DEFAULT_SORT[m]; sortDir=1;
+  document.getElementById('thead').innerHTML=THEADS[m];
+  currentPage=1;
+  applyFilters();
+}
+
+// ── TABLE HEADERS ─────────────────────────────────────────
+const THEADS = {
+  ecoles:`<tr>
+    <th data-col="commune">Commune</th>
+    <th data-col="type_ecole">Type</th>
+    <th data-col="mail">Mail</th>
+    <th data-col="code_postal">CP</th>
+    <th data-col="nom_etablissement">Établissement</th>
+    <th data-col="departement">Département</th>
+    <th data-col="adresse">Adresse</th>
+    <th data-col="statut">Statut</th>
+    <th data-col="_dist" id="th-dist" style="display:none">Distance</th>
+  </tr>`,
+  mairies:`<tr>
+    <th data-col="commune">Commune</th>
+    <th data-col="mail">Mail</th>
+    <th data-col="telephone">Téléphone</th>
+    <th data-col="code_postal">CP</th>
+    <th data-col="nom">Mairie</th>
+    <th data-col="departement">Département</th>
+    <th data-col="adresse">Adresse</th>
+    <th data-col="_dist" id="th-dist" style="display:none">Distance</th>
+  </tr>`,
+  spectacle:`<tr>
+    <th data-col="nom_lieu">Lieu</th>
+    <th data-col="raison_sociale">Organisation</th>
+    <th data-col="statut">Statut</th>
+    <th data-col="code_postal">CP</th>
+    <th data-col="departement">Département</th>
+    <th data-col="region">Région</th>
+    <th data-col="code_naf">APE</th>
+    <th data-col="date_validite">Validité</th>
+    <th data-col="_dist" id="th-dist" style="display:none">Distance</th>
+  </tr>`,
+  all:`<tr>
+    <th data-col="_source">Source</th>
+    <th data-col="_nom">Nom</th>
+    <th data-col="_commune">Commune</th>
+    <th data-col="_mail">Mail</th>
+    <th data-col="_cp">CP</th>
+    <th data-col="_dept">Département</th>
+    <th data-col="_rlabel">Région</th>
+    <th data-col="_dist" id="th-dist" style="display:none">Distance</th>
+  </tr>`,
+};
+
+// ── DEPT FILTER ───────────────────────────────────────────
+function populateDeptFilter() {
+  const data=getActiveData();
+  const depts=[...new Set(data.map(r=>r._dept).filter(Boolean))].sort();
+  const sel=document.getElementById('filter-dept');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Tous les départements</option>';
+  depts.forEach(d=>{ const o=document.createElement('option'); o.value=d; o.textContent=d; sel.appendChild(o); });
+  if (depts.includes(cur)) sel.value=cur;
+}
+
+function getActiveData() {
+  if (mode==='ecoles')    return ecolesData;
+  if (mode==='mairies')   return mairiesData;
+  if (mode==='spectacle') return spectacleData;
+  return [...ecolesData,...mairiesData,...spectacleData];
+}
+
+// ── APPLY FILTERS ─────────────────────────────────────────
 function applyFilters() {
-  const search  = document.getElementById('search').value.toLowerCase().trim();
-  const region  = document.getElementById('filter-region').value;
-  const dept    = document.getElementById('filter-dept').value;
-  const type    = document.getElementById('filter-type').value;
-  const statut  = document.getElementById('filter-statut').value;
-  const rayon   = parseFloat(document.getElementById('filter-rayon').value);
-  const hasRayon = !isNaN(rayon) && rayon > 0;
+  const search  =document.getElementById('search').value.toLowerCase().trim();
+  const dept    =document.getElementById('filter-dept').value;
+  const rayon   =parseFloat(document.getElementById('filter-rayon').value);
+  const hasRayon=!isNaN(rayon)&&rayon>0;
 
-  // Affiche/masque la colonne distance
-  document.getElementById('th-dist').style.display = hasRayon ? '' : 'none';
+  let data=getActiveData();
 
-  filtered = allData.filter(r => {
-    if (region  && r._region     !== region)  return false;
-    if (dept    && r.departement !== dept)     return false;
-    if (type    && r.type_ecole  !== type)     return false;
-    if (statut  && r.statut      !== statut)   return false;
-    if (hasRayon && (r._dist === null || r._dist > rayon)) return false;
+  if (mode==='ecoles') {
+    const region=document.getElementById('filter-region-ecole').value;
+    const type  =document.getElementById('filter-type').value;
+    const statut=document.getElementById('filter-statut-ecole').value;
+    data=data.filter(r=>(!region||r._region===region)&&(!type||r.type_ecole===type)&&(!statut||r.statut===statut));
+  } else if (mode==='spectacle') {
+    const region=document.getElementById('filter-region-spectacle').value;
+    const statut=document.getElementById('filter-statut-spectacle').value;
+    data=data.filter(r=>(!region||r.region===region)&&(!statut||r.statut===statut));
+  } else if (mode==='all') {
+    const source=document.getElementById('filter-source').value;
+    if (source) data=data.filter(r=>r._source===source);
+  }
+
+  data=data.filter(r=>{
+    if (dept&&r._dept!==dept) return false;
+    if (hasRayon&&(r._dist===null||r._dist>rayon)) return false;
     if (search) {
-      const hay = [r.nom_etablissement, r.commune, r.mail, r.departement, r.adresse].join(' ').toLowerCase();
+      const hay=[r._nom,r._commune,r._mail,r._dept,r._rlabel,
+                 r.adresse,r.telephone,r.raison_sociale,r.code_postal].join(' ').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
   });
 
-  // Tri : si rayon actif, trie par distance par défaut
-  if (hasRayon && sortCol === 'commune') {
-    filtered.sort((a, b) => (a._dist ?? 999) - (b._dist ?? 999));
+  const thDist=document.getElementById('th-dist');
+  if (thDist) thDist.style.display=hasRayon?'':'none';
+
+  if (hasRayon&&sortCol===DEFAULT_SORT[mode]) {
+    data.sort((a,b)=>(a._dist??999999)-(b._dist??999999));
   } else {
-    filtered.sort((a, b) => {
-      if (sortCol === '_dist') return ((a._dist ?? 999) - (b._dist ?? 999)) * sortDir;
-      const va = (a[sortCol] || '').toLowerCase();
-      const vb = (b[sortCol] || '').toLowerCase();
-      return va < vb ? -sortDir : va > vb ? sortDir : 0;
+    data.sort((a,b)=>{
+      if (sortCol==='_dist') return((a._dist??999999)-(b._dist??999999))*sortDir;
+      const va=(a[sortCol]||'').toLowerCase(), vb=(b[sortCol]||'').toLowerCase();
+      return va<vb?-sortDir:va>vb?sortDir:0;
     });
   }
 
-  currentPage = 1;
-  render();
+  filtered=data; currentPage=1; render();
 }
 
-function render() {
-  perPage = parseInt(document.getElementById('per-page').value);
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / perPage));
-  currentPage = Math.min(currentPage, totalPages);
-  const start = (currentPage - 1) * perPage;
-  const page  = filtered.slice(start, start + perPage);
-
-  // Stats + bouton copie
-  document.getElementById('stats').innerHTML =
-    `<span>${total.toLocaleString('fr-FR')}</span> école${total > 1 ? 's' : ''} — page <span>${currentPage}</span>/<span>${totalPages}</span>`;
-
-  const copyBtn = document.getElementById('copy-all-btn');
-  copyBtn.style.display = total > 0 ? '' : 'none';
-  copyBtn.textContent = `Copier ${total > 1 ? 'les ' + total.toLocaleString('fr-FR') + ' mails' : 'le mail'}`;
-
-  // Lignes
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  page.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+// ── ROW RENDER ────────────────────────────────────────────
+function mailCell(mail) {
+  if (!mail) return '<td style="color:var(--muted)">—</td>';
+  return `<td><div class="mail-cell"><a href="mailto:${esc(mail)}">${esc(mail)}</a><button class="copy-btn" data-mail="${esc(mail)}">Copier</button></div></td>`;
+}
+function distCell(r) {
+  const th=document.getElementById('th-dist');
+  const d=th?th.style.display:'none';
+  return `<td style="display:${d};color:var(--accent);white-space:nowrap">${r._dist!==null?r._dist.toFixed(1)+' km':'—'}</td>`;
+}
+function spectacleStatutClass(s) {
+  const sl=s.toLowerCase();
+  if (sl==='valide') return 'badge-valide';
+  if (sl.includes('expir')) return 'badge-expire';
+  if (sl==='en instruction') return 'badge-instruction';
+  return 'badge-invalide';
+}
+function renderRow(r) {
+  switch(mode) {
+    case 'ecoles': return `
       <td>${esc(r.commune)}</td>
-      <td><span class="badge ${r.type_ecole === 'Mater' ? 'badge-mater' : 'badge-elem'}">${esc(r.type_ecole)}</span></td>
-      <td>
-        <div class="mail-cell">
-          <a href="mailto:${esc(r.mail)}">${esc(r.mail)}</a>
-          <button class="copy-btn" data-mail="${esc(r.mail)}">Copier</button>
-        </div>
-      </td>
+      <td><span class="badge ${r.type_ecole==='Mater'?'badge-mater':'badge-elem'}">${esc(r.type_ecole)}</span></td>
+      ${mailCell(r.mail)}
       <td>${esc(r.code_postal)}</td>
       <td>${esc(r.nom_etablissement)}</td>
       <td>${esc(r.departement)}</td>
       <td>${esc(r.adresse)}</td>
-      <td><span class="badge ${r.statut === 'Public' ? 'badge-public' : 'badge-prive'}">${esc(r.statut)}</span></td>
-      <td style="display:${document.getElementById('th-dist').style.display};color:var(--cyan);white-space:nowrap">
-        ${r._dist !== null ? r._dist.toFixed(1) + ' km' : '—'}
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+      <td><span class="badge ${r.statut==='Public'?'badge-public':'badge-prive'}">${esc(r.statut)}</span></td>
+      ${distCell(r)}`;
+    case 'mairies': return `
+      <td>${esc(r.commune)}</td>
+      ${mailCell(r.mail)}
+      <td>${esc(r.telephone)}</td>
+      <td>${esc(r.code_postal)}</td>
+      <td>${esc(r.nom)}</td>
+      <td>${esc(r.departement)}</td>
+      <td>${esc(r.adresse)}</td>
+      ${distCell(r)}`;
+    case 'spectacle': return `
+      <td>${esc(r.nom_lieu)}</td>
+      <td style="color:var(--muted);font-size:.85rem">${esc(r.raison_sociale)}</td>
+      <td><span class="badge ${spectacleStatutClass(r.statut)}">${esc(r.statut)}</span></td>
+      <td>${esc(r.code_postal)}</td>
+      <td>${esc(r.departement)}</td>
+      <td>${esc(r.region)}</td>
+      <td style="color:var(--muted);font-size:.8rem">${esc(r.code_naf)}</td>
+      <td style="color:var(--muted);font-size:.85rem">${esc(r.date_validite)}</td>
+      ${distCell(r)}`;
+    case 'all': return `
+      <td><span class="badge badge-${r._source}">${r._source==='ecole'?'ÉCOLE':r._source==='mairie'?'MAIRIE':'SPECTACLE'}</span></td>
+      <td>${esc(r._nom)}</td>
+      <td>${esc(r._commune)}</td>
+      ${mailCell(r._mail)}
+      <td>${esc(r._cp)}</td>
+      <td>${esc(r._dept)}</td>
+      <td style="color:var(--muted);font-size:.85rem">${esc(r._rlabel)}</td>
+      ${distCell(r)}`;
+  }
+}
 
-  // En-têtes triées
-  document.querySelectorAll('thead th').forEach(th => {
-    th.classList.remove('asc', 'desc');
-    if (th.dataset.col === sortCol) th.classList.add(sortDir === 1 ? 'asc' : 'desc');
+// ── RENDER ────────────────────────────────────────────────
+function render() {
+  perPage=parseInt(document.getElementById('per-page').value);
+  const total=filtered.length, totalPages=Math.max(1,Math.ceil(total/perPage));
+  currentPage=Math.min(currentPage,totalPages);
+  const start=(currentPage-1)*perPage, page=filtered.slice(start,start+perPage);
+
+  const nouns={ecoles:['école','écoles'],mairies:['mairie','mairies'],spectacle:['lieu','lieux'],all:['résultat','résultats']};
+  const [sing,plur]=nouns[mode];
+  document.getElementById('stats').innerHTML=
+    `<span>${total.toLocaleString('fr-FR')}</span> ${total>1?plur:sing} — page <span>${currentPage}</span>/<span>${totalPages}</span>`;
+
+  // Copy button
+  const copyBtn=document.getElementById('copy-all-btn');
+  const mailField=mode==='all'?'_mail':'mail';
+  const hasMails=mode!=='spectacle';
+  if (hasMails&&total>0) {
+    const n=filtered.filter(r=>r[mailField]).length;
+    copyBtn.style.display='';
+    copyBtn.textContent=`Copier ${n.toLocaleString('fr-FR')} mails`;
+    copyBtn.onclick=function(){
+      const mails=filtered.map(r=>r[mailField]).filter(Boolean).join(', ');
+      navigator.clipboard.writeText(mails).then(()=>{
+        const orig=this.textContent; this.textContent='✓ Copié !'; this.style.background='#6ec46e';
+        setTimeout(()=>{ this.textContent=orig; this.style.background='var(--accent)'; },2000);
+      });
+    };
+  } else {
+    copyBtn.style.display='none';
+  }
+
+  // Rows
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  page.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=renderRow(r); tbody.appendChild(tr); });
+
+  // Sort indicators
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.classList.remove('asc','desc');
+    if (th.dataset.col===sortCol) th.classList.add(sortDir===1?'asc':'desc');
   });
 
   renderPagination(totalPages);
 }
 
 function renderPagination(totalPages) {
-  const el = document.getElementById('pagination');
-  el.innerHTML = '';
-
-  const btn = (label, page, active = false, disabled = false) => {
-    const b = document.createElement('button');
-    b.textContent = label;
-    if (active) b.classList.add('active');
-    b.disabled = disabled;
-    b.addEventListener('click', () => { currentPage = page; render(); window.scrollTo(0, 0); });
+  const el=document.getElementById('pagination');
+  el.innerHTML='';
+  const btn=(label,p,active=false,disabled=false)=>{
+    const b=document.createElement('button');
+    b.textContent=label; if(active) b.classList.add('active'); b.disabled=disabled;
+    b.addEventListener('click',()=>{ currentPage=p; render(); window.scrollTo(0,0); });
     return b;
   };
-
-  el.appendChild(btn('←', currentPage - 1, false, currentPage === 1));
-
-  // Pages visibles
-  const delta = 2;
-  const pages = new Set([1, totalPages]);
-  for (let i = Math.max(1, currentPage - delta); i <= Math.min(totalPages, currentPage + delta); i++) pages.add(i);
-  const sorted = [...pages].sort((a, b) => a - b);
-
-  let prev = 0;
-  sorted.forEach(p => {
-    if (p - prev > 1) {
-      const span = document.createElement('span');
-      span.id = 'page-info'; span.textContent = '…';
-      el.appendChild(span);
-    }
-    el.appendChild(btn(p, p, p === currentPage));
-    prev = p;
+  el.appendChild(btn('←',currentPage-1,false,currentPage===1));
+  const delta=2, pages=new Set([1,totalPages]);
+  for(let i=Math.max(1,currentPage-delta);i<=Math.min(totalPages,currentPage+delta);i++) pages.add(i);
+  let prev=0;
+  [...pages].sort((a,b)=>a-b).forEach(p=>{
+    if(p-prev>1){ const s=document.createElement('span'); s.textContent='…'; s.style.color='var(--muted)'; s.style.padding='0 4px'; el.appendChild(s); }
+    el.appendChild(btn(p,p,p===currentPage)); prev=p;
   });
-
-  el.appendChild(btn('→', currentPage + 1, false, currentPage === totalPages));
+  el.appendChild(btn('→',currentPage+1,false,currentPage===totalPages));
 }
 
-// ── EVENTS ──────────────────────────────────────────────
+// ── EVENTS ────────────────────────────────────────────────
 function bindEvents() {
-  ['search', 'filter-region', 'filter-dept', 'filter-type', 'filter-statut', 'filter-rayon'].forEach(id => {
-    document.getElementById(id).addEventListener('input', applyFilters);
+  document.querySelectorAll('.mode-tab').forEach(t=>{
+    t.addEventListener('click',()=>switchMode(t.dataset.mode));
   });
 
-  document.getElementById('clear-rayon').addEventListener('click', () => {
-    document.getElementById('filter-rayon').value = '';
+  ['search','filter-dept','filter-rayon','filter-source',
+   'filter-region-ecole','filter-type','filter-statut-ecole',
+   'filter-region-spectacle','filter-statut-spectacle'
+  ].forEach(id=>document.getElementById(id)?.addEventListener('input',applyFilters));
+
+  document.getElementById('clear-rayon').addEventListener('click',()=>{
+    document.getElementById('filter-rayon').value=''; applyFilters();
+  });
+  document.getElementById('per-page').addEventListener('change',()=>{ currentPage=1; render(); });
+
+  // Sort (délégation sur la table entière)
+  document.querySelector('table').addEventListener('click',e=>{
+    const th=e.target.closest('th[data-col]');
+    if (!th) return;
+    if (sortCol===th.dataset.col) sortDir*=-1; else { sortCol=th.dataset.col; sortDir=1; }
     applyFilters();
   });
 
-  document.getElementById('copy-all-btn').addEventListener('click', function() {
-    const mails = filtered.map(r => r.mail).join(', ');
-    navigator.clipboard.writeText(mails).then(() => {
-      const orig = this.textContent;
-      this.textContent = '✓ Copié !';
-      this.style.background = '#6ec46e';
-      setTimeout(() => {
-        this.textContent = orig;
-        this.style.background = 'var(--cyan)';
-      }, 2000);
-    });
-  });
-
-  document.getElementById('per-page').addEventListener('change', () => { currentPage = 1; render(); });
-
-  document.querySelectorAll('thead th[data-col]').forEach(th => {
-    th.addEventListener('click', () => {
-      if (sortCol === th.dataset.col) sortDir *= -1;
-      else { sortCol = th.dataset.col; sortDir = 1; }
-      applyFilters();
-    });
-  });
-
-  document.getElementById('tbody').addEventListener('click', e => {
-    const btn = e.target.closest('.copy-btn');
+  // Copy individual mail
+  document.getElementById('tbody').addEventListener('click',e=>{
+    const btn=e.target.closest('.copy-btn');
     if (!btn) return;
-    navigator.clipboard.writeText(btn.dataset.mail).then(() => {
-      btn.textContent = '✓';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 1500);
+    navigator.clipboard.writeText(btn.dataset.mail).then(()=>{
+      btn.textContent='✓'; btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent='Copier'; btn.classList.remove('copied'); },1500);
     });
   });
 }
 
-function esc(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 </script>
 </body>
 </html>
