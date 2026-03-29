@@ -365,7 +365,12 @@
     </div>
   </div>
 
-  <div id="stats"></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+    <div id="stats"></div>
+    <button id="copy-all-btn" style="display:none;background:var(--cyan);border:none;border-radius:4px;color:#000;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1.5px;padding:5px 14px;transition:all .2s;">
+      Copier tous les mails
+    </button>
+  </div>
   <div id="loading">Chargement des données…</div>
 
   <div class="table-wrap" id="table-wrap" style="display:none">
@@ -583,9 +588,13 @@ function render() {
   const start = (currentPage - 1) * perPage;
   const page  = filtered.slice(start, start + perPage);
 
-  // Stats
+  // Stats + bouton copie
   document.getElementById('stats').innerHTML =
     `<span>${total.toLocaleString('fr-FR')}</span> école${total > 1 ? 's' : ''} — page <span>${currentPage}</span>/<span>${totalPages}</span>`;
+
+  const copyBtn = document.getElementById('copy-all-btn');
+  copyBtn.style.display = total > 0 ? '' : 'none';
+  copyBtn.textContent = `Copier ${total > 1 ? 'les ' + total.toLocaleString('fr-FR') + ' mails' : 'le mail'}`;
 
   // Lignes
   const tbody = document.getElementById('tbody');
@@ -666,6 +675,19 @@ function bindEvents() {
   document.getElementById('clear-rayon').addEventListener('click', () => {
     document.getElementById('filter-rayon').value = '';
     applyFilters();
+  });
+
+  document.getElementById('copy-all-btn').addEventListener('click', function() {
+    const mails = filtered.map(r => r.mail).join(', ');
+    navigator.clipboard.writeText(mails).then(() => {
+      const orig = this.textContent;
+      this.textContent = '✓ Copié !';
+      this.style.background = '#6ec46e';
+      setTimeout(() => {
+        this.textContent = orig;
+        this.style.background = 'var(--cyan)';
+      }, 2000);
+    });
   });
 
   document.getElementById('per-page').addEventListener('change', () => { currentPage = 1; render(); });
