@@ -259,6 +259,23 @@
     }
     .minima-table tbody tr:hover td { background: rgba(62,207,207,0.03); }
 
+    /* ── SR band ── */
+    .sr-band {
+      display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap;
+      background: rgba(62,207,207,0.04); border: 1px solid rgba(62,207,207,0.18);
+      padding: 1rem 1.5rem; margin-bottom: 2rem;
+    }
+    .sr-band-label {
+      font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--accent); white-space: nowrap;
+    }
+    .sr-band-val {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+      letter-spacing: .04em; color: var(--text); line-height: 1;
+    }
+    .sr-band-unit { font-size: .85rem; color: var(--dim); }
+    .sr-band-formula { font-size: .8rem; color: var(--dim); margin-left: auto; }
+
     /* ── Annotation ── */
     .annotation {
       background: rgba(62,207,207,0.05); border-left: 2px solid var(--accent);
@@ -526,6 +543,13 @@
 
     </div>
 
+    <!-- SR computed display -->
+    <div class="sr-band">
+      <div class="sr-band-label">Salaire de Référence (SR)</div>
+      <div class="sr-band-val"><span id="r-sr-band">—</span> <span class="sr-band-unit">€ brut</span></div>
+      <div class="sr-band-formula" id="r-sr-formula">= — cachets × — €</div>
+    </div>
+
     <div class="results">
       <div class="ri">
         <div class="ri-label">Heures travaillées (NHT)</div>
@@ -722,8 +746,10 @@ function update() {
   const travail = jourstrav * salaire;       // revenu travail mensuel (salaire/cachet × jours)
   const total   = are + travail;
 
-  document.getElementById('r-nht').textContent = NHT;
-  document.getElementById('r-sr').textContent  = SR.toLocaleString('fr-FR');
+  document.getElementById('r-nht').textContent      = NHT;
+  document.getElementById('r-sr').textContent       = SR.toLocaleString('fr-FR');
+  document.getElementById('r-sr-band').textContent  = SR.toLocaleString('fr-FR');
+  document.getElementById('r-sr-formula').textContent = `= ${cachets} cachets × ${salaire} €`;
   document.getElementById('r-aj').textContent  = aj.toFixed(2);
   document.getElementById('r-are').textContent = Math.round(are);
   document.getElementById('r-total').textContent = Math.round(total);
