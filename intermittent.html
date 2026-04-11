@@ -349,9 +349,9 @@
     <div class="card">
       <div class="c-label">Étape 3 — Allocation Journalière</div>
       <div class="c-formula">AJ = 12,47 € + (SJR × 40,4 %)</div>
-      <p>Plancher à <strong>32,62 €/j</strong> (pour SJR &lt; 49,9 €).
-        Plafond théorique à 75 % du SJR, mais la formule proportionnelle y reste
-        naturellement inférieure dès que le SJR dépasse ~36 €.</p>
+      <p>Plancher à <strong>44 €/j</strong> pour les artistes (Annexe 8) — 38 €/j pour les techniciens (Annexe 10).
+        Ce plancher s'applique quand la formule donne moins, soit pour SJR &lt; ~78 €.
+        Plafond à 75 % du SJR.</p>
     </div>
     <div class="card">
       <div class="c-label">Étape 4 — Indemnité mensuelle</div>
@@ -365,15 +365,17 @@
     <strong>Pour atteindre 2 000 €/mois</strong> en percevant l'ARE sur 20 jours par mois
     (10 jours travaillés), il faut une <strong>AJ de 100 €/jour</strong>,
     ce qui correspond à un <strong>SJR d'environ 217 €/jour</strong>.<br>
-    <span style="font-size:.88rem">Formule : SJR = (100 – 12,47) ÷ 0,404 ≈ 216,7 €/j</span>
+    <span style="font-size:.88rem">Formule : SJR = (100 – 12,47) ÷ 0,404 ≈ 216,7 €/j</span><br><br>
+    <strong>Au plancher (artiste, SJR &lt; 78 €)</strong> : AJ = <strong>44 €/j</strong>
+    → indemnité mensuelle = 44 × 30 = <strong>1 320 €/mois</strong> (0 jour travaillé).
   </div>
 
   <h3>Zones de la courbe AJ</h3>
   <div class="key-strip">
     <div class="key-item">
-      <div class="k-label">Plancher AJ</div>
-      <div class="k-val">32,62 €</div>
-      <div class="k-unit">si SJR &lt; 49,9 €</div>
+      <div class="k-label">Plancher AJ — Artistes</div>
+      <div class="k-val">44 €</div>
+      <div class="k-unit">si SJR &lt; ~78 € (Annexe 8)</div>
     </div>
     <div class="key-item">
       <div class="k-label">Part fixe</div>
@@ -445,7 +447,7 @@
   <div class="annotation">
     <strong>Impact sur l'ARE :</strong> avec le cachet minimum de <strong>138,85 €</strong>
     et seulement 43 cachets (minimum légal), le SJR est de 43 × 138,85 ÷ 365 ≈ <strong>16,36 €/j</strong>
-    → AJ au plancher (<strong>32,62 €/j</strong>) → ARE mensuelle (20j) ≈ <strong>652 €/mois</strong>.<br><br>
+    → AJ au plancher artiste (<strong>44 €/j</strong>) → ARE mensuelle (30j sans travail) ≈ <strong>1 320 €/mois</strong>.<br><br>
     Pour atteindre 2 000 €/mois à ce tarif minimum, il faudrait théoriquement
     <strong>~569 cachets</strong> sur la période — impossible en pratique.
     La clé : <strong>augmenter le nombre de cachets ET négocier au-dessus du minimum</strong>.
@@ -636,7 +638,7 @@
 
   <p style="margin-top:2rem;">
     Valeurs Unédic utilisées : part fixe <strong>12,47 €</strong> — taux proportionnel <strong>40,4 %</strong>
-    — plancher AJ <strong>32,62 €/j</strong> — plafond <strong>75 % du SJR</strong>.
+    — plancher AJ artistes <strong>44 €/j</strong> (techniciens : 38 €/j) — plafond <strong>75 % du SJR</strong>.
     Ces montants sont revalorisés chaque année par arrêté.
   </p>
   <p>
@@ -654,7 +656,7 @@
    ===================================================================== */
 const PART_FIXE   = 12.47;   // part fixe journalière (€)
 const TAUX_PROP   = 0.404;   // taux proportionnel
-const AJ_MIN      = 32.62;   // plancher AJ (€/j)
+const AJ_MIN      = 44.00;   // plancher AJ artistes Annexe 8 (€/j) — techniciens Annexe 10 : 38€
 const AJ_MAX_RATE = 0.75;    // plafond = 75% du SJR
 const TARGET      = 2000;    // objectif mensuel (€)
 const PERIODE_REF = 365;     // période de référence standard (jours)
