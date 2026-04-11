@@ -259,6 +259,35 @@
     }
     .minima-table tbody tr:hover td { background: rgba(62,207,207,0.03); }
 
+    /* ── Hero thresholds ── */
+    .hero-thresholds {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      margin-top: 2.5rem;
+      border: 1px solid rgba(62,207,207,0.25);
+      background: rgba(62,207,207,0.04);
+      width: fit-content;
+    }
+    .ht-item {
+      padding: 1rem 1.6rem;
+      text-align: center;
+    }
+    .ht-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.9rem; letter-spacing: .05em;
+      color: var(--text); line-height: 1;
+    }
+    .ht-item.ht-accent .ht-val { color: var(--accent); }
+    .ht-label {
+      font-size: .62rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--dim);
+      margin-top: .25rem;
+    }
+    .ht-sep {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem; color: rgba(62,207,207,0.4);
+      padding: 0 .1rem; align-self: center;
+    }
+
     /* ── SR band ── */
     .sr-band {
       display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap;
@@ -335,8 +364,124 @@
       Formule Unédic officielle + minimas conventionnels artistes de cirque (CCNEAC NAO 2024), avec simulateur et graphiques interactifs.
     </p>
     <a href="#simulateur" class="cta">Accéder au simulateur ↓</a>
+
+    <div class="hero-thresholds">
+      <div class="ht-item">
+        <div class="ht-val">58</div>
+        <div class="ht-label">cachets</div>
+      </div>
+      <div class="ht-sep">×</div>
+      <div class="ht-item">
+        <div class="ht-val">236 €</div>
+        <div class="ht-label">/ cachet</div>
+      </div>
+      <div class="ht-sep">=</div>
+      <div class="ht-item">
+        <div class="ht-val">690 h</div>
+        <div class="ht-label">NHT · seuil B</div>
+      </div>
+      <div class="ht-sep">/</div>
+      <div class="ht-item">
+        <div class="ht-val">13 700 €</div>
+        <div class="ht-label">SR · seuil A</div>
+      </div>
+      <div class="ht-sep">=</div>
+      <div class="ht-item ht-accent">
+        <div class="ht-val">~ 2 000 €</div>
+        <div class="ht-label">ARE / mois</div>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- Simulateur -->
+<section id="simulateur">
+  <p class="eyebrow">Simulateur interactif</p>
+  <h2>Estimez votre indemnité</h2>
+  <p>Déplacez les curseurs pour voir en temps réel l'impact sur votre ARE mensuelle.</p>
+
+  <div class="calc-box">
+    <div class="slider-grid">
+
+      <div class="sg">
+        <label>Cachets dans la période de référence</label>
+        <div class="sv"><span id="v-cachets">100</span></div>
+        <div class="su">cachets (1 cachet = 1 jour contractuel)</div>
+        <input type="range" id="s-cachets" min="43" max="300" value="100" step="1">
+        <div class="hint">Minimum légal artiste cirque (Annexe 10) : 43 cachets × 12h = 516h &gt; 507h</div>
+      </div>
+
+      <div class="sg">
+        <label>Salaire brut moyen par cachet</label>
+        <div class="sv"><span id="v-salaire">300</span> €</div>
+        <div class="su">salaire brut par cachet (jour)</div>
+        <input type="range" id="s-salaire" min="50" max="1000" value="300" step="10">
+      </div>
+
+      <div class="sg">
+        <label>Jours travaillés par mois</label>
+        <div class="sv"><span id="v-jours">10</span></div>
+        <div class="su">jours effectifs de travail par mois</div>
+        <input type="range" id="s-jours" min="0" max="25" value="10" step="1">
+        <div class="hint">Le reste du mois est indemnisé par l'ARE</div>
+      </div>
+
+      <div class="sg">
+        <label>Durée de la période de référence</label>
+        <div class="sv"><span id="v-periode">365</span> j</div>
+        <div class="su">jours calendaires entre 1er et dernier contrat</div>
+        <input type="range" id="s-periode" min="200" max="365" value="365" step="1">
+      </div>
+
+    </div>
+
+    <!-- SR computed display -->
+    <div class="sr-band">
+      <div class="sr-band-label">Salaire de Référence (SR)</div>
+      <div class="sr-band-val"><span id="r-sr-band">—</span> <span class="sr-band-unit">€ brut</span></div>
+      <div class="sr-band-formula" id="r-sr-formula">= — cachets × — €</div>
+    </div>
+
+    <div class="results">
+      <div class="ri">
+        <div class="ri-label">Heures travaillées (NHT)</div>
+        <div class="ri-val" id="r-nht">—</div>
+        <div class="ri-unit">heures sur la période</div>
+      </div>
+      <div class="ri">
+        <div class="ri-label">Salaire de référence (SR)</div>
+        <div class="ri-val" id="r-sr">—</div>
+        <div class="ri-unit">€ brut total</div>
+      </div>
+      <div class="ri">
+        <div class="ri-label">Allocation journalière (AJ)</div>
+        <div class="ri-val" id="r-aj">—</div>
+        <div class="ri-unit">€ / jour</div>
+      </div>
+      <div class="ri accent">
+        <div class="ri-label">Indemnité mensuelle ARE</div>
+        <div class="ri-val" id="r-are">—</div>
+        <div class="ri-unit">€ / mois</div>
+      </div>
+      <div class="ri">
+        <div class="ri-label">Total mensuel (ARE + travail)</div>
+        <div class="ri-val" id="r-total">—</div>
+        <div class="ri-unit">€ / mois</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-head">
+        <span>Progression vers l'objectif <strong>2 000 €/mois d'ARE</strong></span>
+        <strong id="pct">0 %</strong>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="pfill" style="width:0%"></div>
+      </div>
+      <div class="progress-note" id="progress-note"></div>
+    </div>
+  </div>
+</section>
 
 <!-- Formule -->
 <section id="formule">
@@ -498,95 +643,6 @@
       <div class="k-label">À 800 € / cachet</div>
       <div class="k-val">~99</div>
       <div class="k-unit">cachets / an</div>
-    </div>
-  </div>
-</section>
-
-<!-- Simulateur -->
-<section id="simulateur">
-  <p class="eyebrow">Simulateur interactif</p>
-  <h2>Estimez votre indemnité</h2>
-  <p>Déplacez les curseurs pour voir en temps réel l'impact sur votre ARE mensuelle.</p>
-
-  <div class="calc-box">
-    <div class="slider-grid">
-
-      <div class="sg">
-        <label>Cachets dans la période de référence</label>
-        <div class="sv"><span id="v-cachets">100</span></div>
-        <div class="su">cachets (1 cachet = 1 jour contractuel)</div>
-        <input type="range" id="s-cachets" min="43" max="300" value="100" step="1">
-        <div class="hint">Minimum légal artiste cirque (Annexe 10) : 43 cachets × 12h = 516h &gt; 507h</div>
-      </div>
-
-      <div class="sg">
-        <label>Salaire brut moyen par cachet</label>
-        <div class="sv"><span id="v-salaire">300</span> €</div>
-        <div class="su">salaire brut par cachet (jour)</div>
-        <input type="range" id="s-salaire" min="50" max="1000" value="300" step="10">
-      </div>
-
-      <div class="sg">
-        <label>Jours travaillés par mois</label>
-        <div class="sv"><span id="v-jours">10</span></div>
-        <div class="su">jours effectifs de travail par mois</div>
-        <input type="range" id="s-jours" min="0" max="25" value="10" step="1">
-        <div class="hint">Le reste du mois est indemnisé par l'ARE</div>
-      </div>
-
-      <div class="sg">
-        <label>Durée de la période de référence</label>
-        <div class="sv"><span id="v-periode">365</span> j</div>
-        <div class="su">jours calendaires entre 1er et dernier contrat</div>
-        <input type="range" id="s-periode" min="200" max="365" value="365" step="1">
-      </div>
-
-    </div>
-
-    <!-- SR computed display -->
-    <div class="sr-band">
-      <div class="sr-band-label">Salaire de Référence (SR)</div>
-      <div class="sr-band-val"><span id="r-sr-band">—</span> <span class="sr-band-unit">€ brut</span></div>
-      <div class="sr-band-formula" id="r-sr-formula">= — cachets × — €</div>
-    </div>
-
-    <div class="results">
-      <div class="ri">
-        <div class="ri-label">Heures travaillées (NHT)</div>
-        <div class="ri-val" id="r-nht">—</div>
-        <div class="ri-unit">heures sur la période</div>
-      </div>
-      <div class="ri">
-        <div class="ri-label">Salaire de référence (SR)</div>
-        <div class="ri-val" id="r-sr">—</div>
-        <div class="ri-unit">€ brut total</div>
-      </div>
-      <div class="ri">
-        <div class="ri-label">Allocation journalière (AJ)</div>
-        <div class="ri-val" id="r-aj">—</div>
-        <div class="ri-unit">€ / jour</div>
-      </div>
-      <div class="ri accent">
-        <div class="ri-label">Indemnité mensuelle ARE</div>
-        <div class="ri-val" id="r-are">—</div>
-        <div class="ri-unit">€ / mois</div>
-      </div>
-      <div class="ri">
-        <div class="ri-label">Total mensuel (ARE + travail)</div>
-        <div class="ri-val" id="r-total">—</div>
-        <div class="ri-unit">€ / mois</div>
-      </div>
-    </div>
-
-    <div class="progress-wrap">
-      <div class="progress-head">
-        <span>Progression vers l'objectif <strong>2 000 €/mois d'ARE</strong></span>
-        <strong id="pct">0 %</strong>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="pfill" style="width:0%"></div>
-      </div>
-      <div class="progress-note" id="progress-note"></div>
     </div>
   </div>
 </section>
