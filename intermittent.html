@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur Intermittent — 2 000 €/mois</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #080808;
+      --accent: #3ECFCF;
+      --text: #F0EDE8;
+      --dim: rgba(240,237,232,0.52);
+      --border: rgba(240,237,232,0.10);
+      --card: rgba(255,255,255,0.025);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.35rem; letter-spacing: 0.22em;
+      color: var(--text); text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-back {
+      font-size: 0.75rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--dim);
+      text-decoration: none; transition: color .2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 3rem 5rem;
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 70% 60% at 80% 40%, rgba(62,207,207,0.06) 0%, transparent 70%);
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-size: 0.75rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.92; letter-spacing: 0.04em;
+      margin-bottom: 2rem;
+    }
+    .hero h1 em { color: var(--accent); font-style: normal; }
+    .hero-sub {
+      max-width: 560px; font-size: 1.05rem;
+      color: var(--dim); margin-bottom: 2.5rem;
+    }
+    .cta {
+      display: inline-flex; align-items: center; gap: .7rem;
+      font-size: 0.75rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--accent);
+      border: 1px solid var(--accent); padding: .7rem 1.4rem;
+      text-decoration: none; transition: background .2s, color .2s;
+    }
+    .cta:hover { background: var(--accent); color: var(--bg); }
+
+    /* ── Sections ── */
+    section { padding: 5rem 3rem; border-bottom: 1px solid var(--border); }
+    .eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: 0.05em; line-height: 1; margin-bottom: 1.8rem;
+    }
+    h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem; letter-spacing: 0.08em;
+      color: var(--dim); margin: 2.5rem 0 .8rem;
+    }
+    p { color: var(--dim); margin-bottom: 1rem; max-width: 720px; }
+
+    /* ── Formula cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.25rem; margin: 2.5rem 0;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 1.75rem;
+    }
+    .card .c-label {
+      font-size: 0.68rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: .5rem;
+    }
+    .card .c-formula {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+      letter-spacing: 0.05em; color: var(--text); margin-bottom: .6rem;
+    }
+    .card p { font-size: .88rem; margin: 0; }
+
+    /* ── Key numbers strip ── */
+    .key-strip {
+      display: flex; flex-wrap: wrap; gap: 0;
+      border: 1px solid var(--border); margin: 2.5rem 0;
+    }
+    .key-item {
+      flex: 1 1 160px; padding: 1.5rem;
+      border-right: 1px solid var(--border);
+    }
+    .key-item:last-child { border-right: none; }
+    .key-item .k-label {
+      font-size: .68rem; letter-spacing: .22em;
+      text-transform: uppercase; color: var(--dim); margin-bottom: .3rem;
+    }
+    .key-item .k-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; letter-spacing: .03em; color: var(--accent);
+    }
+    .key-item .k-unit { font-size: .78rem; color: var(--dim); }
+
+    /* ── Calculator ── */
+    .calc-box {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 2.5rem; max-width: 940px;
+    }
+    .slider-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2.5rem 3rem; margin-bottom: 2.5rem;
+    }
+    .sg { display: flex; flex-direction: column; gap: .4rem; }
+    .sg label {
+      font-size: .68rem; letter-spacing: .22em;
+      text-transform: uppercase; color: var(--accent);
+    }
+    .sg .sv {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; color: var(--text); line-height: 1.1;
+    }
+    .sg .su { font-size: .78rem; color: var(--dim); }
+    .sg input[type=range] {
+      appearance: none; width: 100%; height: 1px;
+      background: var(--border); outline: none; margin: .5rem 0; cursor: pointer;
+    }
+    .sg input[type=range]::-webkit-slider-thumb {
+      appearance: none; width: 13px; height: 13px;
+      background: var(--accent); border-radius: 50%;
+    }
+    .sg input[type=range]::-moz-range-thumb {
+      width: 13px; height: 13px;
+      background: var(--accent); border: none; border-radius: 50%;
+    }
+    .sg .hint { font-size: .72rem; color: rgba(240,237,232,0.3); }
+
+    /* Results */
+    .results {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+      gap: 1.25rem; padding-top: 2rem; border-top: 1px solid var(--border);
+    }
+    .ri .ri-label {
+      font-size: .67rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--dim); margin-bottom: .25rem;
+    }
+    .ri .ri-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem; letter-spacing: .03em; line-height: 1;
+    }
+    .ri.accent .ri-val { color: var(--accent); }
+    .ri .ri-unit { font-size: .78rem; color: var(--dim); margin-top: .1rem; }
+
+    /* Progress bar */
+    .progress-wrap { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+    .progress-head {
+      display: flex; justify-content: space-between;
+      font-size: .68rem; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--dim); margin-bottom: .7rem;
+    }
+    .progress-head strong { color: var(--accent); }
+    .progress-bar {
+      height: 2px; background: var(--border); position: relative;
+    }
+    .progress-fill {
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: var(--accent); transition: width .35s ease;
+      max-width: 100%;
+    }
+    .progress-note {
+      margin-top: .6rem; font-size: .75rem; color: var(--dim);
+    }
+
+    /* ── Charts ── */
+    .chart-wrap {
+      position: relative; height: 460px; margin-top: 2rem;
+    }
+    .chart-wrap.small { height: 340px; }
+
+    .legend-row {
+      display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 1.5rem;
+    }
+    .leg {
+      display: flex; align-items: center; gap: .55rem;
+      font-size: .8rem; color: var(--dim);
+    }
+    .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .leg-dash {
+      width: 18px; height: 2px; border-top: 2px dashed;
+      flex-shrink: 0;
+    }
+
+    /* ── Minima table ── */
+    .minima-table {
+      width: 100%; border-collapse: collapse;
+      font-family: 'Cormorant Garamond', serif; font-size: .92rem;
+    }
+    .minima-table th {
+      font-size: .65rem; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent); font-weight: 400; padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border); text-align: left;
+    }
+    .minima-table th span { color: var(--dim); font-size: .6rem; }
+    .minima-table td {
+      padding: .85rem 1rem; border-bottom: 1px solid rgba(240,237,232,0.05);
+      color: var(--dim);
+    }
+    .minima-table td.accent-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: .04em; color: var(--text);
+      text-align: right;
+    }
+    .minima-table tbody tr:hover td { background: rgba(62,207,207,0.03); }
+
+    /* ── Annotation ── */
+    .annotation {
+      background: rgba(62,207,207,0.05); border-left: 2px solid var(--accent);
+      padding: 1.25rem 1.5rem; margin: 2rem 0; max-width: 680px;
+    }
+    .annotation strong { color: var(--text); }
+
+    /* ── Footnotes ── */
+    .notes {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 2rem; margin-top: 2.5rem;
+    }
+    .notes h3 { margin-top: 0; }
+    .notes ul { list-style: none; padding: 0; }
+    .notes ul li {
+      font-size: .82rem; color: var(--dim); padding: .3rem 0 .3rem 1rem;
+      border-left: 1px solid var(--accent); margin-bottom: .5rem;
+    }
+    a { color: var(--accent); }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2rem 3rem; text-align: center;
+      font-size: .78rem; color: rgba(240,237,232,0.3);
+      letter-spacing: .15em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .hero { padding: 0 1.5rem 4rem; }
+      section { padding: 3.5rem 1.5rem; }
+      .slider-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .calc-box { padding: 1.75rem 1.25rem; }
+      .key-strip { flex-direction: column; }
+      .key-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .key-item:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a href="/" class="nav-logo">Noé <span>Dagonet</span></a>
+  <a href="/" class="nav-back">← Portfolio</a>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Artiste de Cirque — Annexe 8 — Formule Unédic &amp; CCNEAC 2024–2025</p>
+    <h1>Intermittent<br>du Spectacle<br><em>2 000 €</em>/mois</h1>
+    <p class="hero-sub">
+      Quel SJR, combien de cachets, quel salaire moyen pour atteindre 2 000 € d'indemnité mensuelle ?
+      Formule Unédic officielle + minimas conventionnels artistes de cirque (CCNEAC NAO 2024), avec simulateur et graphiques interactifs.
+    </p>
+    <a href="#simulateur" class="cta">Accéder au simulateur ↓</a>
+  </div>
+</div>
+
+<!-- Formule -->
+<section id="formule">
+  <p class="eyebrow">La mécanique exacte</p>
+  <h2>Comment l'ARE est calculée</h2>
+  <p>
+    L'Allocation de Retour à l'Emploi (ARE) pour les intermittents du spectacle repose sur
+    le <strong>Salaire Journalier de Référence (SJR)</strong>, calculé à partir de l'ensemble
+    de vos salaires bruts sur la période de référence.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="c-label">Étape 1 — Éligibilité</div>
+      <div class="c-formula">≥ 507 heures / 12 mois</div>
+      <p>Pour un <strong>artiste de cirque (Annexe 8)</strong>, chaque cachet compte
+        pour <strong>12 heures</strong>, quel que soit le temps réel de travail.<br>
+        507h ÷ 12h = 42,25 → <strong>43 cachets minimum</strong>.<br>
+        <span style="opacity:.6">(Techniciens Annexe 10 : 64 cachets × 8h)</span></p>
+    </div>
+    <div class="card">
+      <div class="c-label">Étape 2 — Salaire Journalier de Référence</div>
+      <div class="c-formula">SJR = Σ Salaires bruts ÷ Jours calendaires</div>
+      <p>Total des salaires bruts de la période divisé par le nombre de jours
+        calendaires entre le 1<sup>er</sup> et le dernier contrat (plafonné à 365 jours).</p>
+    </div>
+    <div class="card">
+      <div class="c-label">Étape 3 — Allocation Journalière</div>
+      <div class="c-formula">AJ = 12,47 € + (SJR × 40,4 %)</div>
+      <p>Plancher à <strong>32,62 €/j</strong> (pour SJR &lt; 49,9 €).
+        Plafond théorique à 75 % du SJR, mais la formule proportionnelle y reste
+        naturellement inférieure dès que le SJR dépasse ~36 €.</p>
+    </div>
+    <div class="card">
+      <div class="c-label">Étape 4 — Indemnité mensuelle</div>
+      <div class="c-formula">ARE/mois ≈ AJ × Jours non travaillés</div>
+      <p>Chaque jour calendaire non travaillé donne droit à une AJ.
+        Une franchise (~7 jours + franchise CP) s'applique à l'ouverture des droits.</p>
+    </div>
+  </div>
+
+  <div class="annotation">
+    <strong>Pour atteindre 2 000 €/mois</strong> en percevant l'ARE sur 20 jours par mois
+    (10 jours travaillés), il faut une <strong>AJ de 100 €/jour</strong>,
+    ce qui correspond à un <strong>SJR d'environ 217 €/jour</strong>.<br>
+    <span style="font-size:.88rem">Formule : SJR = (100 – 12,47) ÷ 0,404 ≈ 216,7 €/j</span>
+  </div>
+
+  <h3>Zones de la courbe AJ</h3>
+  <div class="key-strip">
+    <div class="key-item">
+      <div class="k-label">Plancher AJ</div>
+      <div class="k-val">32,62 €</div>
+      <div class="k-unit">si SJR &lt; 49,9 €</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">Part fixe</div>
+      <div class="k-val">12,47 €</div>
+      <div class="k-unit">constante journalière</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">Taux proportionnel</div>
+      <div class="k-val">40,4 %</div>
+      <div class="k-unit">du SJR</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">SJR cible (20 j ARE)</div>
+      <div class="k-val">~217 €</div>
+      <div class="k-unit">pour 2 000 €/mois</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">SJR cible (25 j ARE)</div>
+      <div class="k-val">~167 €</div>
+      <div class="k-unit">pour 2 000 €/mois</div>
+    </div>
+  </div>
+</section>
+
+<!-- Minimas conventionnels -->
+<section id="minimas">
+  <p class="eyebrow">Convention Collective CCNEAC — NAO 2024</p>
+  <h2>Minimas conventionnels artistes de cirque</h2>
+  <p>
+    Les artistes de cirque relèvent de la <strong>Convention Collective Nationale pour les
+    Entreprises Artistiques et Culturelles (CCNEAC, IDCC 1285)</strong>, titre XVII « Artistes de cirque ».
+    Les minimas ci-dessous sont issus de l'accord salarial NAO 2024, applicables depuis le 1er juin 2024.
+  </p>
+
+  <!-- Table minimas -->
+  <div style="overflow-x:auto; margin: 2.5rem 0;">
+    <table class="minima-table">
+      <thead>
+        <tr>
+          <th>Type de prestation</th>
+          <th>Plateau ≤ 5 artistes<br><span>1–2 cachets/mois</span></th>
+          <th>Plateau ≤ 5 artistes<br><span>&gt; 2 cachets/mois</span></th>
+          <th>Plateau &gt; 5 artistes<br><span>toutes fréquences</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Représentation</strong></td>
+          <td class="accent-val">159,56 €</td>
+          <td class="accent-val">138,85 €</td>
+          <td class="accent-val">138,85 €</td>
+        </tr>
+        <tr>
+          <td><strong>Répétition — journée</strong></td>
+          <td class="accent-val" colspan="3">122,10 €</td>
+        </tr>
+        <tr>
+          <td><strong>Répétition — ½ journée</strong></td>
+          <td class="accent-val" colspan="3">61,05 €</td>
+        </tr>
+        <tr>
+          <td><strong>Salaire mensuel (CDI)</strong></td>
+          <td class="accent-val" colspan="3">2 252,37 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="annotation">
+    <strong>Impact sur l'ARE :</strong> avec le cachet minimum de <strong>138,85 €</strong>
+    et seulement 43 cachets (minimum légal), le SJR est de 43 × 138,85 ÷ 365 ≈ <strong>16,36 €/j</strong>
+    → AJ au plancher (<strong>32,62 €/j</strong>) → ARE mensuelle (20j) ≈ <strong>652 €/mois</strong>.<br><br>
+    Pour atteindre 2 000 €/mois à ce tarif minimum, il faudrait théoriquement
+    <strong>~569 cachets</strong> sur la période — impossible en pratique.
+    La clé : <strong>augmenter le nombre de cachets ET négocier au-dessus du minimum</strong>.
+  </div>
+
+  <h3>Cachets nécessaires pour 2 000 €/mois selon votre tarif</h3>
+  <p>Pour SJR cible ≈ 217 €/j (20 jours ARE/mois) sur 365 jours :</p>
+
+  <div class="key-strip">
+    <div class="key-item">
+      <div class="k-label">Au minimum (138,85 €)</div>
+      <div class="k-val" style="font-size:1.5rem">~569</div>
+      <div class="k-unit">cachets — non atteignable</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">À 200 € / cachet</div>
+      <div class="k-val">~396</div>
+      <div class="k-unit">cachets / an</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">À 300 € / cachet</div>
+      <div class="k-val">~264</div>
+      <div class="k-unit">cachets / an</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">À 500 € / cachet</div>
+      <div class="k-val">~158</div>
+      <div class="k-unit">cachets / an</div>
+    </div>
+    <div class="key-item">
+      <div class="k-label">À 800 € / cachet</div>
+      <div class="k-val">~99</div>
+      <div class="k-unit">cachets / an</div>
+    </div>
+  </div>
+</section>
+
+<!-- Simulateur -->
+<section id="simulateur">
+  <p class="eyebrow">Simulateur interactif</p>
+  <h2>Estimez votre indemnité</h2>
+  <p>Déplacez les curseurs pour voir en temps réel l'impact sur votre ARE mensuelle.</p>
+
+  <div class="calc-box">
+    <div class="slider-grid">
+
+      <div class="sg">
+        <label>Cachets dans la période de référence</label>
+        <div class="sv"><span id="v-cachets">100</span></div>
+        <div class="su">cachets (1 cachet = 1 jour contractuel)</div>
+        <input type="range" id="s-cachets" min="43" max="300" value="100" step="1">
+        <div class="hint">Minimum légal artiste cirque : 43 cachets × 12h = 516h &gt; 507h</div>
+      </div>
+
+      <div class="sg">
+        <label>Salaire brut moyen par cachet</label>
+        <div class="sv"><span id="v-salaire">300</span> €</div>
+        <div class="su">salaire brut par cachet (jour)</div>
+        <input type="range" id="s-salaire" min="50" max="1000" value="300" step="10">
+      </div>
+
+      <div class="sg">
+        <label>Jours travaillés par mois</label>
+        <div class="sv"><span id="v-jours">10</span></div>
+        <div class="su">jours effectifs de travail par mois</div>
+        <input type="range" id="s-jours" min="0" max="25" value="10" step="1">
+        <div class="hint">Le reste du mois est indemnisé par l'ARE</div>
+      </div>
+
+      <div class="sg">
+        <label>Durée de la période de référence</label>
+        <div class="sv"><span id="v-periode">365</span> j</div>
+        <div class="su">jours calendaires entre 1er et dernier contrat</div>
+        <input type="range" id="s-periode" min="200" max="365" value="365" step="1">
+      </div>
+
+    </div>
+
+    <div class="results">
+      <div class="ri">
+        <div class="ri-label">SJR calculé</div>
+        <div class="ri-val" id="r-sjr">—</div>
+        <div class="ri-unit">€ / jour</div>
+      </div>
+      <div class="ri">
+        <div class="ri-label">Allocation journalière</div>
+        <div class="ri-val" id="r-aj">—</div>
+        <div class="ri-unit">€ / jour</div>
+      </div>
+      <div class="ri accent">
+        <div class="ri-label">Indemnité mensuelle ARE</div>
+        <div class="ri-val" id="r-are">—</div>
+        <div class="ri-unit">€ / mois</div>
+      </div>
+      <div class="ri">
+        <div class="ri-label">Revenu travail mensuel</div>
+        <div class="ri-val" id="r-travail">—</div>
+        <div class="ri-unit">€ / mois (approx.)</div>
+      </div>
+      <div class="ri">
+        <div class="ri-label">Total mensuel</div>
+        <div class="ri-val" id="r-total">—</div>
+        <div class="ri-unit">€ / mois</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-head">
+        <span>Progression vers l'objectif <strong>2 000 €/mois d'ARE</strong></span>
+        <strong id="pct">0 %</strong>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="pfill" style="width:0%"></div>
+      </div>
+      <div class="progress-note" id="progress-note"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Graphiques -->
+<section id="graphique">
+  <p class="eyebrow">Visualisation</p>
+  <h2>Indemnité mensuelle selon le salaire par cachet</h2>
+  <p>
+    Chaque courbe représente un nombre de cachets différent sur la période de référence (365 j),
+    pour <strong>20 jours d'ARE par mois</strong>. La ligne pointillée marque l'objectif des 2 000 €/mois.
+  </p>
+
+  <div class="chart-wrap">
+    <canvas id="chartMain"></canvas>
+  </div>
+
+  <div class="legend-row" id="legend-main"></div>
+  <div class="legend-row" style="margin-top:.5rem;">
+    <div class="leg"><div class="leg-dash" style="border-color:rgba(62,207,207,0.4)"></div>Min. représentation 138,85 €/cachet</div>
+    <div class="leg"><div class="leg-dash" style="border-color:rgba(62,207,207,0.25)"></div>Min. représentation 159,56 €/cachet</div>
+    <div class="leg"><div class="leg-dash" style="border-color:rgba(62,207,207,0.3)"></div>Min. répétition journée 122,10 €/cachet</div>
+  </div>
+
+  <!-- Chart 2 -->
+  <h3>Relation SJR → Allocation Journalière (AJ)</h3>
+  <p>
+    La formule <em>AJ = 12,47 + SJR × 40,4 %</em> s'applique dès que le SJR dépasse le seuil plancher (~49,9 €).
+    La droite cyan montre la progression de l'AJ ; les pointillés indiquent
+    l'AJ nécessaire pour 2 000 €/mois selon le nombre de jours d'ARE.
+  </p>
+
+  <div class="chart-wrap small">
+    <canvas id="chartAJ"></canvas>
+  </div>
+
+  <div class="legend-row" style="margin-top:1.2rem;">
+    <div class="leg"><div class="leg-dot" style="background:#3ECFCF"></div>AJ effective</div>
+    <div class="leg"><div class="leg-dash" style="border-color:rgba(240,237,232,0.35)"></div>AJ cible 2 000 € / 20 j ARE (= 100 €/j)</div>
+    <div class="leg"><div class="leg-dash" style="border-color:rgba(240,237,232,0.2)"></div>AJ cible 2 000 € / 25 j ARE (= 80 €/j)</div>
+    <div class="leg"><div class="leg-dash" style="border-color:rgba(62,207,207,0.3)"></div>Plafond 75 % du SJR</div>
+  </div>
+
+  <!-- Chart 3 : heatmap-like — SJR needed -->
+  <h3>SJR nécessaire pour 2 000 €/mois selon les jours ARE</h3>
+  <p>
+    Plus vous travaillez de jours dans le mois, moins vous percevez l'ARE et plus votre AJ
+    journalière doit être élevée pour atteindre 2 000 €.
+    Ce graphique montre le <strong>SJR minimum requis</strong> en fonction des jours d'ARE mensuels.
+  </p>
+
+  <div class="chart-wrap" style="height:300px;">
+    <canvas id="chartSJR"></canvas>
+  </div>
+</section>
+
+<!-- Méthodologie -->
+<section>
+  <p class="eyebrow">Méthodologie &amp; sources</p>
+  <h2>Hypothèses &amp; précisions</h2>
+
+  <div class="notes">
+    <h3>Hypothèses du simulateur</h3>
+    <ul>
+      <li>Pour un artiste de cirque (Annexe 8) : <strong>1 cachet = 12 heures</strong> pour le décompte des 507h. Minimum légal = 43 cachets.</li>
+      <li>SJR = (Nombre de cachets × Salaire moyen par cachet) ÷ Jours de la période de référence.</li>
+      <li>Les salaires ne sont pas plafonnés au PMSS dans le simulateur (3 925 €/mois en 2025).</li>
+      <li>La franchise de 7 jours (délai d'attente) et la franchise congés payés ne sont pas déduites ici — elles s'appliquent uniquement à l'ouverture initiale des droits.</li>
+      <li>Revenu travail mensuel estimé = Jours travaillés × SJR (qui est une bonne approximation du salaire journalier moyen).</li>
+      <li>La courbe principale suppose 20 jours d'ARE/mois (10 jours travaillés). Ajustez via le simulateur.</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:2rem;">
+    Valeurs Unédic utilisées : part fixe <strong>12,47 €</strong> — taux proportionnel <strong>40,4 %</strong>
+    — plancher AJ <strong>32,62 €/j</strong> — plafond <strong>75 % du SJR</strong>.
+    Ces montants sont revalorisés chaque année par arrêté.
+  </p>
+  <p>
+    Pour un calcul officiel et personnalisé, utilisez le
+    <a href="https://www.unedic.org/indemnisation/vos-questions-sur-indemnisation-assurance-chomage/comment-est-calcule-le-montant-de-mon-allocation" target="_blank" rel="noopener">simulateur Unédic</a>
+    ou consultez <a href="https://www.francetravail.fr" target="_blank" rel="noopener">France Travail</a>.
+  </p>
+</section>
+
+<footer>Simulation indicative — Unédic Annexe 8 · CCNEAC NAO 2024 · Artistes de Cirque</footer>
+
+<script>
+/* =====================================================================
+   CONSTANTS (Unédic 2024-2025)
+   ===================================================================== */
+const PART_FIXE   = 12.47;   // part fixe journalière (€)
+const TAUX_PROP   = 0.404;   // taux proportionnel
+const AJ_MIN      = 32.62;   // plancher AJ (€/j)
+const AJ_MAX_RATE = 0.75;    // plafond = 75% du SJR
+const TARGET      = 2000;    // objectif mensuel (€)
+const PERIODE_REF = 365;     // période de référence standard (jours)
+
+/* =====================================================================
+   FORMULAS
+   ===================================================================== */
+function sjr(cachets, salaire, periode) {
+  return (cachets * salaire) / periode;
+}
+
+function aj(s) {
+  const prop   = PART_FIXE + s * TAUX_PROP;
+  const plafond = s * AJ_MAX_RATE;
+  return Math.max(AJ_MIN, Math.min(prop, plafond));
+}
+
+function areMensuel(s, joursAre) {
+  return aj(s) * joursAre;
+}
+
+/* =====================================================================
+   SIMULATOR
+   ===================================================================== */
+const ids = {
+  cachets: ['s-cachets','v-cachets'],
+  salaire: ['s-salaire','v-salaire'],
+  jours:   ['s-jours',  'v-jours'],
+  periode: ['s-periode','v-periode'],
+};
+
+function update() {
+  const cachets = +document.getElementById('s-cachets').value;
+  const salaire = +document.getElementById('s-salaire').value;
+  const jourstrav = +document.getElementById('s-jours').value;
+  const periode = +document.getElementById('s-periode').value;
+
+  document.getElementById('v-cachets').textContent = cachets;
+  document.getElementById('v-salaire').textContent = salaire;
+  document.getElementById('v-jours').textContent   = jourstrav;
+  document.getElementById('v-periode').textContent = periode;
+
+  const joursAre = 30 - jourstrav;
+  const s = sjr(cachets, salaire, periode);
+  const a = aj(s);
+  const are  = a * joursAre;
+  const travailMois = jourstrav * s;   // SJR ≈ salaire journalier moyen
+  const total = are + travailMois;
+
+  document.getElementById('r-sjr').textContent     = s.toFixed(2);
+  document.getElementById('r-aj').textContent      = a.toFixed(2);
+  document.getElementById('r-are').textContent     = Math.round(are);
+  document.getElementById('r-travail').textContent = Math.round(travailMois);
+  document.getElementById('r-total').textContent   = Math.round(total);
+
+  const pct = Math.min(100, (are / TARGET) * 100);
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('pct').textContent   = Math.round(pct) + ' %';
+
+  const diff = are - TARGET;
+  const note = diff >= 0
+    ? `✓ Objectif atteint — ${Math.round(diff)} € au-dessus de la cible.`
+    : `Il manque ${Math.round(-diff)} € pour atteindre 2 000 €/mois d'ARE.`;
+  document.getElementById('progress-note').textContent = note;
+
+  // Update fill color
+  const fill = document.getElementById('pfill');
+  fill.style.background = pct >= 100
+    ? '#3ECFCF'
+    : pct >= 66
+      ? 'rgba(62,207,207,0.65)'
+      : 'rgba(62,207,207,0.35)';
+}
+
+Object.values(ids).forEach(([slid]) => {
+  document.getElementById(slid).addEventListener('input', update);
+});
+update();
+
+/* =====================================================================
+   CHART 1 — Indemnité mensuelle vs salaire par cachet
+   ===================================================================== */
+// Minimas conventionnels CCNEAC NAO 2024 (artiste de cirque)
+const MIN_CACHET_HAUT   = 159.56;  // représentation, ≤5 artistes, 1-2 cachets/mois
+const MIN_CACHET_BAS    = 138.85;  // représentation, >2 cachets/mois ou >5 artistes
+const MIN_REPET_JOUR    = 122.10;  // répétition journée
+const MIN_REPET_DEMI    = 61.05;   // répétition ½ journée
+
+const CACHETS_SERIES = [43, 80, 120, 170, 250];
+const COLORS_BASE = [
+  [62, 207, 207],   // #3ECFCF — full cyan
+  [62, 207, 207],
+  [62, 207, 207],
+  [62, 207, 207],
+  [62, 207, 207],
+];
+const OPACITIES = [1, 0.78, 0.58, 0.40, 0.25];
+
+const SALAIRE_RANGE = [];
+for (let w = 50; w <= 1000; w += 10) SALAIRE_RANGE.push(w);
+
+const JOURS_ARE_CHART = 20; // assumption for main chart
+
+const ctx1 = document.getElementById('chartMain').getContext('2d');
+
+const ds1 = CACHETS_SERIES.map((n, i) => ({
+  label: `${n} cachets/an`,
+  data: SALAIRE_RANGE.map(w => {
+    const s = sjr(n, w, PERIODE_REF);
+    return areMensuel(s, JOURS_ARE_CHART);
+  }),
+  borderColor: `rgba(${COLORS_BASE[i].join(',')},${OPACITIES[i]})`,
+  backgroundColor: 'transparent',
+  borderWidth: i === 0 ? 2.5 : 1.5,
+  pointRadius: 0,
+  tension: 0.35,
+}));
+
+// Target line
+ds1.push({
+  label: 'Objectif 2 000 €/mois',
+  data: SALAIRE_RANGE.map(() => TARGET),
+  borderColor: 'rgba(240,237,232,0.45)',
+  backgroundColor: 'transparent',
+  borderWidth: 1.5,
+  borderDash: [7, 5],
+  pointRadius: 0,
+});
+
+// Minima markers — vertical reference lines via null-spike datasets
+// We simulate a vertical line at x=MIN_CACHET_BAS by setting a single spike
+const minBasSpikeIdx = SALAIRE_RANGE.findIndex(w => w >= MIN_CACHET_BAS);
+const minHautSpikeIdx = SALAIRE_RANGE.findIndex(w => w >= MIN_CACHET_HAUT);
+const minRepetIdx = SALAIRE_RANGE.findIndex(w => w >= MIN_REPET_JOUR);
+
+function vertLine(idx, color) {
+  return SALAIRE_RANGE.map((_, i) => i === idx ? 3500 : null);
+}
+
+ds1.push({
+  label: 'Min. représentation 138,85 €',
+  data: vertLine(minBasSpikeIdx, 'rgba(62,207,207,0.3)'),
+  borderColor: 'rgba(62,207,207,0.3)',
+  backgroundColor: 'transparent',
+  borderWidth: 1,
+  borderDash: [3, 4],
+  pointRadius: 0,
+  spanGaps: false,
+});
+ds1.push({
+  label: 'Min. représentation 159,56 €',
+  data: vertLine(minHautSpikeIdx, 'rgba(62,207,207,0.18)'),
+  borderColor: 'rgba(62,207,207,0.18)',
+  backgroundColor: 'transparent',
+  borderWidth: 1,
+  borderDash: [2, 5],
+  pointRadius: 0,
+  spanGaps: false,
+});
+ds1.push({
+  label: 'Min. répétition 122,10 €',
+  data: vertLine(minRepetIdx, 'rgba(62,207,207,0.22)'),
+  borderColor: 'rgba(62,207,207,0.22)',
+  backgroundColor: 'transparent',
+  borderWidth: 1,
+  borderDash: [2, 5],
+  pointRadius: 0,
+  spanGaps: false,
+});
+
+const chart1 = new Chart(ctx1, {
+  type: 'line',
+  data: { labels: SALAIRE_RANGE, datasets: ds1 },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111',
+        titleColor: '#3ECFCF',
+        bodyColor: '#F0EDE8',
+        borderColor: 'rgba(240,237,232,0.12)',
+        borderWidth: 1,
+        padding: 12,
+        callbacks: {
+          title: ctx => `Salaire par cachet : ${ctx[0].label} €`,
+          label: ctx => `${ctx.dataset.label} : ${Math.round(ctx.parsed.y)} €/mois`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Salaire moyen par cachet (€)',
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond', size: 13 },
+        },
+        grid: { color: 'rgba(240,237,232,0.05)' },
+        ticks: {
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond' },
+          maxTicksLimit: 12,
+          callback: v => v + ' €',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Indemnité mensuelle ARE (€)',
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond', size: 13 },
+        },
+        grid: { color: 'rgba(240,237,232,0.05)' },
+        ticks: {
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond' },
+          callback: v => v + ' €',
+        },
+        min: 0,
+      },
+    },
+  },
+});
+
+// Build legend for chart 1
+const legMain = document.getElementById('legend-main');
+CACHETS_SERIES.forEach((n, i) => {
+  const d = document.createElement('div');
+  d.className = 'leg';
+  const note = n === 43 ? ' (min. légal)' : '';
+  d.innerHTML = `<div class="leg-dot" style="background:rgba(62,207,207,${OPACITIES[i]})"></div>${n} cachets/an${note}`;
+  legMain.appendChild(d);
+});
+const dTarget = document.createElement('div');
+dTarget.className = 'leg';
+dTarget.innerHTML = `<div class="leg-dash" style="border-color:rgba(240,237,232,0.45)"></div>Objectif 2 000 €/mois`;
+legMain.appendChild(dTarget);
+
+/* =====================================================================
+   CHART 2 — SJR → AJ
+   ===================================================================== */
+const SJR_RANGE = [];
+for (let s = 0; s <= 320; s += 2) SJR_RANGE.push(s);
+
+const ctx2 = document.getElementById('chartAJ').getContext('2d');
+new Chart(ctx2, {
+  type: 'line',
+  data: {
+    labels: SJR_RANGE,
+    datasets: [
+      {
+        label: 'AJ effective',
+        data: SJR_RANGE.map(s => aj(s)),
+        borderColor: '#3ECFCF',
+        backgroundColor: 'rgba(62,207,207,0.06)',
+        fill: true,
+        borderWidth: 2.5,
+        pointRadius: 0,
+        tension: 0.15,
+      },
+      {
+        label: 'Plafond 75% SJR',
+        data: SJR_RANGE.map(s => s * AJ_MAX_RATE),
+        borderColor: 'rgba(62,207,207,0.25)',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderDash: [4, 4],
+        pointRadius: 0,
+      },
+      {
+        label: 'Cible 100€/j (2000€, 20j)',
+        data: SJR_RANGE.map(() => 100),
+        borderColor: 'rgba(240,237,232,0.35)',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderDash: [6, 4],
+        pointRadius: 0,
+      },
+      {
+        label: 'Cible 80€/j (2000€, 25j)',
+        data: SJR_RANGE.map(() => 80),
+        borderColor: 'rgba(240,237,232,0.2)',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderDash: [3, 5],
+        pointRadius: 0,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111',
+        titleColor: '#3ECFCF',
+        bodyColor: '#F0EDE8',
+        borderColor: 'rgba(240,237,232,0.12)',
+        borderWidth: 1,
+        padding: 12,
+        callbacks: {
+          title: ctx => `SJR : ${ctx[0].label} €/jour`,
+          label: ctx => `${ctx.dataset.label} : ${ctx.parsed.y.toFixed(2)} €/j`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'SJR — Salaire Journalier de Référence (€/j)',
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond', size: 13 },
+        },
+        grid: { color: 'rgba(240,237,232,0.05)' },
+        ticks: {
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond' },
+          maxTicksLimit: 10,
+          callback: v => v + ' €',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'AJ — Allocation Journalière (€/j)',
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond', size: 13 },
+        },
+        grid: { color: 'rgba(240,237,232,0.05)' },
+        ticks: {
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond' },
+          callback: v => v + ' €',
+        },
+        min: 0,
+      },
+    },
+  },
+});
+
+/* =====================================================================
+   CHART 3 — SJR requis pour 2000€/mois selon les jours d'ARE
+   ===================================================================== */
+const JOURS_ARE_RANGE = [];
+for (let j = 5; j <= 30; j++) JOURS_ARE_RANGE.push(j);
+
+// SJR needed = (TARGET / joursAre - PART_FIXE) / TAUX_PROP
+function sjrNeeded(joursAre) {
+  const ajNeed = TARGET / joursAre;
+  if (ajNeed <= AJ_MIN) return (AJ_MIN - PART_FIXE) / TAUX_PROP; // plancher
+  return (ajNeed - PART_FIXE) / TAUX_PROP;
+}
+
+const ctx3 = document.getElementById('chartSJR').getContext('2d');
+new Chart(ctx3, {
+  type: 'line',
+  data: {
+    labels: JOURS_ARE_RANGE,
+    datasets: [
+      {
+        label: 'SJR requis pour 2 000 €/mois',
+        data: JOURS_ARE_RANGE.map(j => sjrNeeded(j)),
+        borderColor: '#3ECFCF',
+        backgroundColor: 'rgba(62,207,207,0.07)',
+        fill: true,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#3ECFCF',
+        tension: 0.35,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111',
+        titleColor: '#3ECFCF',
+        bodyColor: '#F0EDE8',
+        borderColor: 'rgba(240,237,232,0.12)',
+        borderWidth: 1,
+        padding: 12,
+        callbacks: {
+          title: ctx => `${ctx[0].label} jours d'ARE par mois`,
+          label: ctx => `SJR requis : ${Math.round(ctx.parsed.y)} €/jour`,
+          afterLabel: ctx => {
+            const joursAre = ctx.parsed.x;
+            const s = ctx.parsed.y;
+            const a = aj(s);
+            return `→ AJ : ${a.toFixed(2)} €/j  |  ${30 - joursAre} jours travaillés/mois`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Jours d\'ARE perçus par mois',
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond', size: 13 },
+        },
+        grid: { color: 'rgba(240,237,232,0.05)' },
+        ticks: {
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond' },
+          callback: v => v + ' j',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'SJR requis (€/j)',
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond', size: 13 },
+        },
+        grid: { color: 'rgba(240,237,232,0.05)' },
+        ticks: {
+          color: 'rgba(240,237,232,0.45)',
+          font: { family: 'Cormorant Garamond' },
+          callback: v => v + ' €',
+        },
+        min: 0,
+      },
+    },
+  },
+});
+</script>
+</body>
+</html>
