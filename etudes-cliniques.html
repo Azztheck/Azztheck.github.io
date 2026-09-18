@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Études cliniques — 18/09/2026 16:36</title>
+  <style>
+    :root {
+      --bg:          #000b11;
+      --bg-card:     #04101a;
+      --bg-row:      #040e17;
+      --bg-row-alt:  #050f18;
+      --bg-hover:    #081c2a;
+      --border:      rgba(100,150,180,0.13);
+      --border-gold: rgba(196,163,90,0.35);
+      --gold:        #c4a35a;
+      --gold-bright: #d4b96a;
+      --gold-dim:    rgba(196,163,90,0.08);
+      --text:        #b0c4d0;
+      --text-dim:    #445a68;
+      --text-bright: #ddeaf4;
+      --red:         rgba(192,57,43,0.32);
+      --red-text:    #c84535;
+      --red-dim:     rgba(192,57,43,0.06);
+      --green:       #3ddc84;
+      --orange:      #f0a030;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px;
+      min-height: 100vh;
+    }
+    body::after {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+                  rgba(0,0,0,0.022) 2px, rgba(0,0,0,0.022) 4px);
+    }
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(0,11,17,0.97); border-bottom: 1px solid var(--border-gold);
+      backdrop-filter: blur(8px); padding: 10px 18px;
+    }
+    .hd {
+      max-width: 1800px; margin: 0 auto;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .hd-title {
+      font-family: 'Courier New', monospace; font-size: 0.9rem;
+      font-weight: 700; letter-spacing: 2.5px; color: var(--text-bright);
+      display: flex; align-items: baseline; gap: 7px;
+    }
+    .hd-accent { color: var(--gold); }
+    .hd-meta   { font-size: 0.65rem; font-weight: 400; color: var(--text-dim); letter-spacing: 1px; }
+    .hd-ctrl   { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+    #search {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 10px; font-size: 0.73rem; outline: none;
+      width: 140px; transition: border-color .2s;
+    }
+    #search:focus { border-color: var(--gold); }
+    #search::placeholder { color: var(--text-dim); }
+    .btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+      padding: 4px 10px; font-size: 0.65rem; letter-spacing: 1px; cursor: pointer;
+      font-family: 'Courier New', monospace; transition: all .2s; white-space: nowrap;
+    }
+    .btn:hover  { border-color: var(--gold); color: var(--gold); }
+    .btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .sort-wrap { display: flex; align-items: center; border: 1px solid var(--border); }
+    .sort-lbl  {
+      font-size: 0.56rem; color: var(--text-dim); letter-spacing: 1px;
+      padding: 0 6px; font-family: 'Courier New', monospace;
+    }
+    .sort-btn {
+      background: transparent; border: none; border-left: 1px solid var(--border);
+      color: var(--text-dim); padding: 4px 8px; font-size: 0.62rem; letter-spacing: 1px;
+      cursor: pointer; font-family: 'Courier New', monospace; transition: color .2s;
+    }
+    .sort-btn:hover  { color: var(--gold); }
+    .sort-btn.active { color: var(--gold); }
+    main { max-width: 1800px; margin: 0 auto; padding: 16px 18px; }
+    .tbl-wrap { overflow-x: auto; position: relative; }
+    .tbl-wrap::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      background:
+        linear-gradient(var(--gold),var(--gold)) top    left  / 14px 1.5px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) top    left  / 1.5px 14px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) top    right / 14px 1.5px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) top    right / 1.5px 14px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) bottom left  / 14px 1.5px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) bottom left  / 1.5px 14px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) bottom right / 14px 1.5px no-repeat,
+        linear-gradient(var(--gold),var(--gold)) bottom right / 1.5px 14px no-repeat;
+    }
+    table {
+      width: 100%; border-collapse: collapse; border: 1px solid var(--border-gold);
+    }
+    thead th {
+      background: #030c14; color: var(--gold);
+      font-family: 'Courier New', monospace; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 1.8px; text-transform: uppercase;
+      padding: 9px 10px; border-bottom: 1px solid var(--border-gold);
+      border-right: 1px solid var(--border); white-space: nowrap;
+      cursor: pointer; user-select: none;
+    }
+    thead th:hover { color: var(--gold-bright); }
+    thead th .sa { opacity: 0.3; margin-left: 4px; font-size: 0.6rem; }
+    thead th.sort-asc  .sa::after { content: '▲'; opacity: 1; }
+    thead th.sort-desc .sa::after { content: '▼'; opacity: 1; }
+    tbody tr {
+      background: var(--bg-row); border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    tbody tr:nth-child(even) { background: var(--bg-row-alt); }
+    tbody tr:hover { background: var(--bg-hover); }
+    tbody td {
+      padding: 7px 10px; vertical-align: middle;
+      border-right: 1px solid var(--border); color: var(--text);
+    }
+    tr.row-incompat { background: #080a0a !important; }
+    tr.row-incompat td { color: #506060; }
+    tr.row-nouveau td:first-child { border-left: 2px solid var(--gold); }
+    .td-montant {
+      font-family: 'Courier New', monospace; font-weight: 700;
+      font-size: 0.88rem; color: var(--gold-bright); white-space: nowrap;
+    }
+    td.ratio-high { font-family:'Courier New',monospace; font-weight:700; color: var(--green); text-align:center; white-space:nowrap; }
+    td.ratio-med  { font-family:'Courier New',monospace; font-weight:700; color: var(--orange); text-align:center; white-space:nowrap; }
+    td.ratio-low  { font-family:'Courier New',monospace; color: var(--text-dim); text-align:center; white-space:nowrap; }
+    td.ratio-na   { color: var(--text-dim); text-align:center; }
+    .badge-src {
+      font-size: 0.58rem; letter-spacing: 1.5px; padding: 2px 6px;
+      font-family: 'Courier New', monospace; font-weight: 700;
+      border: 1px solid rgba(100,150,180,.2); color: #5a7888;
+      background: rgba(100,150,180,.04); white-space: nowrap;
+    }
+    .badge-new {
+      font-size: 0.56rem; letter-spacing: 1.5px; padding: 1px 5px;
+      font-family: 'Courier New', monospace; font-weight: 700;
+      border: 1px solid var(--gold); color: var(--gold); background: var(--gold-dim);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+    .badge-compat {
+      font-size: 0.58rem; letter-spacing: 1.2px; padding: 2px 7px;
+      font-family: 'Courier New', monospace; font-weight: 700; white-space: nowrap;
+    }
+    .badge-compat.ok {
+      border: 1px solid rgba(196,163,90,.4); color: var(--gold); background: rgba(196,163,90,.07);
+    }
+    .badge-compat.no {
+      border: 1px solid var(--red); color: var(--red-text); background: var(--red-dim);
+      font-size: 0.72rem; letter-spacing: 0; font-weight: 400; font-family: inherit;
+    }
+    .badge-statut {
+      font-size: 0.65rem; letter-spacing: 0; padding: 2px 7px; white-space: nowrap;
+      font-family: inherit; font-weight: 400; max-width: 220px; overflow: hidden;
+      text-overflow: ellipsis; display: inline-block; vertical-align: middle;
+    }
+    .badge-statut.ok { color: var(--green); }
+    .badge-statut.warn { color: var(--orange); }
+    .badge-statut.na { color: var(--text-dim); }
+    .td-vis { white-space: nowrap; }
+    .td-vis details { display: inline; }
+    .td-vis details summary {
+      display: inline; font-size: 0.68rem; color: var(--text-dim);
+      cursor: pointer; font-family: 'Courier New', monospace; list-style: none;
+    }
+    .td-vis details summary::-webkit-details-marker { display: none; }
+    .td-vis details summary:hover { color: var(--gold); }
+    .prog-list {
+      position: absolute; z-index: 50;
+      background: #030c14; border: 1px solid var(--border-gold);
+      padding: 8px 12px; margin-top: 4px; font-size: 0.72rem; line-height: 1.9;
+      min-width: 220px; list-style: none; box-shadow: 0 8px 24px rgba(0,0,0,.6);
+    }
+    .td-dates { font-size: 0.76rem; }
+    .td-dates details summary {
+      cursor: pointer; font-size: 0.72rem; color: var(--text-dim);
+      list-style: none; font-family: 'Courier New', monospace;
+    }
+    .td-dates details summary::-webkit-details-marker { display: none; }
+    .td-dates details summary:hover { color: var(--gold); }
+    .dt-drop { font-size: 0.73rem; line-height: 1.7; margin-top: 3px; white-space: normal; color: var(--text); min-width: 180px; }
+    .td-lien { text-align: center; }
+    .tbl-lien {
+      font-family: 'Courier New', monospace; font-size: 1rem;
+      color: var(--gold); text-decoration: none; transition: color .2s;
+    }
+    .tbl-lien:hover { color: var(--gold-bright); }
+    .col-titre { display: none; }
+    .show-titres .col-titre { display: table-cell; }
+    #no-results {
+      text-align: center; padding: 50px; color: var(--text-dim);
+      font-family: 'Courier New', monospace; letter-spacing: 2px; font-size: 0.8rem;
+      display: none;
+    }
+    @media (max-width: 700px) {
+      main { padding: 8px; }
+      header { padding: 8px 10px; }
+      #search { width: 110px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hd">
+      <div class="hd-title">
+        <span class="hd-accent">//</span> ÉTUDES CLINIQUES
+        <span class="hd-meta">18/09/2026 16:36 · 18 COMPATIBLES / 21 TOTAL</span>
+      </div>
+      <div class="hd-ctrl">
+        <input type="text" id="search" placeholder="Rechercher...">
+        <button id="btnIncompat"  class="btn active">⊘ INCOMPATIBLES</button>
+        <button id="btnNouvelles" class="btn">★ NOUVELLES (1)</button>
+        <button id="btnTitre"     class="btn">TITRES</button>
+        <div class="sort-wrap">
+          <span class="sort-lbl">TRIER</span>
+          <button class="sort-btn active" data-sort="montant">MONTANT</button>
+          <button class="sort-btn"        data-sort="ratio">RATIO</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="tbl-wrap">
+      <table id="etudes">
+        <thead>
+          <tr>
+            <th data-col="source">SOURCE <span class="sa"></span></th>
+            <th class="col-titre">TITRE</th>
+            <th data-col="montant">INDEMNITÉ <span class="sa"></span></th>
+            <th data-col="ratio">€/JOUR <span class="sa"></span></th>
+            <th>DURÉE</th>
+            <th>VISITES</th>
+            <th>PÉRIODES</th>
+            <th>ÂGE</th>
+            <th>SEXE</th>
+            <th>STATUT</th>
+            <th>COMPAT.</th>
+            <th>LIEN</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+<tr class="" data-montant="600" data-ratio="200" data-compatible="1" data-nouveau="0" data-search="etude sur le grattage nocturne et qualité du sommeil optimed op1151"><td><span class="badge-src">OPTIMED</span></td><td class="col-titre">Etude sur le grattage nocturne et qualité du sommeil</td><td data-order="600" class="td-montant">600€</td><td class="ratio-med" data-order="200">200 €/j</td><td>3 jours</td><td class="td-vis">0 </td><td class="td-dates">01/07/2026<br>30/09/2026</td><td>Entre 18 et 65 ans</td><td>Mixte</td><td><span class="badge-statut ok" title="En recrutement (vérifié : filigrane + dates)">● En recrutement (vérifié : filigrane + dates)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.optimed-recrutement.fr/les-etudes-disponibles/etude-sur-le-grattage-nocturne-et-qualite-du-sommeil/?f=filter2-orange" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="row-incompat" data-montant="5365" data-ratio="268" data-compatible="0" data-nouveau="0" data-search="m2739 partie ii gr.7 (femmes ménopausées) inokura "><td><span class="badge-src">INOKURA</span></td><td class="col-titre">M2739 Partie II Gr.7 (femmes ménopausées)</td><td data-order="5365" class="td-montant">5365 €</td><td class="ratio-med" data-order="268">268 €/j</td><td>16 nuit</td><td class="td-vis">4 </td><td class="td-dates">?</td><td>Entre 18 et 65 ans</td><td>Femme</td><td><span class="badge-statut warn" title="En pré-recrutement">⏳ En pré-recrutement</span></td><td><span class="badge-compat no" title="Réservé aux femmes (Femme)">✗ Réservé aux femmes (Femme)</span></td><td class="td-lien"><a href="https://www.inokura.be/etudes/m2739-partie-ii-gr7-femmes-menopausees/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="row-incompat" data-montant="2480" data-ratio="118" data-compatible="0" data-nouveau="0" data-search="etude sur des troubles inflammatoires induits pfizer "><td><span class="badge-src">PFIZER</span></td><td class="col-titre">Etude sur des troubles inflammatoires induits</td><td data-order="2480" class="td-montant">Jusqu'a € 2.480, plus les frais de transport</td><td class="ratio-low" data-order="118">118 €/j</td><td>21 jour</td><td class="td-vis">? </td><td class="td-dates">?</td><td>18-55</td><td>Femme</td><td><span class="badge-statut ok" title="Recrutement">● Recrutement</span></td><td><span class="badge-compat no" title="Réservé aux femmes (Femme)">✗ Réservé aux femmes (Femme)</span></td><td class="td-lien"><a href="https://www.pfizerclinicaltrials.com/fr/pcru-brussels/C5041053" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="6700" data-ratio="418" data-compatible="1" data-nouveau="0" data-search="study with study medication for cholestatic disease pionier "><td><span class="badge-src">PIONIER</span></td><td class="col-titre">Study with study medication for cholestatic disease</td><td data-order="6700" class="td-montant">6700(men)          6650(women) €</td><td class="ratio-high" data-order="418">418 €/j</td><td>multiple stays consisting of:a stay of 6 days (5 nights)3 times a stay of 3 days (2 nights)3 times a stay of 4 days (3 nights)</td><td class="td-vis">7 <details><summary>📋 7v</summary><ul class="prog-list"><li>a screening visit</li><li>multiple stays consisting of:a stay of 6 days (5 nights)3 times a stay of 3 days (2 nights)3 times a stay of 4 days (3 nights)</li><li>5 morning return visits</li><li>an end of trial visit</li></ul></details></td><td class="td-dates">?</td><td>18 - 55</td><td>Male, Female</td><td><span class="badge-statut ok" title="En recrutement">● En recrutement</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.ikbenpionier.be/en/clinical-studies/study-with-study-medication-for-cholestatic-disease" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="2992" data-ratio="230" data-compatible="1" data-nouveau="0" data-search="patient study for the treatment of rheumatoid arthritis pionier "><td><span class="badge-src">PIONIER</span></td><td class="col-titre">Patient study for the treatment of rheumatoid arthritis</td><td data-order="2992" class="td-montant">2992 €</td><td class="ratio-med" data-order="230">230 €/j</td><td>a stay of 4 days (3 nights)</td><td class="td-vis">9 <details><summary>📋 9v</summary><ul class="prog-list"><li>a screening visit</li><li>a stay of 4 days (3 nights)</li><li>7 morning return visits</li><li>1 (or 2) end of trial visit(s)</li></ul></details></td><td class="td-dates">?</td><td>18-75</td><td>Male, Female</td><td><span class="badge-statut ok" title="En recrutement">● En recrutement</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.ikbenpionier.be/en/clinical-studies/patient-study-for-the-treatment-of-rheumatoid-arthritis" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="4207" data-ratio="1051" data-compatible="1" data-nouveau="0" data-search="chronic inflammation (ac3582-0006-grq-c) icon "><td><span class="badge-src">ICON</span></td><td class="col-titre">Chronic inflammation (AC3582-0006-GRQ-C)</td><td data-order="4207" class="td-montant">€4.207,- to €4.449,-</td><td class="ratio-high" data-order="1051">1051 €/j</td><td>?</td><td class="td-vis">4 <details><summary>📋 4v</summary><ul class="prog-list"><li><strong style="color:#c4a35a">Group C5</strong></li><li style="padding-left:10px">9 October</li><li style="padding-left:10px">16 October</li><li style="padding-left:10px">30 October</li><li style="padding-left:10px">3 November</li><li><strong style="color:#c4a35a">Group C6</strong></li><li style="padding-left:10px">17 October</li><li style="padding-left:10px">24 October</li><li style="padding-left:10px">7 November</li><li style="padding-left:10px">11 November</li><li><strong style="color:#c4a35a">Group C7</strong></li><li style="padding-left:10px">22 October</li><li style="padding-left:10px">29 October</li><li style="padding-left:10px">12 November</li><li style="padding-left:10px">16 November</li><li><strong style="color:#c4a35a">Group C8</strong></li><li style="padding-left:10px">29 October</li><li style="padding-left:10px">5 November</li><li style="padding-left:10px">19 November</li><li style="padding-left:10px">23 November</li><li><strong style="color:#c4a35a">Group C9</strong></li><li style="padding-left:10px">5 November</li><li style="padding-left:10px">12 November</li><li style="padding-left:10px">26 November</li><li style="padding-left:10px">30 November</li><li><strong style="color:#c4a35a">Group C10</strong></li><li style="padding-left:10px">20 November</li><li style="padding-left:10px">27 November</li><li style="padding-left:10px">11 December</li><li style="padding-left:10px">15 December</li><li><strong style="color:#c4a35a">Groep C11</strong></li><li style="padding-left:10px">26 November</li><li style="padding-left:10px">3 December</li><li style="padding-left:10px">17 December</li><li style="padding-left:10px">21 December</li></ul></details></td><td class="td-dates"><strong>Group C5</strong><br>29 September up to and including 1 October<br>27 up to and including 28 October<br><strong>Group C6</strong><br>7 up to and including 9 October<br>4 up to and including 5 November<br><strong>Group C7</strong><br>12 up to and including 14 October<br>9 up to and including 10 November<br><strong>Group C8</strong><br>19 up to and including 21 October<br>16 up to and including 17 November<br><strong>Group C9</strong><br>26 up to and including 28 October<br>23 up to and including 24 November<br><strong>Group C10</strong><br>10 up to and including 12 November<br>8 up to and including 9 December<br><strong>Groep C11</strong><br>16 up to and including 18 November<br>14 up to and including 15 December</td><td>18 - 75 years old</td><td>M/F</td><td><span class="badge-statut ok" title="En recrutement (7/11 groupes ouverts)">● En recrutement (7/11 groupes ouverts)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/AC3582-0006-GRQ-C" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="row-incompat" data-montant="6829" data-ratio="0" data-compatible="0" data-nouveau="0" data-search="treatment of cancer (br0078-2753-grq) icon "><td><span class="badge-src">ICON</span></td><td class="col-titre">Treatment of cancer (BR0078-2753-GRQ)</td><td data-order="6829" class="td-montant">€6.829,-</td><td class="ratio-na" data-order="-1">?</td><td>?</td><td class="td-vis">? </td><td class="td-dates"><strong>Group 1a</strong><br>11 up to and including 29 October (Possible extension up to and including 3 November)<br><strong>Group 1b</strong><br>26 October up to and including 13 November (Possible extension up to and including 18 November)</td><td>18 - 55 years old</td><td>F</td><td><span class="badge-statut ok" title="En recrutement (2/2 groupes ouverts)">● En recrutement (2/2 groupes ouverts)</span></td><td><span class="badge-compat no" title="Réservé aux femmes (F)">✗ Réservé aux femmes (F)</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/BR0078-2753-GRQ" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="2943" data-ratio="0" data-compatible="1" data-nouveau="0" data-search="skin conditions (ar4973-0041-grq-b) icon "><td><span class="badge-src">ICON</span></td><td class="col-titre">Skin conditions (AR4973-0041-GRQ-B)</td><td data-order="2943" class="td-montant">€2.943,- to €3.093,-</td><td class="ratio-na" data-order="-1">?</td><td>?</td><td class="td-vis">? </td><td class="td-dates"><strong>Group B2</strong><br>14 up to and including 23 October<br><strong>Groep B3</strong><br>4 up to and including 13 November</td><td>18 - 55 years old</td><td>M/F</td><td><span class="badge-statut ok" title="En recrutement (2/3 groupes ouverts)">● En recrutement (2/3 groupes ouverts)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/AR4973-0041-GRQ-B" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="2495" data-ratio="2495" data-compatible="1" data-nouveau="0" data-search="kidney diseases (mi7965-0002-grq) icon "><td><span class="badge-src">ICON</span></td><td class="col-titre">Kidney diseases (MI7965-0002-GRQ)</td><td data-order="2495" class="td-montant">€2.495,-</td><td class="ratio-high" data-order="2495">2495 €/j</td><td>?</td><td class="td-vis">1 <details><summary>📋 1v</summary><ul class="prog-list"><li><strong style="color:#c4a35a">Group 1d2</strong></li><li style="padding-left:10px">6 November</li></ul></details></td><td class="td-dates"><strong>Group 1d2</strong><br>28 October up to and including 2 November</td><td>18 - 59 years old</td><td>M/F</td><td><span class="badge-statut ok" title="En recrutement (1/8 groupes ouverts)">● En recrutement (1/8 groupes ouverts)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/MI7965-0002-GRQ" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="4467" data-ratio="0" data-compatible="1" data-nouveau="0" data-search="long-term lung condition (in2540-0072-grq) icon "><td><span class="badge-src">ICON</span></td><td class="col-titre">Long-term lung condition (IN2540-0072-GRQ)</td><td data-order="4467" class="td-montant">€4.467,-</td><td class="ratio-na" data-order="-1">?</td><td>?</td><td class="td-vis">? </td><td class="td-dates"><strong>Group 1</strong><br>28 October up to and including 14 November</td><td>18 - 55 years old</td><td>M/F</td><td><span class="badge-statut ok" title="En recrutement (1/2 groupes ouverts)">● En recrutement (1/2 groupes ouverts)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/IN2540-0072-GRQ" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="7253" data-ratio="3626" data-compatible="1" data-nouveau="0" data-search="fungal infections (ba0680-0068-grq) icon "><td><span class="badge-src">ICON</span></td><td class="col-titre">Fungal infections (BA0680-0068-GRQ)</td><td data-order="7253" class="td-montant">€7.253,-</td><td class="ratio-high" data-order="3626">3626 €/j</td><td>?</td><td class="td-vis">2 <details><summary>📋 2v</summary><ul class="prog-list"><li><strong style="color:#c4a35a">Group 1a</strong></li><li style="padding-left:10px">5 December</li><li style="padding-left:10px">11 December</li><li><strong style="color:#c4a35a">Group 1b</strong></li><li style="padding-left:10px">26 December</li><li style="padding-left:10px">1 January</li></ul></details></td><td class="td-dates"><strong>Group 1a</strong><br>3 November up to and including 1 December<br><strong>Group 1b</strong><br>24 November up to and including 22 December</td><td>18 - 55 years old</td><td>M/F</td><td><span class="badge-statut ok" title="En recrutement (2/3 groupes ouverts)">● En recrutement (2/3 groupes ouverts)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/BA0680-0068-GRQ" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="row-nouveau" data-montant="7445" data-ratio="7445" data-compatible="1" data-nouveau="1" data-search="heart and vascular disease and metabolic diseases (no0009-1092-grq) icon "><td><span class="badge-src">ICON</span> <span class="badge-new">NEW</span></td><td class="col-titre">Heart and vascular disease and metabolic diseases (NO0009-1092-GRQ)</td><td data-order="7445" class="td-montant">€7.445,-</td><td class="ratio-high" data-order="7445">7445 €/j</td><td>?</td><td class="td-vis">1 <details><summary>📋 1v</summary><ul class="prog-list"><li><strong style="color:#c4a35a">Group C2a (deel C)</strong></li><li style="padding-left:10px">22 December</li><li><strong style="color:#c4a35a">Group C2b (deel C)</strong></li><li style="padding-left:10px">24 December</li></ul></details></td><td class="td-dates"><strong>Group C2a (deel C)</strong><br>17 November up to and including 16 December<br><strong>Group C2b (deel C)</strong><br>19 November up to and including 18 December</td><td>18 - 55 years old</td><td>M/F</td><td><span class="badge-statut ok" title="En recrutement (2/10 groupes ouverts)">● En recrutement (2/10 groupes ouverts)</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.iconclinicaltrials.com/trials/NO0009-1092-GRQ" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="3000" data-ratio="300" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1tzs1-3 biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1TZS1-3</td><td data-order="3000" class="td-montant">3 000 €</td><td class="ratio-med" data-order="300">300 €/j</td><td>9 nuit</td><td class="td-vis">1 </td><td class="td-dates">?</td><td>18-55</td><td>Mixte</td><td><span class="badge-statut ok" title="Étude en cours">● Étude en cours</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1tzs1-3/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="3100" data-ratio="344" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1epn3-b biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1EPN3-B</td><td data-order="3100" class="td-montant">3 100 €</td><td class="ratio-med" data-order="344">344 €/j</td><td>8 nuit</td><td class="td-vis">1 </td><td class="td-dates"><details><summary>📅</summary><div class="dt-drop">Plusieurs groupes disponibles entre octobre et novembre 2026</div></details></td><td>18-65</td><td>Mixte</td><td><span class="badge-statut ok" title="Étude en cours">● Étude en cours</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1epn3-b/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="1700" data-ratio="340" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1epn3-a biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1EPN3-A</td><td data-order="1700" class="td-montant">1 700 €</td><td class="ratio-med" data-order="340">340 €/j</td><td>4 nuit</td><td class="td-vis">1 </td><td class="td-dates"><details><summary>📅</summary><div class="dt-drop">Plusieurs groupes disponibles entre septembre 2026 et janvier 2027</div></details></td><td>18-65</td><td>Mixte</td><td><span class="badge-statut ok" title="Étude en cours">● Étude en cours</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1epn3-a/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="3250" data-ratio="250" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1mvoe14-b biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1MVOE14-B</td><td data-order="3250" class="td-montant">3 250 €</td><td class="ratio-med" data-order="250">250 €/j</td><td>12 nuit</td><td class="td-vis">1 </td><td class="td-dates"><details><summary>📅</summary><div class="dt-drop">Plusieurs groupes disponibles entre août et novembre 2026</div></details></td><td>18-55</td><td>Mixte</td><td><span class="badge-statut ok" title="Étude en cours">● Étude en cours</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1mvoe14-b/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="4250" data-ratio="326" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1mvoe14-c biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1MVOE14-C</td><td data-order="4250" class="td-montant">4 250 €</td><td class="ratio-med" data-order="326">326 €/j</td><td>12 nuit</td><td class="td-vis">1 </td><td class="td-dates"><details><summary>📅</summary><div class="dt-drop">Plusieurs groupes disponibles entre septembre et octobre 2026</div></details></td><td>18-55</td><td>Homme</td><td><span class="badge-statut warn" title="Sur liste d’attente">⏳ Sur liste d’attente</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1mvoe14-c/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="1300" data-ratio="260" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1mvoe14-a biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1MVOE14-A</td><td data-order="1300" class="td-montant">1 300 €</td><td class="ratio-med" data-order="260">260 €/j</td><td>4 nuit</td><td class="td-vis">1 </td><td class="td-dates"><details><summary>📅</summary><div class="dt-drop">Plusieurs groupes disponibles entre février et septembre 2026</div></details></td><td>18-55</td><td>Mixte</td><td><span class="badge-statut warn" title="Sur liste d’attente">⏳ Sur liste d’attente</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/inscription-etude-dobservation-1mvoe14-a/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="2700" data-ratio="245" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1mvoe14-d biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1MVOE14-D</td><td data-order="2700" class="td-montant">2 700 €</td><td class="ratio-med" data-order="245">245 €/j</td><td>10 nuit</td><td class="td-vis">1 </td><td class="td-dates"><details><summary>📅</summary><div class="dt-drop">Plusieurs groupes disponibles entre mars et septembre 2026</div></details></td><td>18-55</td><td>Mixte</td><td><span class="badge-statut warn" title="Sur liste d’attente">⏳ Sur liste d’attente</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1mvoe14-d/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="1400" data-ratio="350" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1tzs1-1a biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1TZS1-1A</td><td data-order="1400" class="td-montant">1 400 €</td><td class="ratio-high" data-order="350">350 €/j</td><td>3 nuit</td><td class="td-vis">1 </td><td class="td-dates">?</td><td>18-55</td><td>Mixte</td><td><span class="badge-statut warn" title="Sur liste d’attente">⏳ Sur liste d’attente</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1tzs1-1a/" target="_blank" class="tbl-lien">→</a></td></tr>
+<tr class="" data-montant="3650" data-ratio="365" data-compatible="1" data-nouveau="0" data-search="etude d’observation 1boub4-b biotrial "><td><span class="badge-src">BIOTRIAL</span></td><td class="col-titre">Etude d’observation 1BOUB4-B</td><td data-order="3650" class="td-montant">3 650 €</td><td class="ratio-high" data-order="365">365 €/j</td><td>9 nuit</td><td class="td-vis">1 </td><td class="td-dates">?</td><td>18-55</td><td>Mixte</td><td><span class="badge-statut warn" title="Sur liste d'attente">⏳ Sur liste d'attente</span></td><td><span class="badge-compat ok">ÉLIGIBLE</span></td><td class="td-lien"><a href="https://www.aider-recherche-clinique.fr/essais-clinique/etude-dobservation-1boub4-b/" target="_blank" class="tbl-lien">→</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="no-results">// AUCUN RÉSULTAT //</div>
+  </main>
+  <script>
+    var tbody        = document.getElementById('tbody');
+    var tbl          = document.getElementById('etudes');
+    var noRes        = document.getElementById('no-results');
+    var allRows      = Array.from(tbody.querySelectorAll('tr'));
+    var hideIncompat  = true;
+    var nouvellesOnly = false;
+    var searchQuery   = '';
+    var sortKey       = 'montant';
+    var sortDir       = -1;
+
+    function applyAll() {
+      var visible = allRows.filter(function(r) {
+        if (hideIncompat  && r.dataset.compatible === '0') return false;
+        if (nouvellesOnly && r.dataset.nouveau    !== '1') return false;
+        if (searchQuery   && !r.dataset.search.includes(searchQuery)) return false;
+        return true;
+      });
+      visible.sort(function(a, b) {
+        return sortDir * (parseInt(b.dataset[sortKey]) - parseInt(a.dataset[sortKey]));
+      });
+      allRows.forEach(function(r) { r.style.display = 'none'; });
+      visible.forEach(function(r) { r.style.display = ''; tbody.appendChild(r); });
+      noRes.style.display = visible.length === 0 ? 'block' : 'none';
+    }
+
+    document.getElementById('btnIncompat').addEventListener('click', function() {
+      hideIncompat = !hideIncompat;
+      this.classList.toggle('active', hideIncompat);
+      applyAll();
+    });
+    document.getElementById('btnNouvelles').addEventListener('click', function() {
+      nouvellesOnly = !nouvellesOnly;
+      this.classList.toggle('active', nouvellesOnly);
+      applyAll();
+    });
+    document.getElementById('btnTitre').addEventListener('click', function() {
+      tbl.classList.toggle('show-titres');
+      this.classList.toggle('active', tbl.classList.contains('show-titres'));
+    });
+    document.getElementById('search').addEventListener('input', function() {
+      searchQuery = this.value.toLowerCase().trim();
+      applyAll();
+    });
+    document.querySelectorAll('.sort-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.sort-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        if (sortKey === this.dataset.sort) { sortDir *= -1; } else { sortKey = this.dataset.sort; sortDir = -1; }
+        applyAll();
+      });
+    });
+    document.querySelectorAll('thead th[data-col]').forEach(function(th) {
+      th.addEventListener('click', function() {
+        var key = this.dataset.col;
+        if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = -1; }
+        document.querySelectorAll('thead th').forEach(function(h) { h.classList.remove('sort-asc','sort-desc'); });
+        this.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
+        document.querySelectorAll('.sort-btn').forEach(function(b) {
+          b.classList.toggle('active', b.dataset.sort === sortKey);
+        });
+        applyAll();
+      });
+    });
+
+    applyAll();
+  </script>
+</body>
+</html>
