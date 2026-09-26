@@ -1,0 +1,80 @@
+:root {
+  --police: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --police-titre: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  /* Design sombre par défaut */
+  --fond: #000000; --surface: #161617; --surface-2: #1d1d1f; --texte: #f5f5f7; --doux: #86868b; --filet: rgba(255, 255, 255, .1);
+  --lien: #2997ff; --segment: rgba(118, 118, 128, .24); --segment-actif: #636366;
+  --ombre: 0 0 0 .5px rgba(255, 255, 255, .06);
+  --ombre-survol: 0 0 0 .5px rgba(255, 255, 255, .14), 0 12px 40px rgba(0, 0, 0, .6);
+  --barre: rgba(22, 22, 23, .72);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fond); color: var(--texte); font: 17px/1.47 var(--police); letter-spacing: -.022em;
+       -webkit-font-smoothing: antialiased; }
+a { color: var(--lien); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Barre de navigation translucide */
+.barre { position: sticky; top: 0; z-index: 50; background: var(--barre); border-bottom: .5px solid var(--filet);
+         -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+         padding-top: env(safe-area-inset-top, 0px); }
+.barre .interieur { max-width: 1024px; margin: 0 auto; height: 48px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; }
+.barre .marque { color: var(--texte); font-weight: 600; font-size: 17px; letter-spacing: -.02em; }
+.barre .marque:hover { text-decoration: none; }
+.barre nav a { color: var(--texte); opacity: .8; font-size: 12px; margin-left: 24px; letter-spacing: -.01em; }
+.barre nav a:hover { opacity: 1; text-decoration: none; }
+
+.page { max-width: 1024px; margin: 0 auto; padding: 0 22px 96px; }
+
+/* En-têtes */
+.entete { text-align: center; padding: 88px 0 56px; }
+h1 { background: linear-gradient(180deg, #ffffff 30%, #a1a1a6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.surtitre { color: var(--doux); font-size: 17px; font-weight: 600; margin: 0 0 8px; }
+h1 { font: 700 clamp(40px, 7vw, 64px)/1.06 var(--police-titre); letter-spacing: -.035em; margin: 0 0 16px; }
+h2 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--police-titre); letter-spacing: -.03em; margin: 0 0 12px; }
+.chapo { color: var(--doux); font-size: clamp(19px, 2.4vw, 21px); line-height: 1.38; max-width: 36em; margin: 0 auto; letter-spacing: -.02em; }
+
+/* Grille des biens */
+.biens { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+.bien { display: block; background: var(--surface); border-radius: 20px; overflow: hidden; color: var(--texte); box-shadow: var(--ombre);
+        transition: transform .4s cubic-bezier(.2, .8, .2, 1), box-shadow .4s; }
+.bien:hover { transform: scale(1.015); text-decoration: none; box-shadow: var(--ombre-survol); }
+.bien .vignette { aspect-ratio: 4/3; background: #0a0a0a center/cover; display: grid; place-items: center; color: #86868b; font-size: 14px; }
+.bien .infos { padding: 20px 22px 24px; }
+.bien .infos b { display: block; font-size: 21px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 2px; }
+.bien .infos span { color: var(--doux); font-size: 15px; }
+.formats { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+.formats i { font-style: normal; font-size: 12px; font-weight: 500; color: var(--doux); background: var(--segment); border-radius: 999px; padding: 3px 10px; }
+
+/* Contrôle segmenté */
+.segments { display: flex; gap: 2px; padding: 2px; margin: 0 auto 20px; width: fit-content; max-width: 100%; overflow-x: auto;
+            background: var(--segment); border-radius: 9px; }
+.segments button { flex: none; border: 0; background: transparent; color: var(--texte); cursor: pointer;
+                   font: 500 14px/1 var(--police); letter-spacing: -.01em; padding: 8px 18px; border-radius: 7px;
+                   transition: background .2s, box-shadow .2s; }
+.segments button[aria-selected="true"] { background: var(--segment-actif); box-shadow: 0 1px 3px rgba(0, 0, 0, .4); }
+
+/* Visionneuse */
+.scene { position: relative; width: 100%; aspect-ratio: 16/9; max-height: 80vh; background: #000; border-radius: 20px; overflow: hidden; }
+@media (max-width: 700px) { .scene { aspect-ratio: 4/5; border-radius: 16px; } }
+.scene iframe, .scene video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.scene .vide { position: absolute; inset: 0; display: grid; place-items: center; color: #86868b; text-align: center; padding: 24px; font-size: 15px; }
+.scene .plein { position: absolute; top: 14px; right: 14px; z-index: 2; width: 36px; height: 36px; border: 0; border-radius: 50%; cursor: pointer;
+                display: grid; place-items: center; background: rgba(28, 28, 30, .5); border: .5px solid rgba(255, 255, 255, .18);
+                -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); transition: background .2s; }
+.scene .plein:hover { background: rgba(28, 28, 30, .7); }
+.scene .plein svg { width: 16px; height: 16px; }
+.legende { color: var(--doux); font-size: 14px; text-align: center; margin: 14px 0 0; }
+
+/* Fiche du bien */
+.fiche { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; margin: 56px 0 0;
+         background: var(--surface); border-radius: 20px; box-shadow: var(--ombre); overflow: hidden; }
+.fiche div { padding: 20px 22px; border-right: .5px solid var(--filet); }
+.fiche div:last-child { border-right: 0; }
+.fiche small { display: block; color: var(--doux); font-size: 12px; margin-bottom: 2px; }
+.fiche strong { font-size: 21px; font-weight: 600; letter-spacing: -.02em; }
+
+.contact { text-align: center; padding: 96px 0 0; }
+.pied { text-align: center; color: var(--doux); font-size: 12px; padding: 48px 22px calc(32px + env(safe-area-inset-bottom, 0px)); border-top: .5px solid var(--filet); }

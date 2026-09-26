@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visite 3D</title>
+<style>
+  :root { --police: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+          --verre: rgba(28, 28, 30, .5); --flou: saturate(180%) blur(20px); }
+  html, body { margin: 0; height: 100%; background: #000; color: #f5f5f7; font: 13px/1.3 var(--police); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  #load { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; }
+  #load[hidden] { display: none; }
+  #load div { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; background: var(--verre);
+              -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); font-weight: 500; letter-spacing: -.01em; }
+  #load div::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25);
+                      border-top-color: #fff; animation: tourne .8s linear infinite; }
+  @keyframes tourne { to { transform: rotate(360deg); } }
+  #aide { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+          padding: 8px 16px; border-radius: 999px; background: var(--verre); border: .5px solid rgba(255,255,255,.18);
+          -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); font-weight: 500; letter-spacing: -.01em;
+          white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; transition: opacity .8s; }
+  #aide.cache { opacity: 0; }
+  #pos { position: fixed; top: 12px; left: 12px; font: 12px ui-monospace, monospace; background: var(--verre); padding: 6px 10px; border-radius: 8px; }
+</style>
+<script type="importmap">
+  { "imports": {
+      "three": "./lib/three/three.module.js",
+      "three/addons/": "./lib/three/addons/",
+      "@sparkjsdev/spark": "./lib/spark.module.js" } }
+</script>
+</head>
+<body>
+<div id="load"><div>Chargement <span id="pct"></span></div></div>
+<div id="aide"></div>
+<div id="pos" hidden></div>
+<script type="module">
+// Paramètres d'URL :
+//   src=chemin/vers/scene.ply|.spz|.sog|.splat   (obligatoire)
+//   rot=rx,ry,rz                                   (redresser le modèle, en degrés)
+//   cam=x,y,z & look=x,y,z                         (point de vue de départ, sinon centre du modèle)
+//   edit                                           (affiche la position caméra pour régler cam/look)
+import * as THREE from "three";
+import { SparkRenderer, SplatMesh, SparkControls } from "@sparkjsdev/spark";
+
+const q = new URLSearchParams(location.search);
+const vec = s => s && new THREE.Vector3(...s.split(",").map(Number));
+const tactile = matchMedia("(pointer: coarse)").matches;
+document.getElementById("aide").textContent = tactile
+  ? "Glisser pour regarder · deux doigts pour se déplacer"
+  : "Glisser pour regarder · Z Q S D ou flèches pour se déplacer · molette pour avancer";
+
+const renderer = new THREE.WebGLRenderer({ antialias: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(+(q.get("fov") || 75), 1, 0.01, 500);
+// Réglages validés contre le rendu de Brush (voir visites360/compare_splat.py) ; surcharge possible via ?spark={...}
+const reglages = { sortRadial: false, maxPixelRadius: 2048, clipXY: 2.0, ...JSON.parse(q.get("spark") || "{}") };
+scene.add(new SparkRenderer({ renderer, ...reglages }));
+
+const resize = () => {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+};
+addEventListener("resize", resize); resize();
+
+const splat = new SplatMesh({
+  url: q.get("src"),
+  onProgress: e => { if (e.total) document.getElementById("pct").textContent = Math.round(100 * e.loaded / e.total) + " %"; },
+});
+splat.quaternion.set(1, 0, 0, 0);   // repère COLMAP (Y vers le bas) -> repère three.js
+if (q.get("rot")) {
+  const [rx, ry, rz] = q.get("rot").split(",").map(d => THREE.MathUtils.degToRad(+d));
+  splat.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)));
+}
+scene.add(splat);
+
+splat.initialized.then(() => {
+  document.getElementById("load").hidden = true;
+  const box = splat.getBoundingBox(true).applyMatrix4(splat.matrixWorld);
+  const centre = box.getCenter(new THREE.Vector3());
+  camera.position.copy(vec(q.get("cam")) || centre);
+  const look = vec(q.get("look")) || centre.clone().add(new THREE.Vector3(0, 0, -1));
+  if (q.get("up")) camera.up.copy(vec(q.get("up")));
+  camera.lookAt(look);
+  window.pret = true;
+  setTimeout(() => document.getElementById("aide").classList.add("cache"), 6000);
+}).catch(err => {
+  document.querySelector("#load div").textContent = "Impossible de charger le modèle 3D (" + err.message + ")";
+});
+
+const controls = new SparkControls({ canvas: renderer.domElement });
+controls.fpsMovement.moveSpeed = 1.2;            // m/s : allure de visite, pas de jeu vidéo
+const pos = document.getElementById("pos");
+pos.hidden = !q.has("edit");
+renderer.setAnimationLoop(() => {
+  controls.update(camera);
+  if (!pos.hidden) {
+    const d = camera.getWorldDirection(new THREE.Vector3()).add(camera.position);
+    const f = v => v.toArray().map(n => n.toFixed(2)).join(",");
+    pos.textContent = `cam=${f(camera.position)}&look=${f(d)}`;
+  }
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

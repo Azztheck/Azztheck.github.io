@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Appartement — visite 360°</title>
+<link rel="stylesheet" href="pannellum.css">
+<style>
+  :root {
+    --police: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    --verre: rgba(28, 28, 30, .5);
+    --verre-bord: rgba(255, 255, 255, .18);
+    --flou: saturate(180%) blur(20px);
+  }
+  html, body { margin: 0; height: 100%; background: #000; font: 13px/1.3 var(--police); -webkit-font-smoothing: antialiased; }
+  #pano { position: fixed; inset: 0; }
+
+  /* Barre des pièces : contrôle segmenté en verre dépoli */
+  #pieces { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 10;
+            display: flex; gap: 2px; padding: 3px; max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none;
+            background: var(--verre); border: .5px solid var(--verre-bord); border-radius: 999px;
+            -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); }
+  #pieces::-webkit-scrollbar { display: none; }
+  #pieces button { flex: none; border: 0; border-radius: 999px; padding: 7px 14px; background: transparent; cursor: pointer;
+                   color: rgba(255, 255, 255, .82); font: 500 13px/1.2 var(--police); letter-spacing: -.01em;
+                   transition: background .25s, color .25s; }
+  #pieces button:hover { color: #fff; }
+  #pieces button.actif { background: rgba(255, 255, 255, .92); color: #1d1d1f; }
+
+  /* Points de passage */
+  .porte { width: 40px; height: 40px; cursor: pointer; }
+  .porte .rond { position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center;
+                 background: rgba(255, 255, 255, .2); border: 1.5px solid rgba(255, 255, 255, .85);
+                 -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+                 box-shadow: 0 2px 12px rgba(0, 0, 0, .25); transition: transform .25s cubic-bezier(.2, .8, .2, 1), background .25s; }
+  .porte .rond svg { width: 16px; height: 16px; }
+  .porte .nom { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); white-space: nowrap; pointer-events: none;
+                padding: 4px 10px; border-radius: 999px; color: #fff; font: 500 12px/1.2 var(--police); letter-spacing: -.01em;
+                background: var(--verre); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+                opacity: .9; transition: opacity .25s; }
+  .porte:hover .rond { transform: scale(1.12); background: rgba(255, 255, 255, .35); }
+  .porte:hover .nom { opacity: 1; }
+
+  /* Chargement Pannellum, plus discret */
+  .pnlm-load-box { background: var(--verre) !important; border-radius: 14px !important; font-family: var(--police) !important;
+                   -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); }
+  .pnlm-panorama-info, .pnlm-about-msg { display: none !important; }
+
+  #edition { position: fixed; top: 12px; left: 12px; z-index: 10; color: #fff; padding: 12px; border-radius: 12px; max-width: 360px;
+             background: var(--verre); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); font: 12px/1.5 ui-monospace, monospace; }
+  #edition textarea { width: 100%; height: 120px; background: rgba(0, 0, 0, .4); color: #9f9; border: 0; border-radius: 6px; font: inherit; }
+</style>
+</head>
+<body>
+<div id="pano"></div>
+<nav id="pieces" aria-label="Pièces"></nav>
+<div id="edition" hidden>
+  <b>Mode édition</b> — clic sur une porte = point de passage<br>
+  Pièce : <span id="courante"></span><br>
+  <textarea id="sortie" readonly></textarea>
+</div>
+<script src="pannellum.js"></script>
+<script>
+const config = {"default": {"firstScene": "salon", "sceneFadeDuration": 800, "autoLoad": true, "compass": false, "minHfov": 40, "maxHfov": 120}, "scenes": {"salon": {"title": "Salon", "type": "multires", "multiRes": {"path": "/%l/%s%y_%x", "fallbackPath": "/fallback/%s", "extension": "jpg", "tileResolution": 512, "maxLevel": 4, "cubeResolution": 3784, "basePath": "tiles/salon"}, "yaw": 0, "pitch": 0, "hfov": 100, "hotSpots": [{"type": "scene", "sceneId": "vue", "yaw": 0, "pitch": -2, "text": "Vue", "targetYaw": 20}, {"type": "scene", "sceneId": "chambre", "yaw": -140, "pitch": -8, "text": "Chambre", "targetYaw": 40}, {"type": "scene", "sceneId": "entree", "yaw": -163, "pitch": -6, "text": "Entrée", "targetYaw": -175}]}, "entree": {"title": "Entrée", "type": "multires", "multiRes": {"path": "/%l/%s%y_%x", "fallbackPath": "/fallback/%s", "extension": "jpg", "tileResolution": 512, "maxLevel": 4, "cubeResolution": 3784, "basePath": "tiles/entree"}, "yaw": 0, "pitch": 0, "hfov": 100, "hotSpots": [{"type": "scene", "sceneId": "salon", "yaw": 5, "pitch": -8, "text": "Salon", "targetYaw": 17}, {"type": "scene", "sceneId": "sdb", "yaw": 85, "pitch": -10, "text": "Salle de bain", "targetYaw": -97}]}, "sdb": {"title": "Salle de bain", "type": "multires", "multiRes": {"path": "/%l/%s%y_%x", "fallbackPath": "/fallback/%s", "extension": "jpg", "tileResolution": 512, "maxLevel": 4, "cubeResolution": 3784, "basePath": "tiles/sdb"}, "yaw": 0, "pitch": 0, "hfov": 100, "hotSpots": [{"type": "scene", "sceneId": "entree", "yaw": 83, "pitch": -10, "text": "Entrée", "targetYaw": -95}]}, "chambre": {"title": "Chambre", "type": "multires", "multiRes": {"path": "/%l/%s%y_%x", "fallbackPath": "/fallback/%s", "extension": "jpg", "tileResolution": 512, "maxLevel": 4, "cubeResolution": 3784, "basePath": "tiles/chambre"}, "yaw": 0, "pitch": 0, "hfov": 100, "hotSpots": [{"type": "scene", "sceneId": "salon", "yaw": -140, "pitch": -8, "text": "Salon", "targetYaw": 40}]}, "vue": {"title": "Vue", "type": "multires", "multiRes": {"path": "/%l/%s%y_%x", "fallbackPath": "/fallback/%s", "extension": "jpg", "tileResolution": 512, "maxLevel": 4, "cubeResolution": 3784, "basePath": "tiles/vue"}, "yaw": 0, "pitch": 0, "hfov": 100, "hotSpots": [{"type": "scene", "sceneId": "salon", "yaw": -160, "pitch": -10, "text": "Salon", "targetYaw": -180}]}}};
+const q = new URLSearchParams(location.search);
+
+// Lien direct : ?scene=cuisine&yaw=90&pitch=0
+if (config.scenes[q.get('scene')]) {
+  const s = config.default.firstScene = q.get('scene');
+  if (q.has('yaw')) config.scenes[s].yaw = +q.get('yaw');
+  if (q.has('pitch')) config.scenes[s].pitch = +q.get('pitch');
+}
+
+// Points de passage : rond en verre + flèche + nom de la pièce
+const fleche = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10 8 5.5 12.5 10"/></svg>';
+function dessinerPorte(div, nom) {
+  div.innerHTML = `<span class="rond">${fleche}</span><span class="nom">${nom}</span>`;
+}
+for (const s of Object.values(config.scenes))
+  for (const h of s.hotSpots) {
+    h.cssClass = 'porte';
+    h.createTooltipFunc = dessinerPorte;
+    h.createTooltipArgs = h.text;
+    delete h.text;
+  }
+Object.assign(config.default, { showControls: false, showZoomCtrl: false, showFullscreenCtrl: false, compass: false });
+
+const viewer = pannellum.viewer('pano', config);
+
+const barre = document.getElementById('pieces');
+for (const [id, s] of Object.entries(config.scenes)) {
+  const b = document.createElement('button');
+  b.textContent = s.title; b.dataset.id = id;
+  b.onclick = () => viewer.loadScene(id);
+  barre.appendChild(b);
+}
+const marquer = id => {
+  for (const b of barre.children) {
+    const actif = b.dataset.id === id;
+    b.classList.toggle('actif', actif);
+    // centre la pièce active dans la barre sans faire défiler la page qui contient l'iframe
+    if (actif) barre.scrollTo({ left: b.offsetLeft - (barre.clientWidth - b.offsetWidth) / 2, behavior: 'smooth' });
+  }
+};
+viewer.on('scenechange', marquer);
+viewer.on('load', () => marquer(viewer.getScene()));
+marquer(config.default.firstScene);
+
+if (q.has('edit')) {
+  const boite = document.getElementById('edition'), sortie = document.getElementById('sortie');
+  boite.hidden = false;
+  viewer.on('load', () => document.getElementById('courante').textContent = viewer.getScene());
+  viewer.on('mouseup', e => {
+    const [pitch, yaw] = viewer.mouseEventToCoords(e);
+    sortie.value += `{"to": "?", "yaw": ${yaw.toFixed(1)}, "pitch": ${pitch.toFixed(1)}},\n`;
+  });
+}
+</script>
+</body>
+</html>

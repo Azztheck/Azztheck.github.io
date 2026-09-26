@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bien de démonstration — Visites immersives</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="barre">
+  <div class="interieur">
+    <a class="marque" href="../../">Visites immersives</a>
+    <nav><a href="../../#biens">Réalisations</a><a href="../../#contact">Contact</a></nav>
+  </div>
+</header>
+
+<div class="page">
+  <section class="entete">
+    <p class="surtitre">Appartement</p>
+    <h1>Bien de démonstration</h1>
+    <p class="chapo">Trois façons de découvrir le même logement.</p>
+  </section>
+
+  <!-- Chaque onglet ne charge son contenu qu'au clic (data-src) ; « bientôt » si le fichier n'existe pas -->
+  <div class="segments" role="tablist">
+    <button role="tab" data-type="iframe" data-src="visite/index.html"
+            data-texte="Touchez les flèches pour passer d'une pièce à l'autre.">Visite 360°</button>
+    <button role="tab" data-type="iframe" data-src="../../3d.html?src=biens/demo/3d/scene.spz&amp;cam=-0.53,0.04,1.54&amp;look=-0.67,0.04,0.55" data-fichier="3d/scene.spz"
+            data-texte="Glissez pour regarder, avancez avec les flèches du clavier ou deux doigts.">3D</button>
+    <button role="tab" data-type="video" data-src="fpv.mp4"
+            data-texte="Vol en drone à travers le logement.">Drone</button>
+  </div>
+  <div class="scene" id="scene"></div>
+  <p class="legende" id="legende"></p>
+
+  <section class="fiche">
+    <div><small>Surface</small><strong>— m²</strong></div>
+    <div><small>Pièces</small><strong>—</strong></div>
+    <div><small>Ville</small><strong>—</strong></div>
+    <div><small>Réalisé le</small><strong>—</strong></div>
+  </section>
+</div>
+<footer class="pied">Visites immersives</footer>
+
+<script>
+const scene = document.getElementById('scene'), legende = document.getElementById('legende');
+const onglets = [...document.querySelectorAll('.segments button')];
+const iconePlein = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg>';
+
+async function existe(url) {
+  try { return (await fetch(url, { method: 'HEAD', cache: 'no-store' })).ok; } catch { return false; }
+}
+
+async function ouvrir(bouton) {
+  onglets.forEach(b => b.setAttribute('aria-selected', b === bouton));
+  legende.textContent = bouton.dataset.texte;
+  const src = bouton.dataset.src;
+  if (!(await existe(bouton.dataset.fichier || src.split('?')[0]))) {
+    scene.innerHTML = '<div class="vide">Bientôt disponible pour ce bien.</div>';
+    return;
+  }
+  scene.innerHTML = bouton.dataset.type === 'video'
+    ? `<video src="${src}" controls playsinline preload="metadata"></video>`
+    : `<iframe src="${src}" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>`;
+  const plein = document.createElement('button');
+  plein.className = 'plein'; plein.setAttribute('aria-label', 'Plein écran'); plein.innerHTML = iconePlein;
+  plein.onclick = () => (scene.requestFullscreen || scene.webkitRequestFullscreen).call(scene);
+  scene.appendChild(plein);
+}
+
+onglets.forEach(b => b.onclick = () => ouvrir(b));
+ouvrir(onglets[0]);
+</script>
+</body>
+</html>
