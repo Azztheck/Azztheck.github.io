@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bien de démonstration — Visites immersives</title>
+<title>Appartement 3 pièces — Visites immersives</title>
 <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
@@ -14,51 +14,123 @@
   </div>
 </header>
 
+<!-- Données de démonstration : à remplacer par celles du bien réel -->
 <div class="page">
-  <section class="entete">
-    <p class="surtitre">Appartement</p>
-    <h1>Bien de démonstration</h1>
-    <p class="chapo">Trois façons de découvrir le même logement.</p>
-  </section>
+  <nav class="fil"><a href="../../">Accueil</a><span>›</span><a href="../../#biens">Réalisations</a><span>›</span>Appartement 3 pièces</nav>
 
-  <!-- Chaque onglet ne charge son contenu qu'au clic (data-src) ; « bientôt » si le fichier n'existe pas -->
-  <div class="segments" role="tablist">
-    <button role="tab" data-type="iframe" data-src="visite/index.html"
-            data-texte="Touchez les flèches pour passer d'une pièce à l'autre.">Visite 360°</button>
-    <button role="tab" data-type="iframe" data-src="../../3d.html?src=biens/demo/3d/scene.spz&amp;cam=-0.53,0.04,1.54&amp;look=-0.67,0.04,0.55" data-fichier="3d/scene.spz"
-            data-texte="Glissez pour regarder, avancez avec les flèches du clavier ou deux doigts.">3D</button>
-    <button role="tab" data-type="video" data-src="fpv.mp4"
-            data-texte="Vol en drone à travers le logement.">Drone</button>
+  <div class="annonce">
+    <!-- Colonne principale -->
+    <main>
+      <div class="statuts"><span class="statut bleu">Visite 3D</span><span class="statut">Exclusivité</span><span class="statut">Vue dégagée</span></div>
+
+      <div class="segments" role="tablist" style="margin-left:0">
+        <button role="tab" data-type="iframe" data-src="visite/index.html"
+                data-texte="Touchez les flèches pour passer d'une pièce à l'autre.">Visite 360°</button>
+        <button role="tab" data-type="iframe" data-src="../../3d.html?src=biens/demo/3d/scene.spz&amp;cam=3.06,-0.05,1.78&amp;look=2.12,-0.05,1.43" data-fichier="3d/scene.spz"
+                data-texte="Glissez pour regarder, avancez avec les flèches du clavier ou deux doigts.">3D</button>
+        <button role="tab" data-type="video" data-src="fpv.mp4"
+                data-texte="Vol en drone à travers le logement.">Drone</button>
+      </div>
+      <div class="scene" id="scene"></div>
+      <p class="legende" id="legende"></p>
+
+      <section class="bloc">
+        <h2>Caractéristiques</h2>
+        <div class="carac">
+          <div><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span><small>Surface habitable</small><b>68 m²</b></span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg><span><small>Pièces</small><b>3</b></span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6M3 14h18M6 10V7h5v3"/></svg><span><small>Chambres</small><b>1</b></span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM6 12V6a2 2 0 0 1 4 0"/></svg><span><small>Salle d'eau</small><b>1</b></span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5"/></svg><span><small>Étage</small><b>Dernier</b></span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></svg><span><small>Exposition</small><b>Sud</b></span></div>
+        </div>
+      </section>
+
+      <section class="bloc">
+        <h2>Description</h2>
+        <div class="description repliee" id="description">
+          <p>Sous les toits, appartement lumineux de 3 pièces avec poutres apparentes et parquet, offrant une vue dégagée sur le lac et les montagnes.</p>
+          <p>Il se compose d'une entrée, d'un séjour ouvert sur une cuisine équipée, d'une chambre mansardée éclairée par deux fenêtres de toit, d'un bureau et d'une salle d'eau avec douche.</p>
+          <p>Proche des commerces, des écoles et des transports. Visite immersive disponible : découvrez chaque pièce avant de vous déplacer.</p>
+        </div>
+        <button class="lien-bouton" id="plus">Lire la suite</button>
+      </section>
+
+      <section class="bloc">
+        <h2>Équipements</h2>
+        <div class="puces"><span>Cuisine équipée</span><span>Poutres apparentes</span><span>Parquet</span><span>Fenêtres de toit</span><span>Douche</span><span>Cave</span><span>Double vitrage</span></div>
+      </section>
+
+      <section class="bloc">
+        <h2>Performance énergétique</h2>
+        <div class="energie">
+          <div><h3>Consommation (DPE)</h3><div class="echelle" data-classe="D" data-val="189 kWh/m²/an"></div></div>
+          <div><h3>Émissions (GES)</h3><div class="echelle ges" data-classe="C" data-val="14 kg CO₂/m²/an"></div></div>
+        </div>
+      </section>
+
+      <section class="bloc">
+        <h2>Le quartier</h2>
+        <div class="quartier">
+          <div>Arrêts de bus <b>4</b></div><div>Gare <b>1</b></div><div>Écoles <b>3</b></div>
+          <div>Commerces <b>12</b></div><div>Médecins <b>5</b></div><div>Parcs <b>2</b></div>
+        </div>
+      </section>
+
+      <section class="bloc">
+        <h2>Simuler votre financement</h2>
+        <div class="simu">
+          <label>Prix du bien (€)<input type="number" id="s-prix" value="420000" step="1000"></label>
+          <label>Apport (€)<input type="number" id="s-apport" value="80000" step="1000"></label>
+          <label>Taux (%)<input type="number" id="s-taux" value="3.4" step="0.05"></label>
+          <label>Durée : <span id="s-duree-txt">20 ans</span><input type="range" id="s-duree" min="7" max="25" value="20"></label>
+          <div class="mensualite" id="s-mens">—<small>par mois, hors assurance</small></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Colonne latérale -->
+    <aside class="cote">
+      <div class="carte-prix">
+        <div class="type">Vente · Appartement</div>
+        <div class="prix">420 000 €</div>
+        <div class="m2">6 176 €/m²</div>
+        <div class="resume"><span><b>3</b> pièces</span><span><b>1</b> chambre</span><span><b>68</b> m²</span></div>
+        <div class="lieu"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-7.4 7-12a7 7 0 0 0-14 0c0 4.6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>Centre-ville</div>
+      </div>
+
+      <div class="carte-prix" id="contact-bien">
+        <div class="agent"><div class="photo">VI</div><div><b>Visites immersives</b><small>Conseiller dédié</small></div></div>
+        <form class="formulaire" id="form-visite" style="margin-top:16px">
+          <input required placeholder="Nom" autocomplete="name">
+          <input required type="tel" placeholder="Téléphone" autocomplete="tel">
+          <input required type="email" placeholder="E-mail" autocomplete="email">
+          <select><option>Demande de visite</option><option>Demande d'informations</option><option>Estimation de mon bien</option></select>
+          <textarea placeholder="Message (facultatif)"></textarea>
+          <button class="bouton" type="submit">Envoyer ma demande</button>
+        </form>
+        <button class="bouton second" id="vers-3d">Explorer en 3D</button>
+      </div>
+    </aside>
   </div>
-  <div class="scene" id="scene"></div>
-  <p class="legende" id="legende"></p>
 
-  <section class="fiche">
-    <div><small>Surface</small><strong>— m²</strong></div>
-    <div><small>Pièces</small><strong>—</strong></div>
-    <div><small>Ville</small><strong>—</strong></div>
-    <div><small>Réalisé le</small><strong>—</strong></div>
-  </section>
+  <p class="avertissement">Bien de démonstration — prix, surface et caractéristiques fictifs, présentés à titre d'exemple.</p>
 </div>
+
+<div class="action-mobile"><span class="prix">420 000 €</span><a class="bouton" href="#contact-bien">Contacter</a></div>
 <footer class="pied">Visites immersives</footer>
 
 <script>
+/* Onglets média (chargés au clic ; « bientôt » si le fichier n'existe pas) */
 const scene = document.getElementById('scene'), legende = document.getElementById('legende');
 const onglets = [...document.querySelectorAll('.segments button')];
 const iconePlein = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg>';
-
-async function existe(url) {
-  try { return (await fetch(url, { method: 'HEAD', cache: 'no-store' })).ok; } catch { return false; }
-}
-
+async function existe(url) { try { return (await fetch(url, { method: 'HEAD', cache: 'no-store' })).ok; } catch { return false; } }
 async function ouvrir(bouton) {
   onglets.forEach(b => b.setAttribute('aria-selected', b === bouton));
   legende.textContent = bouton.dataset.texte;
   const src = bouton.dataset.src;
-  if (!(await existe(bouton.dataset.fichier || src.split('?')[0]))) {
-    scene.innerHTML = '<div class="vide">Bientôt disponible pour ce bien.</div>';
-    return;
-  }
+  if (!(await existe(bouton.dataset.fichier || src.split('?')[0]))) { scene.innerHTML = '<div class="vide">Bientôt disponible pour ce bien.</div>'; return; }
   scene.innerHTML = bouton.dataset.type === 'video'
     ? `<video src="${src}" controls playsinline preload="metadata"></video>`
     : `<iframe src="${src}" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>`;
@@ -67,9 +139,44 @@ async function ouvrir(bouton) {
   plein.onclick = () => (scene.requestFullscreen || scene.webkitRequestFullscreen).call(scene);
   scene.appendChild(plein);
 }
-
 onglets.forEach(b => b.onclick = () => ouvrir(b));
 ouvrir(onglets[0]);
+document.getElementById('vers-3d').onclick = () => { ouvrir(onglets[1]); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+/* Description repliable */
+document.getElementById('plus').onclick = e => {
+  const d = document.getElementById('description');
+  e.target.textContent = d.classList.toggle('repliee') ? 'Lire la suite' : 'Réduire';
+};
+
+/* Étiquettes énergie A→G */
+const couleurs = { dpe: ['#1a9641', '#52b151', '#a6d96a', '#ffe36a', '#fdae61', '#f46d43', '#d73027'],
+                   ges: ['#f2e6ff', '#d9b3ff', '#c38fff', '#a966f2', '#8c42d9', '#6f26b3', '#4d0f80'] };
+document.querySelectorAll('.echelle').forEach(e => {
+  const pal = e.classList.contains('ges') ? couleurs.ges : couleurs.dpe;
+  'ABCDEFG'.split('').forEach((l, i) => {
+    const d = document.createElement('div');
+    d.textContent = l; d.style.background = pal[i]; d.style.width = `${40 + i * 10}%`;
+    if (l === e.dataset.classe) { d.classList.add('actif'); d.dataset.val = e.dataset.val; }
+    e.appendChild(d);
+  });
+});
+
+/* Simulateur de prêt */
+const val = id => +document.getElementById(id).value;
+function simuler() {
+  const n = val('s-duree') * 12, r = val('s-taux') / 100 / 12, capital = Math.max(0, val('s-prix') - val('s-apport'));
+  const m = r ? capital * r / (1 - Math.pow(1 + r, -n)) : capital / n;
+  document.getElementById('s-duree-txt').textContent = `${val('s-duree')} ans`;
+  document.getElementById('s-mens').innerHTML = `${Math.round(m).toLocaleString('fr-FR')} €<small>par mois, hors assurance · coût du crédit ${Math.round(m * n - capital).toLocaleString('fr-FR')} €</small>`;
+}
+document.querySelectorAll('.simu input').forEach(i => i.oninput = simuler); simuler();
+
+/* Formulaire (démo : aucun envoi) */
+document.getElementById('form-visite').onsubmit = e => {
+  e.preventDefault();
+  e.target.outerHTML = '<div class="confirmation">Merci ! Ceci est un site de démonstration : aucune demande n\'a été envoyée.</div>';
+};
 </script>
 </body>
 </html>

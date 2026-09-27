@@ -78,3 +78,80 @@ h2 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--police-titre); letter-spacing: -
 
 .contact { text-align: center; padding: 96px 0 0; }
 .pied { text-align: center; color: var(--doux); font-size: 12px; padding: 48px 22px calc(32px + env(safe-area-inset-bottom, 0px)); border-top: .5px solid var(--filet); }
+
+/* ===== Page annonce ===== */
+:root { --gris-1: #0d0d0e; --gris-2: #1c1c1e; --gris-3: #2c2c2e; --accent-doux: rgba(41, 151, 255, .14); }
+.fil { font-size: 13px; color: var(--doux); padding: 18px 0 10px; }
+.fil a { color: var(--doux); }
+.fil span { margin: 0 6px; opacity: .5; }
+.annonce { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+@media (max-width: 980px) { .annonce { grid-template-columns: 1fr; } }
+.annonce .scene { max-height: 70vh; }
+.statuts { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.statut { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+          background: var(--gris-3); color: var(--texte); }
+.statut.bleu { background: var(--accent-doux); color: var(--lien); }
+.bloc { background: var(--surface); border-radius: 18px; padding: 24px; box-shadow: var(--ombre); margin-top: 20px; }
+.bloc h2 { font-size: 22px; letter-spacing: -.02em; margin: 0 0 16px; }
+/* Colonne latérale */
+.cote { position: sticky; top: calc(64px + env(safe-area-inset-top, 0px)); display: grid; gap: 16px; }
+@media (max-width: 980px) { .cote { position: static; } }
+.carte-prix { background: var(--surface); border-radius: 18px; padding: 22px; box-shadow: var(--ombre); }
+.carte-prix .type { color: var(--doux); font-size: 14px; }
+.carte-prix .prix { font: 700 34px/1.1 var(--police-titre); letter-spacing: -.03em; margin: 6px 0 2px; }
+.carte-prix .m2 { color: var(--doux); font-size: 13px; }
+.carte-prix .resume { display: flex; gap: 14px; flex-wrap: wrap; margin: 14px 0 4px; font-size: 15px; }
+.carte-prix .resume b { font-weight: 600; }
+.carte-prix .lieu { color: var(--doux); font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.bouton { display: block; width: 100%; border: 0; border-radius: 12px; padding: 13px 16px; font: 600 15px/1 var(--police); cursor: pointer;
+          background: var(--texte); color: var(--fond); text-align: center; transition: opacity .2s; }
+.bouton:hover { opacity: .88; text-decoration: none; }
+.bouton.second { background: var(--gris-3); color: var(--texte); margin-top: 8px; }
+.agent { display: flex; gap: 12px; align-items: center; }
+.agent .photo { width: 44px; height: 44px; border-radius: 50%; background: var(--gris-3); display: grid; place-items: center; font-weight: 600; }
+.agent small { display: block; color: var(--doux); font-size: 12px; }
+/* Caractéristiques */
+.carac { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.carac div { background: var(--gris-2); border-radius: 12px; padding: 14px; display: flex; gap: 10px; align-items: center; }
+.carac svg { width: 22px; height: 22px; flex: none; stroke: var(--doux); }
+.carac small { display: block; color: var(--doux); font-size: 12px; }
+.carac b { font-weight: 600; font-size: 16px; }
+.description p { color: #d2d2d7; margin: 0 0 12px; }
+.description.repliee p:nth-child(n+2) { display: none; }
+.lien-bouton { background: none; border: 0; color: var(--lien); font: inherit; font-size: 15px; cursor: pointer; padding: 0; }
+.puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.puces span { background: var(--gris-2); border-radius: 999px; padding: 7px 14px; font-size: 14px; }
+/* DPE / GES */
+.energie { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+.echelle { display: grid; gap: 4px; }
+.echelle div { height: 24px; border-radius: 4px; color: #111; font: 600 12px/24px var(--police); padding-left: 8px; opacity: .35; }
+.echelle div.actif { opacity: 1; box-shadow: 0 0 0 2px var(--texte); }
+.echelle div.actif::after { content: attr(data-val); float: right; padding-right: 8px; }
+.energie h3 { font-size: 15px; margin: 0 0 10px; font-weight: 600; }
+/* Quartier */
+.quartier { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.quartier div { display: flex; justify-content: space-between; background: var(--gris-2); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.quartier b { font-weight: 600; }
+/* Simulateur */
+.simu { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: end; }
+.simu label { font-size: 13px; color: var(--doux); display: grid; gap: 6px; }
+.simu input { background: var(--gris-2); border: .5px solid var(--filet); color: var(--texte); border-radius: 10px; padding: 11px 12px; font: 15px var(--police); width: 100%; }
+.simu input[type=range] { padding: 0; accent-color: var(--lien); }
+.mensualite { font: 700 30px/1.1 var(--police-titre); letter-spacing: -.02em; }
+.mensualite small { display: block; font: 13px var(--police); color: var(--doux); margin-top: 4px; }
+/* Formulaire */
+.formulaire { display: grid; gap: 10px; }
+.formulaire input, .formulaire select, .formulaire textarea { background: var(--gris-2); border: .5px solid var(--filet); color: var(--texte);
+  border-radius: 10px; padding: 11px 12px; font: 15px var(--police); width: 100%; }
+.formulaire textarea { min-height: 80px; resize: vertical; }
+.confirmation { background: var(--accent-doux); color: var(--lien); border-radius: 10px; padding: 12px; font-size: 14px; }
+.avertissement { color: var(--doux); font-size: 12px; text-align: center; margin: 32px 0 0; }
+/* Barre d'action mobile */
+.action-mobile { display: none; }
+@media (max-width: 980px) {
+  .action-mobile { display: flex; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+                   background: var(--barre); border-top: .5px solid var(--filet); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
+  .action-mobile .prix { font: 700 20px/1 var(--police-titre); align-self: center; flex: 1; }
+  .action-mobile .bouton { width: auto; padding: 12px 18px; }
+  body { padding-bottom: 76px; }
+}
