@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sonate au piano — transcription</title>
+<style>
+  :root { --bg:#111418; --panel:#1b2027; --line:#2c333d; --txt:#e8eaed; --dim:#9aa3ad; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:14px 14px 120px; }
+  h1 { font-size:20px; margin:4px 0 2px; }
+  h2 { font-size:16px; margin:26px 0 10px; }
+  .sub { color:var(--dim); font-size:13px; }
+  .top { display:grid; grid-template-columns:minmax(0,200px) 1fr; gap:14px; align-items:start; margin-top:12px; }
+  video { width:100%; border-radius:10px; background:#000; }
+  .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .stat { background:var(--panel); border-radius:10px; padding:8px 10px; }
+  .stat b { display:block; font-size:18px; }
+  .stat span { color:var(--dim); font-size:12px; }
+  #chordNow { font-size:30px; font-weight:700; text-align:center; background:var(--panel); border-radius:10px; padding:6px; min-height:56px; }
+  #chordNow small { display:block; font-size:12px; color:var(--dim); font-weight:400; }
+  .roll { position:relative; margin-top:10px; background:var(--panel); border-radius:10px; overflow:hidden; touch-action:none; }
+  canvas { display:block; width:100%; height:340px; }
+  .ctrls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px; }
+  button { background:var(--panel); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; cursor:pointer; }
+  button.on { border-color:currentColor; }
+  button.off { opacity:.35; }
+  label.rng { display:flex; align-items:center; gap:6px; color:var(--dim); font-size:13px; }
+  .voices { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:8px; }
+  .vc { background:var(--panel); border-radius:10px; padding:10px; border-left:4px solid; font-size:13px; }
+  .vc b { font-size:14px; }
+  .vc .row { display:flex; gap:6px; margin-top:8px; }
+  .vc button { padding:5px 8px; font-size:12px; flex:1; }
+  .vc a { color:var(--dim); font-size:12px; }
+  .chords { display:flex; flex-wrap:wrap; gap:5px; }
+  .chords span { background:var(--panel); border-radius:6px; padding:4px 7px; font-size:13px; cursor:pointer; }
+  .chords span.cur { background:#3a4452; outline:1px solid var(--dim); }
+  .chords span i { color:var(--dim); font-style:normal; font-size:11px; margin-right:4px; }
+  #sheet { background:#fff; border-radius:10px; overflow-x:auto; }
+  .note { color:var(--dim); font-size:13px; }
+  a { color:#8ab4f8; }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  td, th { padding:7px 8px; border-bottom:1px solid var(--line); text-align:left; }
+  th { color:var(--dim); font-weight:500; font-size:12px; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; }
+  .verdict { background:var(--panel); border-radius:10px; padding:12px 14px; border-left:4px solid #ffb84d; }
+  .engine { display:flex; background:var(--panel); border-radius:12px; padding:3px; border:1px solid var(--line); margin-top:12px; }
+  .engine button { flex:1; border:none; border-radius:9px; padding:10px 4px; font-size:14px; font-weight:600; background:none; color:var(--dim); }
+  .engine button.on { background:#6bd98a; color:#111; }
+  .bar { position:fixed; left:0; right:0; bottom:0; z-index:10; display:flex; gap:10px; align-items:center;
+         padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(17,20,24,.96);
+         border-top:1px solid var(--line); backdrop-filter:blur(8px); }
+  .bar #play { width:54px; height:54px; border-radius:50%; font-size:22px; padding:0; flex:none; background:#e8eaed; color:#111; border:none; }
+  .seg { flex:1; display:flex; background:var(--panel); border-radius:12px; padding:3px; border:1px solid var(--line); }
+  .seg button { flex:1; border:none; border-radius:9px; padding:13px 4px; font-size:15px; font-weight:600; background:none; color:var(--dim); }
+  .seg button.on { background:#3b82f6; color:#fff; }
+  #clock { color:var(--dim); font-size:13px; font-variant-numeric:tabular-nums; min-width:34px; text-align:right; }
+  @media (max-width:600px){ .top{ grid-template-columns:1fr 1fr; } canvas{ height:300px; } #chordNow{ font-size:24px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="sub"><a href="../">← polyphonie</a></div>
+  <h1>Sonate au piano — « tight enough? »</h1>
+  <div class="sub">@maxnceleroy · <a href="https://www.instagram.com/reel/Dd0lgq0IIbM/">reel Instagram</a> · 15 s · test du Transcripteur musical sur du piano</div>
+
+  <div class="engine">
+    <button data-eng="data.json" class="on">Moteur piano (référence)</button>
+    <button data-eng="data_transcripteur.json">Notre transcripteur</button>
+  </div>
+
+  <div class="top">
+    <video id="vid" src="video.mp4" playsinline controls preload="metadata"></video>
+    <div>
+      <div id="chordNow">—<small>accord courant</small></div>
+      <div class="stats" id="stats" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="roll"><canvas id="cv"></canvas></div>
+  <div class="ctrls">
+    <label class="rng">Volume notes <input id="volSynth" type="range" min="0.05" max="1" step="0.05" value="0.8"></label>
+    <label class="rng">Vitesse <select id="rate"><option>0.5</option><option>0.75</option><option selected>1</option></select></label>
+  </div>
+  <p class="note">En haut : choisis la transcription. En bas : <b>Notes</b> coupe l'original et joue la transcription, <b>Les deux</b> superpose pour comparer. Ralentis à 0.5 pour les traits rapides. Glisse le rouleau pour naviguer.</p>
+
+  <h2>Verdict : notre logiciel sur du piano</h2>
+  <div class="verdict">
+    Il <b>ne marche pas encore bien sur du piano</b> — son moteur « toutes les voix » est réglé pour des chœurs, le mode piano est prévu en V2.
+    Ce qu'il trouve est plutôt juste (<b>82 %</b> de ses notes existent vraiment), mais il <b>rate 6 notes sur 10</b> dans ce passage rapide, tient les notes trop longtemps et ne monte pas au-dessus de do5.
+  </div>
+  <table style="margin-top:10px">
+    <tr><th></th><th class="n">Moteur piano</th><th class="n">Notre transcripteur</th></tr>
+    <tr><td>Notes trouvées</td><td class="n">273</td><td class="n">138</td></tr>
+    <tr><td>Notes justes (hauteur + attaque ±50 ms)</td><td class="n">référence</td><td class="n">82 %</td></tr>
+    <tr><td>Notes de la référence retrouvées</td><td class="n">référence</td><td class="n">41 %</td></tr>
+    <tr><td>Score global (F notes)</td><td class="n">—</td><td class="n">0,55</td></tr>
+    <tr><td>Tessiture</td><td class="n">sol1 → sol5</td><td class="n">do#2 → do5</td></tr>
+  </table>
+  <p class="note">
+    Pourquoi : (1) en mode automatique, le logiciel voit « piano 80 % » et n'analyse que la piste Voix → <b>17 notes seulement</b> ; il a fallu forcer « toutes les pistes ». (2) Le modèle chœur ne connaît pas les aigus du piano ni les notes répétées rapides. (3) Une note de piano s'éteint seule : le suivi de ligne, pensé pour des voix tenues, la prolonge.<br>
+    La « référence » est elle-même une transcription automatique (ByteDance, ~97 % de justesse sur piano de concert) : très bonne, mais pas une partition vérifiée.
+  </p>
+
+  <h2>Les deux mains</h2>
+  <div class="voices" id="voices"></div>
+  <p class="note">Séparation simple à do4 (aigus / graves), pas une vraie détection des mains. <span id="dl"></span></p>
+
+  <h2>Accords</h2>
+  <div class="chords" id="chords"></div>
+
+  <h2>Partition</h2>
+  <button id="loadSheet">Afficher la partition</button>
+  <div id="sheet"></div>
+</main>
+
+<div class="bar">
+  <button id="play" aria-label="Lecture">▶︎</button>
+  <div class="seg">
+    <button data-mode="orig" class="on">Original</button>
+    <button data-mode="synth">Notes</button>
+    <button data-mode="both">Les deux</button>
+  </div>
+  <span id="clock">0:00</span>
+</div>
+
+<script>
+const COLORS = ["#5cc8ff", "#ffb84d"];
+const $ = id => document.getElementById(id);
+const vid = $("vid"), cv = $("cv"), ctx = cv.getContext("2d");
+let mode = "orig", eng = "data.json", D, actx, master, voiceGain = [], muted = [], solo = -1, scheduled = new Set(), win = 6;
+let sheetLoaded = false;
+const cacheData = {};
+const prefix = () => eng === "data.json" ? "" : "transcripteur_";
+
+function load(file) {
+  eng = file;
+  document.querySelectorAll("[data-eng]").forEach(b => b.classList.toggle("on", b.dataset.eng === file));
+  const go = d => { D = d; scheduled.clear(); init(); };
+  if (cacheData[file]) return go(cacheData[file]);
+  fetch(file).then(r => r.json()).then(d => { cacheData[file] = d; go(d); });
+}
+document.querySelectorAll("[data-eng]").forEach(b => b.onclick = () => load(b.dataset.eng));
+load("data.json");
+
+function init() {
+  const st = [["Notes", D.notes.length], ["Tempo", Math.round(D.tempo) + " bpm"], ["Tonalité (est.)", D.tonalite],
+              ["Max simultané", D.polyphonie_max]];
+  $("stats").innerHTML = st.map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
+  D.minP = 29; D.maxP = 82;   // même échelle pour les deux moteurs
+  muted = D.voix.map(() => false); solo = -1;
+  $("voices").innerHTML = D.voix.map(v => `
+    <div class="vc" style="border-color:${COLORS[v.id]}">
+      <b style="color:${COLORS[v.id]}">${v.nom}</b><br>
+      ${v.bas} → ${v.haut}<br>${v.nb} notes
+      <div class="row"><button data-m="${v.id}">Muet</button><button data-s="${v.id}">Solo</button></div>
+      <a href="${prefix()}voix${v.id + 1}.mid">MIDI</a>
+    </div>`).join("");
+  $("dl").innerHTML = `MIDI : <a href="${prefix()}toutes_voix.mid">tout</a> · <a href="${prefix()}partition.musicxml">MusicXML</a>`;
+  document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { muted[+b.dataset.m] ^= 1; refreshVoices(); });
+  document.querySelectorAll("[data-s]").forEach(b => b.onclick = () => {
+    const i = +b.dataset.s; solo = solo === i ? -1 : i;
+    if (solo >= 0 && mode === "orig") setMode("both");
+    refreshVoices();
+  });
+  $("chords").innerHTML = D.accords.map((c, i) =>
+    `<span data-i="${i}" data-t="${c.t}"><i>${c.t.toFixed(1)}s</i>${c.nom}</span>`).join("");
+  document.querySelectorAll(".chords span").forEach(s => s.onclick = () => { vid.currentTime = +s.dataset.t; draw(); });
+  if (sheetLoaded) showSheet();
+  resize(); refreshVoices();
+}
+
+function fmt(t) { return Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0"); }
+function audible(v) { return solo >= 0 ? v === solo : !muted[v]; }
+function refreshVoices() {
+  document.querySelectorAll("[data-m]").forEach(b => b.classList.toggle("off", !!muted[+b.dataset.m]));
+  document.querySelectorAll("[data-s]").forEach(b => b.classList.toggle("on", solo === +b.dataset.s));
+  D.voix.forEach(v => voiceGain[v.id] && (voiceGain[v.id].gain.value = audible(v.id) ? 1 : 0));
+  draw();
+}
+
+// ---------- son de piano synthétique calé sur la vidéo ----------
+function ensureAudio() {
+  if (actx) return;
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  master = actx.createGain(); master.gain.value = synthGain(); master.connect(actx.destination);
+  [0, 1].forEach(v => { const g = actx.createGain(); g.gain.value = audible(v) ? 1 : 0; g.connect(master); voiceGain[v] = g; });
+}
+function playNote(n, when, dur) {
+  const f0 = 440 * Math.pow(2, (n.p - 69) / 12), g = actx.createGain();
+  const a = 0.2 + 0.6 * Math.min(1, n.v), decay = Math.min(3, 0.4 + 60 / f0);   // graves plus longs
+  g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(a, when + 0.005);
+  g.gain.setTargetAtTime(0, when + 0.005, decay / 4);
+  g.gain.setTargetAtTime(0, when + dur, 0.05);                                  // relâchement de la touche
+  [[1, "triangle", 1], [2, "sine", 0.35], [3, "sine", 0.12]].forEach(([h, type, amp]) => {
+    const o = actx.createOscillator(), og = actx.createGain();
+    o.type = type; o.frequency.value = f0 * h; og.gain.value = amp;
+    o.connect(og); og.connect(g); o.start(when); o.stop(when + dur + 0.4);
+  });
+  g.connect(voiceGain[n.voix]);
+}
+function schedule() {
+  if (!actx || vid.paused || mode === "orig") return;
+  const now = vid.currentTime, rate = vid.playbackRate, ahead = 0.2;
+  D.notes.forEach((n, i) => {
+    if (n.s >= now && n.s < now + ahead * rate && !scheduled.has(i)) {
+      scheduled.add(i);
+      playNote(n, actx.currentTime + (n.s - now) / rate, (n.e - n.s) / rate);
+    }
+  });
+}
+setInterval(schedule, 40);
+vid.addEventListener("seeked", () => scheduled.clear());
+vid.addEventListener("play", () => { ensureAudio(); actx.resume(); scheduled.clear(); $("play").textContent = "⏸"; loop(); });
+vid.addEventListener("pause", () => $("play").textContent = "▶︎");
+vid.addEventListener("timeupdate", () => $("clock").textContent = fmt(vid.currentTime));
+$("play").onclick = () => { ensureAudio(); actx.resume(); vid.paused ? vid.play() : vid.pause(); };
+function synthGain() { return mode === "orig" ? 0 : +$("volSynth").value * 0.3; }
+function setMode(m) {
+  mode = m; ensureAudio(); actx.resume();
+  if (m !== "orig" && vid.paused) vid.play();
+  vid.muted = m === "synth";
+  master.gain.value = synthGain(); scheduled.clear();
+  document.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
+}
+document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+$("volSynth").oninput = () => { ensureAudio(); actx.resume(); master.gain.value = synthGain(); };
+$("rate").onchange = e => { vid.playbackRate = +e.target.value; scheduled.clear(); };
+
+// ---------- rouleau ----------
+function resize() {
+  const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  cv.width = r.width * dpr; cv.height = r.height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+addEventListener("resize", () => { resize(); draw(); });
+function draw() {
+  if (!D) return;
+  const W = cv.clientWidth, H = cv.clientHeight, t = vid.currentTime, t0 = t - win * 0.3;
+  const x = s => (s - t0) / win * W, rng = D.maxP - D.minP, y = p => H - (p - D.minP + 1) / rng * H, h = H / rng;
+  ctx.clearRect(0, 0, W, H);
+  for (let p = D.minP; p <= D.maxP; p++) {
+    if (p % 12 === 0) { ctx.fillStyle = "#2a313a"; ctx.fillRect(0, y(p), W, 1);
+      ctx.fillStyle = "#6b7580"; ctx.font = "10px system-ui"; ctx.fillText("C" + (p / 12 - 1), 3, y(p) - 2); }
+  }
+  D.notes.forEach(n => {
+    if (n.e < t0 || n.s > t0 + win) return;
+    const on = n.s <= t && t < n.e;
+    ctx.globalAlpha = audible(n.voix) ? (on ? 1 : 0.75) : 0.12;
+    ctx.fillStyle = COLORS[n.voix];
+    ctx.fillRect(x(n.s), y(n.p) - h / 2, Math.max(2, x(n.e) - x(n.s) - 1), Math.max(3, h - 1));
+    if (on && audible(n.voix)) { ctx.fillStyle = "#fff"; ctx.font = "bold 11px system-ui"; ctx.fillText(n.nom, x(n.s) + 2, y(n.p) - h / 2 - 2); }
+  });
+  ctx.globalAlpha = 1; ctx.fillStyle = "#fff"; ctx.fillRect(x(t), 0, 2, H);
+  let ci = -1; D.accords.forEach((c, i) => { if (c.t <= t + 0.02) ci = i; });
+  const c = D.accords[ci];
+  $("chordNow").innerHTML = (c ? c.nom : "—") + `<small>${c ? c.notes.join(" · ") : "accord courant"}</small>`;
+  document.querySelectorAll(".chords span.cur").forEach(s => s.classList.remove("cur"));
+  const s = document.querySelector(`.chords span[data-i="${ci}"]`); if (s) s.classList.add("cur");
+}
+function loop() { draw(); if (!vid.paused) requestAnimationFrame(loop); }
+vid.addEventListener("seeked", draw); vid.addEventListener("timeupdate", () => vid.paused && draw());
+
+let drag = null;
+cv.addEventListener("pointerdown", e => { drag = { x: e.clientX, t: vid.currentTime }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", e => { if (!drag) return;
+  vid.currentTime = Math.max(0, Math.min(D.duree, drag.t - (e.clientX - drag.x) / cv.clientWidth * win)); draw(); });
+cv.addEventListener("pointerup", () => drag = null);
+
+// ---------- partition (OpenSheetMusicDisplay, chargé à la demande) ----------
+async function showSheet() {
+  $("sheet").innerHTML = "";
+  const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("sheet", { autoResize: true, drawTitle: false, drawingParameters: "compacttight" });
+  await osmd.load(prefix() + "partition.musicxml"); osmd.zoom = innerWidth < 600 ? 0.5 : 0.7; osmd.render();
+}
+$("loadSheet").onclick = async () => {
+  $("loadSheet").textContent = "Chargement…";
+  await new Promise((ok, ko) => { const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.9/build/opensheetmusicdisplay.min.js";
+    s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+  sheetLoaded = true; await showSheet(); $("loadSheet").remove();
+};
+</script>
+</body>
+</html>
