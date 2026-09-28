@@ -63,6 +63,8 @@
 //   rot=rx,ry,rz                                   (redresser le modèle, en degrés)
 //   cam=x,y,z & look=x,y,z                         (point de vue de départ, sinon centre du modèle)
 //   edit                                           (affiche la position caméra pour régler cam/look)
+//   hauteur=libre                                  (autorise à monter / descendre ; par défaut la caméra reste
+//                                                   à la hauteur de départ, là où le modèle a été filmé et est le plus net)
 import * as THREE from "three";
 import { SparkRenderer, SplatMesh, SparkControls } from "@sparkjsdev/spark";
 
@@ -108,6 +110,7 @@ splat.initialized.then(() => {
   const look = vec(q.get("look")) || centre.clone().add(new THREE.Vector3(0, 0, -1));
   if (q.get("up")) camera.up.copy(vec(q.get("up")));
   camera.lookAt(look);
+  hauteur = q.get("hauteur") === "libre" ? null : camera.position.y;
   window.pret = true;
   setTimeout(() => document.getElementById("aide").classList.add("cache"), 6000);
 }).catch(err => {
@@ -125,6 +128,7 @@ pos.hidden = !q.has("edit");
 const VITESSE = THREE.MathUtils.degToRad(20);   // degrés par seconde
 const MARCHE = 0.6;                              // unités de la scène par seconde
 const INERTIE = 0.35;                            // secondes pour rejoindre ~63 % de la consigne
+let hauteur = null;                              // hauteur imposée à la caméra (fixée au chargement, sauf hauteur=libre)
 const actif = { p: 0, y: 0, m: 0 }, vitesse = { p: 0, y: 0, m: 0 };
 for (const pave of document.querySelectorAll(".pave")) pave.hidden = navigator.webdriver;
 for (const b of document.querySelectorAll(".pave button")) {
@@ -140,6 +144,7 @@ renderer.setAnimationLoop(() => {
   const maintenant = performance.now(), dt = Math.min(0.1, (maintenant - avant) / 1000);
   avant = maintenant;
   controls.update(camera);
+  if (hauteur !== null) camera.position.y = hauteur;   // pincement / deux doigts / clavier : on reste au même niveau
   const k = 1 - Math.exp(-dt / INERTIE);
   for (const a in vitesse) {
     vitesse[a] += (actif[a] - vitesse[a]) * k;
