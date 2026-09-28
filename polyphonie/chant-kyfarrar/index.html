@@ -166,8 +166,27 @@ function ensureAudio() {
   actx = new (window.AudioContext || window.webkitAudioContext)();
   master = actx.createGain(); master.gain.value = synthGain(); master.connect(actx.destination);
   D.voix.forEach(({id: v}) => { const g = actx.createGain(); g.gain.value = audible(v) ? 1 : 0; g.connect(master); voiceGain[v] = g; });
+  loadSamples();
+}
+
+// ---------- vrais instruments échantillonnés (smplr, sons General MIDI) ; le synthé sert de secours ----------
+const PAGE_INST = "choir_aahs";
+const SF = {};
+let sfLoading = false;
+function instOf(v) { return /guitare/i.test(v.nom) ? "acoustic_guitar_steel" : /piano/i.test(v.nom) ? "acoustic_grand_piano" : PAGE_INST; }
+async function loadSamples() {
+  if (sfLoading || !actx) return; sfLoading = true;
+  try {
+    const { Soundfont } = await import("https://unpkg.com/smplr/dist/index.mjs");
+    await Promise.all(D.voix.map(async v => {
+      const boost = actx.createGain(); boost.gain.value = 3; boost.connect(voiceGain[v.id]);
+      const s = new Soundfont(actx, { instrument: instOf(v), destination: boost });
+      await s.load; SF[v.id] = s;
+    }));
+  } catch (e) { console.warn("échantillons indisponibles, synthé utilisé", e); }
 }
 function playNote(n, when, dur) {
+  if (SF[n.voix]) { SF[n.voix].start({ note: n.p, velocity: Math.round(35 + 85 * Math.min(1, n.v)), time: when, duration: dur }); return; }
   const f0 = 440 * Math.pow(2, (n.p - 69) / 12), g = actx.createGain();
   const a = 0.2 + 0.6 * Math.min(1, n.v), decay = Math.min(3, 0.4 + 60 / f0);   // graves plus longs
   g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(a, when + 0.005);
