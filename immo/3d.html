@@ -20,15 +20,16 @@
           padding: 8px 16px; border-radius: 999px; background: var(--verre); border: .5px solid rgba(255,255,255,.18);
           -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); font-weight: 500; letter-spacing: -.01em;
           white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; transition: opacity .8s; }
-  #aide.cache { opacity: 0; }
+  #aide.cache { opacity: 0; visibility: hidden; transition: opacity .8s, visibility 0s .8s; }   /* plus de flou calculé une fois caché */
   #pos { position: fixed; top: 12px; left: 12px; font: 12px ui-monospace, monospace; background: var(--verre); padding: 6px 10px; border-radius: 8px; }
   /* Boutons tactiles : à droite, orienter la vue (▲▼ lever / baisser, ◀▶ tourner) ; à gauche, avancer / reculer */
   .pave { position: fixed; bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px)); display: grid; gap: 4px; }
   .pave[hidden] { display: none; }
   #fleches { right: max(16px, env(safe-area-inset-right)); grid-template: repeat(3, 48px) / repeat(3, 48px); }
   #marche { left: max(16px, env(safe-area-inset-left)); grid-template: repeat(3, 48px) / 48px; }
-  .pave button { width: 48px; height: 48px; border-radius: 50%; border: .5px solid rgba(255,255,255,.18); background: var(--verre);
-                 -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); color: #f5f5f7; font: 20px/1 var(--police);
+  /* pas de backdrop-filter ici : recalculer un flou sur la 3D à chaque image fait chuter la fluidité sur téléphone */
+  .pave button { width: 48px; height: 48px; border-radius: 50%; border: .5px solid rgba(255,255,255,.2); background: rgba(28, 28, 30, .55);
+                 color: #f5f5f7; font: 20px/1 var(--police);
                  cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
   .pave button:active { background: rgba(255,255,255,.28); }
   #fleches [data-p="1"] { grid-area: 1 / 2; }  #fleches [data-p="-1"] { grid-area: 3 / 2; }
@@ -119,9 +120,12 @@ const pos = document.getElementById("pos");
 pos.hidden = !q.has("edit");
 
 // Boutons : tant qu'un bouton est appuyé, la vue tourne (▲▼ lever / baisser, ◀▶ tourner) ou la caméra avance / recule.
+// La vitesse suit la consigne avec de l'inertie (accélère et freine en douceur, comme les gestes au doigt).
 // Cachés pour les captures automatiques.
-const VITESSE = THREE.MathUtils.degToRad(50);   // degrés par seconde
-const actif = { p: 0, y: 0, m: 0 };
+const VITESSE = THREE.MathUtils.degToRad(45);   // degrés par seconde
+const MARCHE = 0.6;                              // unités de la scène par seconde
+const INERTIE = 0.25;                            // secondes pour rejoindre ~63 % de la consigne
+const actif = { p: 0, y: 0, m: 0 }, vitesse = { p: 0, y: 0, m: 0 };
 for (const pave of document.querySelectorAll(".pave")) pave.hidden = navigator.webdriver;
 for (const b of document.querySelectorAll(".pave button")) {
   const axe = ["p", "y", "m"].find(k => k in b.dataset), sens = +b.dataset[axe];
@@ -136,15 +140,20 @@ renderer.setAnimationLoop(() => {
   const maintenant = performance.now(), dt = Math.min(0.1, (maintenant - avant) / 1000);
   avant = maintenant;
   controls.update(camera);
-  if (actif.p || actif.y) {
+  const k = 1 - Math.exp(-dt / INERTIE);
+  for (const a in vitesse) {
+    vitesse[a] += (actif[a] - vitesse[a]) * k;
+    if (!actif[a] && Math.abs(vitesse[a]) < 1e-3) vitesse[a] = 0;
+  }
+  if (vitesse.p || vitesse.y) {
     const e = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");   // même convention que SparkControls
-    e.x = THREE.MathUtils.clamp(e.x + actif.p * VITESSE * dt, -Math.PI / 2, Math.PI / 2);
-    e.y += actif.y * VITESSE * dt;
+    e.x = THREE.MathUtils.clamp(e.x + vitesse.p * VITESSE * dt, -Math.PI / 2, Math.PI / 2);
+    e.y += vitesse.y * VITESSE * dt;
     camera.quaternion.setFromEuler(e);
   }
-  if (actif.m) {   // avancer / reculer à l'horizontale, comme en marchant
+  if (vitesse.m) {   // avancer / reculer à l'horizontale, comme en marchant
     const d = camera.getWorldDirection(new THREE.Vector3()).setY(0);
-    if (d.lengthSq() > 1e-6) camera.position.addScaledVector(d.normalize(), actif.m * controls.fpsMovement.moveSpeed * dt);
+    if (d.lengthSq() > 1e-6) camera.position.addScaledVector(d.normalize(), vitesse.m * MARCHE * dt);
   }
   if (!pos.hidden) {
     const d = camera.getWorldDirection(new THREE.Vector3()).add(camera.position);
