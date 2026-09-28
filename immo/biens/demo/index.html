@@ -136,9 +136,39 @@ async function ouvrir(bouton) {
     : `<iframe src="${src}" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>`;
   const plein = document.createElement('button');
   plein.className = 'plein'; plein.setAttribute('aria-label', 'Plein écran'); plein.innerHTML = iconePlein;
-  plein.onclick = () => (scene.requestFullscreen || scene.webkitRequestFullscreen).call(scene);
+  plein.onclick = basculerPleinEcran;
   scene.appendChild(plein);
 }
+
+/* Plein écran : API du navigateur quand elle existe (ordinateur, Android, iPad) ;
+   sinon (iPhone : Safari ne l'autorise que pour les vidéos) la scène couvre tout l'écran par-dessus la page. */
+const iconeReduire = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5"/></svg>';
+const enPleinEcran = () => document.fullscreenElement || document.webkitFullscreenElement || scene.classList.contains('plein-ecran');
+function majBouton() {
+  const b = scene.querySelector('.plein');
+  if (!b) return;
+  b.innerHTML = enPleinEcran() ? iconeReduire : iconePlein;
+  b.setAttribute('aria-label', enPleinEcran() ? 'Quitter le plein écran' : 'Plein écran');
+}
+function modeSecours(actif) {
+  scene.classList.toggle('plein-ecran', actif);
+  document.documentElement.classList.toggle('scene-plein-ecran', actif);
+  majBouton();
+}
+async function basculerPleinEcran() {
+  if (scene.classList.contains('plein-ecran')) return modeSecours(false);
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  }
+  const demande = scene.requestFullscreen || scene.webkitRequestFullscreen;
+  if (demande) {
+    try { await demande.call(scene); return; } catch { /* refusé : mode de secours */ }
+  }
+  modeSecours(true);
+}
+document.addEventListener('fullscreenchange', majBouton);
+document.addEventListener('webkitfullscreenchange', majBouton);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && scene.classList.contains('plein-ecran')) modeSecours(false); });
 onglets.forEach(b => b.onclick = () => ouvrir(b));
 ouvrir(onglets[0]);
 document.getElementById('vers-3d').onclick = () => { ouvrir(onglets[1]); window.scrollTo({ top: 0, behavior: 'smooth' }); };
