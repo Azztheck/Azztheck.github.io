@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sonate au piano — transcription</title>
+<title>@corduroy.cadets</title>
 <style>
   :root { --bg:#111418; --panel:#1b2027; --line:#2c333d; --txt:#e8eaed; --dim:#9aa3ad; }
   * { box-sizing:border-box; }
@@ -62,14 +62,10 @@
 <body>
 <main>
   <div class="sub"><a href="../">← polyphonie</a></div>
-  <h1>Sonate au piano — « tight enough? »</h1>
-  <div class="sub">@maxnceleroy · <a href="https://www.instagram.com/reel/Dd0lgq0IIbM/">reel Instagram</a> · 15 s · test du Transcripteur musical sur du piano</div>
+  <h1>@corduroy.cadets</h1>
+  <div class="sub">reel Instagram · voix + guitare + basse · moteur chœur (voix isolées par Demucs) · <a href="https://www.instagram.com/reel/DdXTf48tZuM/">source</a></div>
 
-  <div class="engine">
-    <button data-eng="data.json" class="on">Moteur piano (référence)</button>
-    <button data-eng="data_transcripteur.json">Notre transcripteur</button>
-  </div>
-
+  
   <div class="top">
     <video id="vid" src="video.mp4" playsinline controls preload="metadata"></video>
     <div>
@@ -83,29 +79,12 @@
     <label class="rng">Volume notes <input id="volSynth" type="range" min="0.05" max="1" step="0.05" value="0.8"></label>
     <label class="rng">Vitesse <select id="rate"><option>0.5</option><option>0.75</option><option selected>1</option></select></label>
   </div>
-  <p class="note">En haut : choisis la transcription. En bas : <b>Notes</b> coupe l'original et joue la transcription, <b>Les deux</b> superpose pour comparer. Ralentis à 0.5 pour les traits rapides. Glisse le rouleau pour naviguer.</p>
+  <p class="note">En bas : <b>Notes</b> coupe l'original et joue la transcription, <b>Les deux</b> superpose pour comparer. Ralentis à 0.5 pour les traits rapides. Glisse le rouleau pour naviguer.</p>
 
-  <h2>Verdict : notre logiciel sur du piano</h2>
-  <div class="verdict">
-    Il <b>ne marche pas encore bien sur du piano</b> — son moteur « toutes les voix » est réglé pour des chœurs, le mode piano est prévu en V2.
-    Ce qu'il trouve est plutôt juste (<b>82 %</b> de ses notes existent vraiment), mais il <b>rate 6 notes sur 10</b> dans ce passage rapide, tient les notes trop longtemps et ne monte pas au-dessus de do5.
-  </div>
-  <table style="margin-top:10px">
-    <tr><th></th><th class="n">Moteur piano</th><th class="n">Notre transcripteur</th></tr>
-    <tr><td>Notes trouvées</td><td class="n">273</td><td class="n">138</td></tr>
-    <tr><td>Notes justes (hauteur + attaque ±50 ms)</td><td class="n">référence</td><td class="n">82 %</td></tr>
-    <tr><td>Notes de la référence retrouvées</td><td class="n">référence</td><td class="n">41 %</td></tr>
-    <tr><td>Score global (F notes)</td><td class="n">—</td><td class="n">0,55</td></tr>
-    <tr><td>Tessiture</td><td class="n">sol1 → sol5</td><td class="n">do#2 → do5</td></tr>
-  </table>
-  <p class="note">
-    Pourquoi : (1) en mode automatique, le logiciel voit « piano 80 % » et n'analyse que la piste Voix → <b>17 notes seulement</b> ; il a fallu forcer « toutes les pistes ». (2) Le modèle chœur ne connaît pas les aigus du piano ni les notes répétées rapides. (3) Une note de piano s'éteint seule : le suivi de ligne, pensé pour des voix tenues, la prolonge.<br>
-    La « référence » est elle-même une transcription automatique (ByteDance, ~97 % de justesse sur piano de concert) : très bonne, mais pas une partition vérifiée.
-  </p>
-
-  <h2>Les deux mains</h2>
+  
+  <h2>Les voix</h2>
   <div class="voices" id="voices"></div>
-  <p class="note">Séparation simple à do4 (aigus / graves), pas une vraie détection des mains. <span id="dl"></span></p>
+  <p class="note">Répartition des notes en voix par registre (estimation). <span id="dl"></span></p>
 
   <h2>Accords</h2>
   <div class="chords" id="chords"></div>
@@ -126,7 +105,7 @@
 </div>
 
 <script>
-const COLORS = ["#5cc8ff", "#ffb84d"];
+const COLORS = ["#ff6b6b","#ffb84d","#ffe066","#6bd98a","#5cc8ff","#b18cff","#ff8ad8","#e0e0e0","#7fe0d0","#c9a27a","#8c9eff","#9aa3ad"];
 const $ = id => document.getElementById(id);
 const vid = $("vid"), cv = $("cv"), ctx = cv.getContext("2d");
 let mode = "orig", eng = "data.json", D, actx, master, voiceGain = [], muted = [], solo = -1, scheduled = new Set(), win = 6;
@@ -186,7 +165,7 @@ function ensureAudio() {
   try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
   actx = new (window.AudioContext || window.webkitAudioContext)();
   master = actx.createGain(); master.gain.value = synthGain(); master.connect(actx.destination);
-  [0, 1].forEach(v => { const g = actx.createGain(); g.gain.value = audible(v) ? 1 : 0; g.connect(master); voiceGain[v] = g; });
+  D.voix.forEach(({id: v}) => { const g = actx.createGain(); g.gain.value = audible(v) ? 1 : 0; g.connect(master); voiceGain[v] = g; });
 }
 function playNote(n, when, dur) {
   const f0 = 440 * Math.pow(2, (n.p - 69) / 12), g = actx.createGain();
