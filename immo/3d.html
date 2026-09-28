@@ -16,14 +16,14 @@
   #load div::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25);
                       border-top-color: #fff; animation: tourne .8s linear infinite; }
   @keyframes tourne { to { transform: rotate(360deg); } }
-  #aide { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  #aide { position: fixed; left: 50%; top: max(16px, env(safe-area-inset-top)); transform: translateX(-50%);
           padding: 8px 16px; border-radius: 999px; background: var(--verre); border: .5px solid rgba(255,255,255,.18);
           -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); font-weight: 500; letter-spacing: -.01em;
           white-space: nowrap; max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; transition: opacity .8s; }
   #aide.cache { opacity: 0; visibility: hidden; transition: opacity .8s, visibility 0s .8s; }   /* plus de flou calculé une fois caché */
   #pos { position: fixed; top: 12px; left: 12px; font: 12px ui-monospace, monospace; background: var(--verre); padding: 6px 10px; border-radius: 8px; }
   /* Boutons tactiles : à droite, orienter la vue (▲▼ lever / baisser, ◀▶ tourner) ; à gauche, avancer / reculer */
-  .pave { position: fixed; bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px)); display: grid; gap: 4px; }
+  .pave { position: fixed; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; gap: 4px; }
   .pave[hidden] { display: none; }
   #fleches { right: max(16px, env(safe-area-inset-right)); grid-template: repeat(3, 48px) / repeat(3, 48px); }
   #marche { left: max(16px, env(safe-area-inset-left)); grid-template: repeat(3, 48px) / 48px; }
@@ -122,9 +122,9 @@ pos.hidden = !q.has("edit");
 // Boutons : tant qu'un bouton est appuyé, la vue tourne (▲▼ lever / baisser, ◀▶ tourner) ou la caméra avance / recule.
 // La vitesse suit la consigne avec de l'inertie (accélère et freine en douceur, comme les gestes au doigt).
 // Cachés pour les captures automatiques.
-const VITESSE = THREE.MathUtils.degToRad(45);   // degrés par seconde
+const VITESSE = THREE.MathUtils.degToRad(20);   // degrés par seconde
 const MARCHE = 0.6;                              // unités de la scène par seconde
-const INERTIE = 0.25;                            // secondes pour rejoindre ~63 % de la consigne
+const INERTIE = 0.35;                            // secondes pour rejoindre ~63 % de la consigne
 const actif = { p: 0, y: 0, m: 0 }, vitesse = { p: 0, y: 0, m: 0 };
 for (const pave of document.querySelectorAll(".pave")) pave.hidden = navigator.webdriver;
 for (const b of document.querySelectorAll(".pave button")) {
