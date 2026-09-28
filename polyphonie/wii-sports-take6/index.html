@@ -60,12 +60,15 @@
   <div class="roll"><canvas id="cv"></canvas></div>
   <div class="ctrls">
     <button id="play">▶︎ Lecture</button>
-    <label class="rng">Original <input id="volOrig" type="range" min="0" max="1" step="0.05" value="1"></label>
-    <label class="rng">Voix synthé <input id="volSynth" type="range" min="0" max="1" step="0.05" value="0"></label>
+    <span class="rng">Écouter :</span>
+    <button data-mode="orig" class="on">Original</button>
+    <button data-mode="synth">Notes</button>
+    <button data-mode="both">Les deux</button>
+    <label class="rng">Volume notes <input id="volSynth" type="range" min="0.05" max="1" step="0.05" value="0.8"></label>
     <label class="rng"><input id="showMel" type="checkbox"> Mélodie</label>
     <label class="rng">Vitesse <select id="rate"><option>0.5</option><option>0.75</option><option selected>1</option></select></label>
   </div>
-  <p class="note">Glisse le rouleau pour naviguer. Monte « Voix synthé » et utilise <b>Solo</b> pour entendre une voix seule (baisse l'original pour l'isoler).</p>
+  <p class="note">Glisse le rouleau pour naviguer. <b>Notes</b> coupe l'original et ne joue que la transcription ; <b>Les deux</b> superpose pour comparer ; <b>Solo</b> sur une voix pour l'entendre seule. Sur iPhone, désactive le mode silencieux (bouton sur le côté), sinon les notes ne sonnent pas.</p>
 
   <h2>Les voix</h2>
   <div class="voices" id="voices"></div>
@@ -96,7 +99,7 @@
 const COLORS = ["#ff6b6b","#ffb84d","#ffe066","#6bd98a","#5cc8ff","#b18cff","#ff8ad8","#e0e0e0","#7fe0d0","#c9a27a","#8c9eff"];
 const $ = id => document.getElementById(id);
 const vid = $("vid"), cv = $("cv"), ctx = cv.getContext("2d");
-let D, actx, master, voiceGain = [], muted = [], solo = -1, scheduled = new Set(), win = 8;
+let mode = "orig", D, actx, master, voiceGain = [], muted = [], solo = -1, scheduled = new Set(), win = 8;
 
 fetch("data.json").then(r => r.json()).then(d => { D = d; init(); });
 
@@ -117,7 +120,7 @@ function init() {
   document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { muted[+b.dataset.m] ^= 1; refreshVoices(); });
   document.querySelectorAll("[data-s]").forEach(b => b.onclick = () => {
     const i = +b.dataset.s; solo = solo === i ? -1 : i;
-    if (solo >= 0 && +$("volSynth").value === 0) $("volSynth").value = 0.8;
+    if (solo >= 0 && mode === "orig") setMode("both");
     refreshVoices();
   });
   $("chords").innerHTML = D.accords.map((c, i) =>
@@ -139,7 +142,7 @@ function refreshVoices() {
 function ensureAudio() {
   if (actx) return;
   actx = new (window.AudioContext || window.webkitAudioContext)();
-  master = actx.createGain(); master.gain.value = +$("volSynth").value * 0.25; master.connect(actx.destination);
+  master = actx.createGain(); master.gain.value = synthGain(); master.connect(actx.destination);
   D.voix.forEach(v => { const g = actx.createGain(); g.gain.value = audible(v.id) ? 1 : 0; g.connect(master); voiceGain[v.id] = g; });
 }
 function playNote(n, when, dur) {
@@ -153,7 +156,7 @@ function playNote(n, when, dur) {
   o.start(when); o.stop(when + dur + 0.02);
 }
 function schedule() {
-  if (!actx || vid.paused || +$("volSynth").value === 0) return;
+  if (!actx || vid.paused || mode === "orig") return;
   const now = vid.currentTime, rate = vid.playbackRate, ahead = 0.25;
   D.notes.forEach((n, i) => {
     if (n.s >= now && n.s < now + ahead * rate && !scheduled.has(i)) {
@@ -166,9 +169,17 @@ setInterval(schedule, 60);
 vid.addEventListener("seeked", () => scheduled.clear());
 vid.addEventListener("play", () => { ensureAudio(); actx.resume(); scheduled.clear(); $("play").textContent = "⏸ Pause"; loop(); });
 vid.addEventListener("pause", () => $("play").textContent = "▶︎ Lecture");
-$("play").onclick = () => vid.paused ? vid.play() : vid.pause();
-$("volOrig").oninput = e => vid.volume = +e.target.value;
-$("volSynth").oninput = e => { ensureAudio(); master.gain.value = +e.target.value * 0.25; };
+$("play").onclick = () => { ensureAudio(); actx.resume(); vid.paused ? vid.play() : vid.pause(); };
+// Écouter : Original / Notes / Les deux. vid.muted (et pas vid.volume, ignoré par Safari iOS)
+function synthGain() { return mode === "orig" ? 0 : +$("volSynth").value * 0.25; }
+function setMode(m) {
+  mode = m; ensureAudio(); actx.resume();
+  vid.muted = m === "synth";
+  master.gain.value = synthGain(); scheduled.clear();
+  document.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
+}
+document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+$("volSynth").oninput = () => { ensureAudio(); actx.resume(); master.gain.value = synthGain(); };
 $("showMel").onchange = draw;
 $("rate").onchange = e => { vid.playbackRate = +e.target.value; scheduled.clear(); };
 
@@ -233,6 +244,7 @@ $("loadSheet").onclick = async () => {
 </script>
 </body>
 </html>
+
 
 
 
