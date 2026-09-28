@@ -62,6 +62,7 @@
     <button id="play">▶︎ Lecture</button>
     <label class="rng">Original <input id="volOrig" type="range" min="0" max="1" step="0.05" value="1"></label>
     <label class="rng">Voix synthé <input id="volSynth" type="range" min="0" max="1" step="0.05" value="0"></label>
+    <label class="rng"><input id="showMel" type="checkbox"> Mélodie</label>
     <label class="rng">Vitesse <select id="rate"><option>0.5</option><option>0.75</option><option selected>1</option></select></label>
   </div>
   <p class="note">Glisse le rouleau pour naviguer. Monte « Voix synthé » et utilise <b>Solo</b> pour entendre une voix seule (baisse l'original pour l'isoler).</p>
@@ -72,11 +73,11 @@
 
   <h2>Structure (lecture de l'analyse)</h2>
   <p class="note">
-    <b>0:00–0:33</b> · Intro et thème réharmonisés en <b>si majeur / mi majeur</b>, très « Take 6 » : accords 6/9, maj9, 13, sus4 avec basses renversées (B6/9, Bmaj9/Eb, F#7sus4…).<br>
-    <b>0:33–0:40</b> · Passage en <b>do majeur</b> — la tonalité du thème original de Wii Sports (C, G, Fmaj7, G7#9).<br>
-    <b>0:40–0:50</b> · Montée vers <b>la majeur</b> via mi (Esus4 → E7 → Amaj9), avec un emprunt mineur Dmaj9 → Dm9 → Dm6 → Ddim7 très gospel.<br>
-    <b>0:50–1:04</b> · Final en <b>ré♭ / sol♭ majeur</b> (écrit C# / F# ici) : chaînes de 7sus4 et 9 sur pédale de basse, avant la cadence finale.<br>
-    Basse (voix 9) centrée autour de mi♭2 ; aigu (voix 1) autour de mi5 — soit près de 3 octaves et demie d'écart.
+    <b>0:00–0:32</b> · Intro et thème réharmonisés en <b>si majeur</b> (tonalité principale), autour de mi et fa# : accords maj9, 6/9, 13, 7sus4 avec basses renversées (Emaj9/F#, Bmaj9/Eb, F#7sus4…) — la signature Take 6.<br>
+    <b>0:32–0:40</b> · Bascule en <b>do majeur</b> — la tonalité du thème original de Wii Sports (C6/9, C9, Fmaj9, G9…).<br>
+    <b>0:40–0:51</b> · Montée vers <b>la majeur</b> via mi (Esus4 → E7 → A), avec la descente gospel Dmaj9 → Ddim7 → D6 et des A7#9.<br>
+    <b>0:51–1:04</b> · Final vers <b>la♭ / ré♭</b> (écrit Ab / C#) : chaînes de 7sus4, 9 et 13 sur basse tenue en mi♭, puis retour sur si (B9) pour conclure.<br>
+    Basse (voix 9) centrée autour de mi2 ; aigu (voix 1) autour de do#5 — plus de 3 octaves d'écart.
   </p>
 
   <h2>Grille d'accords</h2>
@@ -87,7 +88,8 @@
   <div id="sheet"></div>
 
   <h2>Comment c'est fait</h2>
-  <p class="note">Transcription polyphonique avec <a href="https://github.com/spotify/basic-pitch">basic-pitch</a> (Spotify), puis répartition des notes en voix par un appariement qui garde l'ordre des registres et minimise les sauts (<a href="../analyse_voix.py">analyse_voix.py</a>). Accords estimés par temps à partir des notes détectées. C'est une analyse automatique : les voix très serrées, les unissons et le beatbox peuvent créer des erreurs — à prendre comme une carte, pas comme la partition officielle.</p>
+  <p class="note">Notes issues du <b>Transcripteur musical</b> maison : séparation Demucs (tout sauf la batterie/beatbox), puis moteur « toutes les voix » v3 (modèles chœur Cuesta exp3+exp4, suivi des lignes, recollage des glissandos, filtre des notes hésitantes niveau 1), réglé et vérifié sur les bancs jaCappella, Cantoría et CSD. Case « Mélodie » = mélodie principale (CREPE, une seule voix suivie : elle saute d'un chanteur à l'autre sur un tel arrangement).<br>
+  Ajouté pour cette page : répartition des notes en 9 voix (une par chanteur de la vidéo) en gardant l'ordre des registres et en minimisant les sauts, accords estimés par temps (<a href="../publier_transcripteur.py">publier_transcripteur.py</a>). Le transcripteur ne sait pas encore attribuer chaque note à un chanteur précis : cette répartition est une estimation, surtout quand les voix se croisent ou chantent à l'unisson.</p>
 </main>
 
 <script>
@@ -167,6 +169,7 @@ vid.addEventListener("pause", () => $("play").textContent = "▶︎ Lecture");
 $("play").onclick = () => vid.paused ? vid.play() : vid.pause();
 $("volOrig").oninput = e => vid.volume = +e.target.value;
 $("volSynth").oninput = e => { ensureAudio(); master.gain.value = +e.target.value * 0.25; };
+$("showMel").onchange = draw;
 $("rate").onchange = e => { vid.playbackRate = +e.target.value; scheduled.clear(); };
 
 // ---------- rouleau ----------
@@ -194,7 +197,14 @@ function draw() {
     ctx.fillRect(x(n.s), y(n.p) - h / 2, Math.max(2, x(n.e) - x(n.s) - 1), Math.max(3, h - 1));
     if (on && audible(n.voix)) { ctx.fillStyle = "#fff"; ctx.font = "bold 11px system-ui"; ctx.fillText(n.nom, x(n.s) + 2, y(n.p) - h / 2 - 2); }
   });
-  ctx.globalAlpha = 1; ctx.fillStyle = "#fff"; ctx.fillRect(x(t), 0, 2, H);
+  ctx.globalAlpha = 1;
+  if ($("showMel").checked && D.melodie) {           // mélodie principale (CREPE) en pointillés blancs
+    ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+    D.melodie.forEach(n => { if (n.e < t0 || n.s > t0 + win) return;
+      ctx.strokeRect(x(n.s), y(n.p) - h / 2 - 1, Math.max(2, x(n.e) - x(n.s)), h + 1); });
+    ctx.setLineDash([]);
+  }
+  ctx.fillStyle = "#fff"; ctx.fillRect(x(t), 0, 2, H);
   let ci = -1; D.accords.forEach((c, i) => { if (c.t <= t + 0.02) ci = i; });
   const c = D.accords[ci];
   $("chordNow").innerHTML = (c ? c.nom : "—") + `<small>${c ? c.notes.join(" · ") : "accord courant"}</small>`;
@@ -223,4 +233,6 @@ $("loadSheet").onclick = async () => {
 </script>
 </body>
 </html>
+
+
 
