@@ -40,6 +40,15 @@
   #sheet { background:#fff; border-radius:10px; min-height:60px; overflow-x:auto; }
   .note { color:var(--dim); font-size:13px; }
   a { color:#8ab4f8; }
+  main { padding-bottom:110px; }
+  .bar { position:fixed; left:0; right:0; bottom:0; z-index:10; display:flex; gap:10px; align-items:center;
+         padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(17,20,24,.96);
+         border-top:1px solid var(--line); backdrop-filter:blur(8px); }
+  .bar #play { width:54px; height:54px; border-radius:50%; font-size:22px; padding:0; flex:none; background:#e8eaed; color:#111; border:none; }
+  .seg { flex:1; display:flex; background:var(--panel); border-radius:12px; padding:3px; border:1px solid var(--line); }
+  .seg button { flex:1; border:none; border-radius:9px; padding:13px 4px; font-size:15px; font-weight:600; background:none; color:var(--dim); }
+  .seg button.on { background:#3b82f6; color:#fff; }
+  #clock { color:var(--dim); font-size:13px; font-variant-numeric:tabular-nums; min-width:34px; text-align:right; }
   @media (max-width:600px){ .top{ grid-template-columns:1fr 1fr; } canvas{ height:300px; } #chordNow{ font-size:28px; } }
 </style>
 </head>
@@ -59,16 +68,11 @@
 
   <div class="roll"><canvas id="cv"></canvas></div>
   <div class="ctrls">
-    <button id="play">▶︎ Lecture</button>
-    <span class="rng">Écouter :</span>
-    <button data-mode="orig" class="on">Original</button>
-    <button data-mode="synth">Notes</button>
-    <button data-mode="both">Les deux</button>
     <label class="rng">Volume notes <input id="volSynth" type="range" min="0.05" max="1" step="0.05" value="0.8"></label>
     <label class="rng"><input id="showMel" type="checkbox"> Mélodie</label>
     <label class="rng">Vitesse <select id="rate"><option>0.5</option><option>0.75</option><option selected>1</option></select></label>
   </div>
-  <p class="note">Glisse le rouleau pour naviguer. <b>Notes</b> coupe l'original et ne joue que la transcription ; <b>Les deux</b> superpose pour comparer ; <b>Solo</b> sur une voix pour l'entendre seule. Sur iPhone, désactive le mode silencieux (bouton sur le côté), sinon les notes ne sonnent pas.</p>
+  <p class="note">Glisse le rouleau pour naviguer. <b>Notes</b> coupe l'original et ne joue que la transcription ; <b>Les deux</b> superpose pour comparer ; <b>Solo</b> sur une voix pour l'entendre seule. Le choix <b>Original / Notes / Les deux</b> est dans la barre en bas de l'écran.</p>
 
   <h2>Les voix</h2>
   <div class="voices" id="voices"></div>
@@ -94,6 +98,16 @@
   <p class="note">Notes issues du <b>Transcripteur musical</b> maison : séparation Demucs (tout sauf la batterie/beatbox), puis moteur « toutes les voix » v3 (modèles chœur Cuesta exp3+exp4, suivi des lignes, recollage des glissandos, filtre des notes hésitantes niveau 1), réglé et vérifié sur les bancs jaCappella, Cantoría et CSD. Case « Mélodie » = mélodie principale (CREPE, une seule voix suivie : elle saute d'un chanteur à l'autre sur un tel arrangement).<br>
   Ajouté pour cette page : répartition des notes en 9 voix (une par chanteur de la vidéo) en gardant l'ordre des registres et en minimisant les sauts, accords estimés par temps (<a href="../publier_transcripteur.py">publier_transcripteur.py</a>). Le transcripteur ne sait pas encore attribuer chaque note à un chanteur précis : cette répartition est une estimation, surtout quand les voix se croisent ou chantent à l'unisson.</p>
 </main>
+
+<div class="bar">
+  <button id="play" aria-label="Lecture">▶︎</button>
+  <div class="seg">
+    <button data-mode="orig" class="on">Original</button>
+    <button data-mode="synth">Notes</button>
+    <button data-mode="both">Les deux</button>
+  </div>
+  <span id="clock">0:00</span>
+</div>
 
 <script>
 const COLORS = ["#ff6b6b","#ffb84d","#ffe066","#6bd98a","#5cc8ff","#b18cff","#ff8ad8","#e0e0e0","#7fe0d0","#c9a27a","#8c9eff"];
@@ -141,6 +155,8 @@ function refreshVoices() {
 // ---------- synthé WebAudio calé sur la vidéo ----------
 function ensureAudio() {
   if (actx) return;
+  // iPhone : sans ça, le mode silencieux coupe les sons générés par la page (Safari 16.4+)
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
   actx = new (window.AudioContext || window.webkitAudioContext)();
   master = actx.createGain(); master.gain.value = synthGain(); master.connect(actx.destination);
   D.voix.forEach(v => { const g = actx.createGain(); g.gain.value = audible(v.id) ? 1 : 0; g.connect(master); voiceGain[v.id] = g; });
@@ -167,13 +183,15 @@ function schedule() {
 }
 setInterval(schedule, 60);
 vid.addEventListener("seeked", () => scheduled.clear());
-vid.addEventListener("play", () => { ensureAudio(); actx.resume(); scheduled.clear(); $("play").textContent = "⏸ Pause"; loop(); });
-vid.addEventListener("pause", () => $("play").textContent = "▶︎ Lecture");
+vid.addEventListener("play", () => { ensureAudio(); actx.resume(); scheduled.clear(); $("play").textContent = "⏸"; loop(); });
+vid.addEventListener("pause", () => $("play").textContent = "▶︎");
+vid.addEventListener("timeupdate", () => $("clock").textContent = fmt(vid.currentTime));
 $("play").onclick = () => { ensureAudio(); actx.resume(); vid.paused ? vid.play() : vid.pause(); };
 // Écouter : Original / Notes / Les deux. vid.muted (et pas vid.volume, ignoré par Safari iOS)
 function synthGain() { return mode === "orig" ? 0 : +$("volSynth").value * 0.25; }
 function setMode(m) {
   mode = m; ensureAudio(); actx.resume();
+  if (m !== "orig" && vid.paused) vid.play();
   vid.muted = m === "synth";
   master.gain.value = synthGain(); scheduled.clear();
   document.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
@@ -244,6 +262,7 @@ $("loadSheet").onclick = async () => {
 </script>
 </body>
 </html>
+
 
 
 
