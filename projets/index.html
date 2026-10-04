@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mes projets</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1c1a;--mute:#6d6a64;--line:#e4e1db;--acc:#2f6fdb;--ok:#1f8a4c;--warn:#b7791f;--bad:#c0392b;--bar:#2f6fdb}
+@media (prefers-color-scheme:dark){:root{--bg:#141517;--card:#1c1e21;--ink:#ecebe8;--mute:#9a978f;--line:#2c2f33;--acc:#6ea0ff;--ok:#4cc27e;--warn:#e0a84a;--bad:#ef6b5b;--bar:#6ea0ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,"Segoe UI",sans-serif}
+header{padding:20px 16px 8px;max-width:1200px;margin:auto;display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+h1{font-size:22px;margin:0}
+.sub{color:var(--mute);font-size:12px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+input,select,button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+main{max-width:1200px;margin:auto;padding:8px 16px 40px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;color:var(--mute);font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
+th.on{color:var(--acc)}
+tr:last-child td{border-bottom:0}
+.nom{font-weight:600}
+.res{color:var(--mute);font-size:12px;max-width:380px}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);white-space:nowrap;margin:1px 0}
+.run{color:var(--ok);border-color:var(--ok)}
+.plan{color:var(--acc);border-color:var(--acc)}
+.err{color:var(--bad);border-color:var(--bad)}
+.man{color:var(--mute)}
+.etat{color:var(--warn);border-color:var(--warn)}
+.spark{display:flex;gap:2px;align-items:end;height:22px}
+.spark i{display:block;width:5px;background:var(--bar);border-radius:1px;min-height:1px;opacity:.85}
+.spark i.z{background:var(--line)}
+.act{display:flex;gap:6px;justify-content:flex-end}
+.act a,.act button{padding:4px 9px;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.when{white-space:nowrap}
+.when small{display:block;color:var(--mute);font-size:11px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:720px;width:calc(100% - 32px);padding:0}
+dialog::backdrop{background:#0008}
+.dh{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
+.db{padding:6px 18px 18px;max-height:70vh;overflow:auto}
+.db h3{font-size:13px;margin:16px 0 6px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.db ul{margin:0;padding-left:20px}
+li.ok::marker{content:"✔  ";color:var(--ok)}
+li.todo::marker{content:"○  ";color:var(--warn)}
+pre{white-space:pre-wrap;font:12px/1.5 ui-monospace,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:300px;overflow:auto}
+tr.arch{opacity:.6}
+.ed label{display:block;margin:12px 0 4px;font-size:12px;color:var(--mute)}
+.ed input,.ed textarea{width:100%;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.ed .bt{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.prim{background:var(--acc);color:#fff;border-color:var(--acc)}
+code{font:12px ui-monospace,Consolas,monospace;word-break:break-all}
+@media (max-width:760px){
+  table,tbody,tr,td{display:block;border:0}
+  thead{display:none}
+  tr{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:6px 0}
+  table{background:none;border:0}
+  td{padding:4px 14px}
+  td.num{text-align:left}
+  td[data-l]::before{content:attr(data-l)" : ";color:var(--mute);font-size:12px}
+  .act{justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Mes projets</h1><div class="sub" id="gen"></div></div>
+  <div class="tools">
+    <input id="q" placeholder="Rechercher…" type="search">
+    <select id="f"><option value="">Tous</option><option value="run">En cours d'exécution</option><option value="plan">Planifiés</option><option value="man">Manuels</option><option value="arch">Archivés</option></select>
+  </div>
+</header>
+<main>
+<table>
+  <thead><tr>
+    <th data-k="nom">Projet</th>
+    <th data-k="modif">Dernière modif</th>
+    <th data-k="exec">Exécution</th>
+    <th data-k="activite">Activité (12 sem.)</th>
+    <th data-k="poids" class="num">Poids</th>
+    <th></th>
+  </tr></thead>
+  <tbody id="tb"></tbody>
+</table>
+</main>
+<dialog id="dlg"><div class="dh"><div><div class="nom" id="dt"></div><div class="res" id="ds"></div></div><button onclick="dlg.close()">✕</button></div><div class="db" id="dbody"></div></dialog>
+<script>
+const DATA={"genere": 1791130719.1433837, "projets": [{"chemin": "Z:\\claude projects\\Couchsurfing automation", "nom": "Couchsurfing auto", "resume": "Scrape des profils Couchsurfing et génère des demandes d'hébergement perso via ChatGPT, avec interface de relecture.", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 921622, "poids_hors_env": 847085, "fichiers": 147, "modif": 1775155376.4644113, "modif_fichier": "data\\fixed_profile.json", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\derush-parkour", "nom": "Dérush parkour auto", "resume": "Rushes → détection des mouvements (YOLO pose) → projet Resolve avec 2 timelines Horizontal / Vertical, sans clic.", "etat": "fonctionnel", "fait": ["Score de dynamisme + segments + tri H/V", "Agent in-app Resolve rechargé à chaud (un seul clic de menu par démarrage)", "Test Cheyenne : 75 rushes → 66 segments (H 40 / V 26)", "Skill Hermes resolve-auto-derush"], "a_faire": [], "archive": false, "fiche": true, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 48358849, "poids_hors_env": 48358849, "fichiers": 103, "modif": 1790356290.0097268, "modif_fichier": "CLAUDE.md", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 103, 0]}, {"chemin": "Z:\\claude projects\\drone-itsy", "nom": "Drone Itsy 3\"", "resume": "FPV 3\" TuneRC Poly F405 : matériel, batteries, réglages Betaflight.", "etat": "en cours", "fait": ["Notes matériel/réglages + dump Betaflight", "Constat : FC 6,5–20 V → pas de 1S"], "a_faire": ["Packs Li-ion 2S 18650 faits maison (en cours au 02/10)"], "archive": false, "fiche": true, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 39613, "poids_hors_env": 36898, "fichiers": 6, "modif": 1791127095.4917765, "modif_fichier": "CLAUDE.md", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5]}, {"chemin": "Z:\\claude projects\\Intermittences indem", "nom": "Calculateur intermittent", "resume": "Page qui calcule les indemnités intermittent du spectacle (objectif 2 000 €/mois).", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 43294, "poids_hors_env": 43294, "fichiers": 1, "modif": 1775913864.9523954, "modif_fichier": "intermittent.html", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\montage", "nom": "Détection parkour (ancien)", "resume": "Premiers essais de détection/suivi du traceur dans les rushes (YOLO, flux optique, overlay) — ancêtre de Dérush parkour.", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 550710853, "poids_hors_env": 550710853, "fichiers": 22, "modif": 1782511484.9620411, "modif_fichier": "_inproc_result.txt", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\montage-resolve-hermes", "nom": "Hermes ↔ Resolve (desktop proxy)", "resume": "Proxy HTTP en Session 1 pour qu'Hermes (Telegram) clique dans DaVinci Resolve.", "etat": "stable / remplacé", "fait": ["desktop_proxy.py blindé (exit si Session 0, pas de double bind)", "Tâche DesktopProxy-Session1 au logon", "Scripts rangés ici depuis le 25/09"], "a_faire": ["Piste non explorée : créer les timelines via l'API au lieu du GUI", "Dans les faits remplacé par Dérush parkour + Remote Control", "Nettoyer les 3 tâches DesktopProxy en double ?"], "archive": false, "fiche": true, "taches": [{"nom": "DesktopProxy", "etat": "Ready", "derniere": "2026-09-24T00:48:48.0000000+02:00", "prochaine": null, "resultat": 4294967295, "frequence": "à l'ouverture de session"}, {"nom": "DesktopProxy-Session1", "etat": "Ready", "derniere": "2026-09-25T12:41:41.0000000+02:00", "prochaine": null, "resultat": 1073807364, "frequence": "à l'ouverture de session"}, {"nom": "DesktopProxy-Test", "etat": "Ready", "derniere": "2026-09-24T13:03:03.0000000+02:00", "prochaine": null, "resultat": 1, "frequence": "à l'ouverture de session"}, {"nom": "DesktopProxyInteractive", "etat": "Ready", "derniere": null, "prochaine": null, "resultat": 267011, "frequence": "à l'ouverture de session"}], "process": [], "note_nom": null, "note": "", "poids": 1142427, "poids_hors_env": 1128300, "fichiers": 48, "modif": 1790332883.9056907, "modif_fichier": "WORKFLOW_CONTEXT.md", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 0]}, {"chemin": "Z:\\claude projects\\new", "nom": "Fix drivers DJI O3", "resume": "Script PowerShell qui réinstalle les drivers USB du DJI O3 (FPV).", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 1422, "poids_hors_env": 1422, "fichiers": 1, "modif": 1775754934.7954142, "modif_fichier": "fix_dji_drivers.ps1", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\posto cds", "nom": "Dossier de candidature", "resume": "CV FR/EN, photos (headshot, plein pied) et vidéo de présentation.", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 73363777, "poids_hors_env": 73363777, "fichiers": 7, "modif": 1775903389.42835, "modif_fichier": "982294-Star-Citizen-space-spaceship-planet-asteroids-Stanton.jpg", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\projet survie", "nom": "Projet survie 2027", "resume": "Expé survie île déserte Indonésie/Philippines mai–juillet 2027 avec Glenn : annonce de recrutement, budget, îles candidates, contacts.", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 37711, "poids_hors_env": 37711, "fichiers": 4, "modif": 1788555631.468216, "modif_fichier": "contacts_terrain.md", "hebdo": [0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\Scraper mail écoles", "nom": "Annuaires écoles / mairies / spectacle", "resume": "Annuaires scrapés (écoles AURA, mairies, lieux de spectacle vivant) + carte, pour démarcher par mail.", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 312827474, "poids_hors_env": 312792187, "fichiers": 68, "modif": 1775910382.737716, "modif_fichier": "pj_test.png", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "Z:\\claude projects\\Scraper trials", "nom": "Veille études cliniques", "resume": "Scrape les études rémunérées (Optimed, Inokura, Biotrial) → notif Telegram.", "etat": "en service", "fait": ["Optimed à 10h, 15h et au logon", "Inokura + Biotrial tous les 3 jours", "Notifs Telegram"], "a_faire": ["Ancienne tâche ScraperEtudes pointe vers Z:\\scraper (n'existe plus) → en échec, à supprimer", "Ajouter le pote (telegram_chat_ids_en_plus) si voulu"], "archive": false, "fiche": true, "taches": [{"nom": "ScraperOptimed", "etat": "Ready", "derniere": "2026-10-04T15:00:00.0000000+02:00", "prochaine": "2026-10-05T10:00:00.0000000+02:00", "resultat": 0, "frequence": "chaque jour à 10:00 · chaque jour à 15:00 · à l'ouverture de session"}], "process": [], "note_nom": null, "note": "", "poids": 12196415, "poids_hors_env": 12088736, "fichiers": 15, "modif": 1791118845.3278265, "modif_fichier": "veille_optimed.log", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 7]}, {"chemin": "Z:\\claude projects\\trajets-neuchatel", "nom": "Trajets Neuchâtel", "resume": "TGVmax → frontière + Flixbus/BlaBla ≤ 25 € ; bot Telegram Skrazbot.", "etat": "fonctionnel", "fait": ["trajets.py v3 (rapport HTML, score, zone de dépose ≤ 60 min de voiture)", "tgvmax_route.py (n'importe quel trajet TGVmax, jusqu'à 3 billets)", "Bot Telegram + rapports sur azztheck.github.io/trajets"], "a_faire": ["Appliquer la règle « pas de BlaBla en France » + sens Neuchâtel → France", "Ajouter BlaBlaCar Bus", "Dernier tronçon train CFF dépose → Neuchâtel"], "archive": false, "fiche": true, "taches": [{"nom": "Trajets-Bot", "etat": "Running", "derniere": "2026-10-03T14:50:50.0000000+02:00", "prochaine": null, "resultat": 267009, "frequence": "à l'ouverture de session"}], "process": [{"pid": 2016, "nom": "pythonw.exe"}], "note_nom": null, "note": "", "poids": 224929025, "poids_hors_env": 224863994, "fichiers": 988, "modif": 1791130688.7985134, "modif_fichier": "bot.log", "hebdo": [59, 36, 0, 5, 0, 0, 0, 39, 0, 17, 1, 682]}, {"chemin": "Z:\\claude projects\\transcripteur-musical", "nom": "Transcripteur musical (polyphonie)", "resume": "Appli PySide6 : séparation des voix / chœurs (moteur Cuesta v3).", "etat": "fonctionnel", "fait": ["Moteur chœur Cuesta v3 peaufiné sur 3 jours", "Publication des pages azztheck.github.io/polyphonie"], "a_faire": [], "archive": false, "fiche": true, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 20814292194, "poids_hors_env": 14932326069, "fichiers": 56836, "modif": 1790686995.1516235, "modif_fichier": "CLAUDE.md", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3120, 1950]}, {"chemin": "Z:\\claude projects\\visites360", "nom": "Portfolio immo 360", "resume": "Visites 360° Insta360 X5 → Gaussian Splatting → FPV pour agences immo.", "etat": "en cours", "fait": ["build_tour.py : visite 360° Pannellum en tuiles", "Chaîne splat COLMAP + Brush, visionneuse Spark sur le site", "run_fisheye.py : +7 dB (le flou venait de l'assemblage maison)", "Page annonce démo /immo/biens/demo"], "a_faire": ["Shooting propre sur trépied/perche, pièces vides", "Détail complet : C:\\Users\\Aztheck\\CLAUDE.md, section Portfolio immo"], "archive": false, "fiche": true, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 936477892, "poids_hors_env": 936384681, "fichiers": 327, "modif": 1790581467.9500113, "modif_fichier": "run_fisheye.py", "hebdo": [0, 0, 0, 0, 0, 0, 0, 294, 0, 0, 13, 10]}, {"chemin": "Z:\\claude projects\\Website", "nom": "Site acrobate (ancienne version)", "resume": "Site « Noé Dagonet — Acrobate & Traceur » + pages outils (carte écoles, études cliniques, calculateur intermittent).", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 491072969, "poids_hors_env": 338594763, "fichiers": 326, "modif": 1789742448.8667595, "modif_fichier": "etudes-cliniques.html", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]}, {"chemin": "Z:\\claude projects\\z", "nom": "Driver CP210x", "resume": "Driver USB-série Silicon Labs CP210x (pour connecter/flasher un appareil en USB).", "etat": "", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 26173809, "poids_hors_env": 26173809, "fichiers": 39, "modif": 1775685129.5806427, "modif_fichier": "p\\CP210x_Windows_Drivers.zip", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"chemin": "C:\\Users\\Aztheck\\progres", "nom": "Progrès — Arcanes du Destin", "resume": "App web d'arbres de hauts faits (dark fantasy pixel), azztheck.github.io/progres.", "etat": "en ligne", "fait": ["Arbres par domaine de vie + onglets perso", "Thème Arcanes", "Carte = globe 3D des lieux visités", "Pré-remplissage preset.js"], "a_faire": ["Retravailler les arbres parkour/acro ensemble (questions à te poser)", "Idées du README : synchro Gist, PWA, objectifs récurrents"], "archive": false, "fiche": true, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 275343145, "poids_hors_env": 274813474, "fichiers": 176, "modif": 1790604236.8689373, "modif_fichier": "README.md", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 76]}, {"chemin": "C:\\Users\\Aztheck\\.claude\\remote-control", "nom": "Remote Control (accès depuis le tel)", "resume": "Claude Code accessible depuis l'appli Claude, relancé au logon.", "etat": "en service", "fait": ["start_rc.ps1 (boucle de relance, anti-doublon)", "Tâche Claude-RemoteControl", "Réveil du PC par WoL via Freebox Connect"], "a_faire": [], "archive": false, "fiche": true, "taches": [{"nom": "Claude-RemoteControl", "etat": "Running", "derniere": "2026-09-26T18:13:13.0000000+02:00", "prochaine": null, "resultat": 267009, "frequence": "à l'ouverture de session"}], "process": [{"pid": 10480, "nom": "powershell.exe"}, {"pid": 30896, "nom": "cmd.exe"}], "note_nom": null, "note": "", "poids": 454457660, "poids_hors_env": 454457660, "fichiers": 2, "modif": 1791100780.0541823, "modif_fichier": "remote-control.log", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]}, {"chemin": "C:\\Users\\Aztheck\\azztheck.github.io", "nom": "Site azztheck.github.io", "resume": "Repo GitHub Pages en ligne : site acrobate + sous-sites immo, progres, polyphonie, trajets.", "etat": "en ligne", "fait": [], "a_faire": [], "archive": false, "fiche": false, "taches": [], "process": [], "note_nom": null, "note": "", "poids": 584533931, "poids_hors_env": 249601759, "fichiers": 5680, "modif": 1790623688.9243813, "modif_fichier": "polyphonie\\wii-sports-take6\\index.html", "hebdo": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2605, 68]}], "public": true};
+const P=DATA.projets;
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const taille=b=>b<1024?b+" o":b<1048576?(b/1024).toFixed(0)+" Ko":b<1073741824?(b/1048576).toFixed(1)+" Mo":(b/1073741824).toFixed(2)+" Go";
+const fdate=t=>new Date(t).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+function depuis(ms){const s=(DATA.genere*1000-ms)/1000;if(s<3600)return"il y a "+Math.max(1,Math.round(s/60))+" min";if(s<86400)return"il y a "+Math.round(s/3600)+" h";const j=Math.round(s/86400);if(j<60)return"il y a "+j+" j";return"il y a "+Math.round(j/30)+" mois"}
+P.forEach(p=>{
+  p.activite=p.hebdo.reduce((a,b)=>a+b,0);
+  p.err=p.taches.some(t=>t.derniere&&t.resultat&&t.resultat!==267009&&t.resultat!==267011&&t.resultat!==0);
+  p.mode=p.process.length?"run":p.taches.length?"plan":"man";
+  p.exec=p.process.length*1000+p.taches.length;
+});
+document.getElementById("gen").textContent="Mis à jour le "+fdate(DATA.genere*1000)+" · "+P.length+" projets"+(DATA.public?"":" · F5 pour rafraîchir")+(P.some(p=>p.archive)?" · "+P.filter(p=>p.archive).length+" archivé(s)":"");
+let tri={k:"modif",dir:-1};
+function execCell(p){
+  let h="";
+  if(p.process.length)h+=`<span class="badge run">▶ tourne en ce moment</span> `;
+  p.taches.forEach(t=>{h+=`<span class="badge ${p.err?"err":"plan"}" title="${esc(t.nom)} — ${esc(t.frequence)}">⏱ ${esc(t.frequence)}</span> `});
+  if(p.err)h+=`<span class="badge err">dernier lancement en erreur</span>`;
+  return h||`<span class="badge man">manuel</span>`;
+}
+function spark(h){const m=Math.max(1,...h);return`<div class="spark" title="fichiers modifiés par semaine (12 dernières)">${h.map(v=>`<i class="${v?"":"z"}" style="height:${v?Math.max(3,22*v/m):1}px"></i>`).join("")}</div>`}
+function rendre(){
+  const q=document.getElementById("q").value.toLowerCase(),f=document.getElementById("f").value;
+  const L=P.filter(p=>(f==="arch"?p.archive:!p.archive)&&(!f||f==="arch"||p.mode===f)&&(!q||(p.nom+" "+p.resume+" "+p.chemin).toLowerCase().includes(q)))
+   .sort((a,b)=>{const x=a[tri.k],y=b[tri.k];return(typeof x==="string"?x.localeCompare(y):x-y)*tri.dir});
+  document.querySelectorAll("th").forEach(th=>th.classList.toggle("on",th.dataset.k===tri.k));
+  document.getElementById("tb").innerHTML=L.map(p=>`<tr class="${p.archive?"arch":""}">
+    <td><div class="nom">${esc(p.nom)} ${p.etat?`<span class="badge etat">${esc(p.etat)}</span>`:""}</div><div class="res">${esc(p.resume)}</div></td>
+    <td class="when" data-l="Modifié">${p.modif?depuis(p.modif*1000)+`<small>${fdate(p.modif*1000)}</small>`:"—"}</td>
+    <td data-l="Exécution">${execCell(p)}</td>
+    <td data-l="Activité">${spark(p.hebdo)}</td>
+    <td class="num" data-l="Poids">${taille(p.poids)}${p.poids_hors_env<p.poids*0.8?`<small style="display:block;color:var(--mute);font-size:11px">${taille(p.poids_hors_env)} hors venv</small>`:""}</td>
+    <td><div class="act"><button onclick="info(${P.indexOf(p)})">ℹ Infos</button>${DATA.public?"":`<button onclick="editer(${P.indexOf(p)})" title="Renommer / modifier la description">✎</button><button onclick="archiver(${P.indexOf(p)})" title="${p.archive?"Désarchiver":"Archiver"}">${p.archive?"↩":"🗄"}</button><a href="file:///${encodeURI(p.chemin.replace(/\\/g,"/"))}" target="_blank" title="Ouvrir le dossier">📂</a>`}</div></td>
+  </tr>`).join("");
+}
+function info(i){
+  const p=P[i];
+  document.getElementById("dt").textContent=p.nom;
+  document.getElementById("ds").textContent=p.resume;
+  let h="";
+  if(p.fait.length||p.a_faire.length){
+    h+=`<h3>Avancement${p.etat?" — "+esc(p.etat):""}</h3><ul>${p.fait.map(x=>`<li class="ok">${esc(x)}</li>`).join("")}${p.a_faire.map(x=>`<li class="todo">${esc(x)}</li>`).join("")}</ul>`;
+  } else if(!p.fiche) h+=`<h3>Avancement</h3><p class="res">Pas encore de fiche — ajoute-la dans <code>tableau-projets\\projets.json</code> (ou demande-moi).</p>`;
+  if(p.taches.length){h+=`<h3>Tâches planifiées</h3><ul>${p.taches.map(t=>`<li><b>${esc(t.nom)}</b> (${esc(t.etat)}) — ${esc(t.frequence)}<br><span class="res">dernier lancement : ${t.derniere?fdate(t.derniere):"jamais"}${t.prochaine?" · prochain : "+fdate(t.prochaine):""}${t.resultat?" · code "+t.resultat:""}</span></li>`).join("")}</ul>`}
+  if(p.process.length)h+=`<h3>En cours</h3><ul>${p.process.map(x=>`<li>${esc(x.nom)} (PID ${x.pid})</li>`).join("")}</ul>`;
+  h+=`<h3>Fichiers</h3><p class="res">${p.fichiers} fichiers · ${taille(p.poids)} (${taille(p.poids_hors_env)} hors venv/.git)<br>Dernier modifié : <code>${esc(p.modif_fichier)}</code><br>Dossier : <code>${esc(p.chemin)}</code></p>`;
+  if(p.note)h+=`<h3>Extrait de ${esc(p.note_nom)}</h3><pre>${esc(p.note)}${p.note.length>=2500?"\n…":""}</pre>`;
+  document.getElementById("dbody").innerHTML=h;
+  document.getElementById("dlg").showModal();
+}
+async function api(p,champs){
+  if(location.protocol==="file:"){alert("Ouvre le tableau avec le raccourci « Mes projets » du Bureau pour pouvoir modifier.");return}
+  const r=await fetch("/api/fiche",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chemin:p.chemin,champs})});
+  if(!r.ok){alert("Erreur : "+(await r.text()));return}
+  Object.assign(p,champs);p.archive=!!p.archive;dlg.open&&dlg.close();rendre();
+}
+function archiver(i){const p=P[i];api(p,{archive:!p.archive})}
+function editer(i){
+  const p=P[i];
+  document.getElementById("dt").textContent="Modifier";
+  document.getElementById("ds").textContent=p.chemin;
+  document.getElementById("dbody").innerHTML=`<form class="ed" onsubmit="event.preventDefault();api(P[${i}],{nom:this.n.value.trim(),resume:this.r.value.trim()})">
+    <label>Nom affiché</label><input name="n" value="${esc(p.nom)}" required>
+    <label>Description rapide</label><textarea name="r" rows="3">${esc(p.resume)}</textarea>
+    <div class="bt"><button type="button" onclick="dlg.close()">Annuler</button><button class="prim">Enregistrer</button></div></form>`;
+  dlg.showModal();document.querySelector(".ed input").select();
+}
+document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{const k=th.dataset.k;tri=tri.k===k?{k,dir:-tri.dir}:{k,dir:k==="nom"?1:-1};rendre()});
+document.getElementById("q").oninput=rendre;document.getElementById("f").onchange=rendre;
+rendre();
+</script>
+</body>
+</html>
