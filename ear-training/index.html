@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oreille</title>
+<style>
+@font-face{font-family:Kalam;font-weight:400;src:url(fonts/kalam-400.woff2) format('woff2')}
+@font-face{font-family:Kalam;font-weight:700;src:url(fonts/kalam-700.woff2) format('woff2')}
+:root{--bg:#0b0a09;--ink:#151311;--paper:#ece6d6;--pmut:#6f685c;--imut:#9b9485}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(ellipse at 50% 15%,#201d19 0%,var(--bg) 65%) fixed;color:var(--paper);font:17px/1.35 Kalam,"Segoe Print",cursive}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.10;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+button{font:inherit;color:inherit}
+.mut{color:var(--imut)} .pmut{color:var(--pmut)}
+
+/* panneaux dessinés à la main : le fond est un pseudo-élément déformé par un filtre SVG */
+.rough{position:relative;isolation:isolate}
+.rough::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:14px;filter:url(#rough)}
+.paper{color:var(--ink)} .paper::before{background:var(--paper)}
+.inkp{color:var(--paper)} .inkp::before{background:rgba(21,19,17,.86);border:2px solid var(--paper)}
+.cap{position:relative;isolation:isolate;display:inline-block;color:var(--ink);font-weight:700;padding:2px 12px;line-height:1.35}
+.cap::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--paper);border:2px solid var(--ink);outline:2px solid var(--paper);filter:url(#rough2)}
+
+.btn{position:relative;isolation:isolate;background:none;border:none;cursor:pointer;padding:7px 14px;line-height:1.2}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;border:2.5px solid currentColor;border-radius:10px;filter:url(#rough2);transition:background .1s}
+.paper .btn:hover::before{background:rgba(21,19,17,.08)}
+.inkp .btn:hover::before{background:rgba(236,230,214,.1)}
+.paper .btn.on{color:var(--paper)} .paper .btn.on::before{background:var(--ink);border-color:var(--ink)}
+.inkp .btn.on{color:var(--ink)} .inkp .btn.on::before{background:var(--paper);border-color:var(--paper)}
+header .btn.on{color:var(--ink)} header .btn.on::before{background:var(--paper);border-color:var(--paper)}
+.btn:disabled{opacity:.3;cursor:default}
+.btn.sm{padding:3px 10px;font-size:15px}
+.btn.big{font-size:20px;font-weight:700;padding:8px 20px}
+.lnk{background:none;border:none;color:var(--imut);cursor:pointer;font-size:14px;padding:0 3px;text-decoration:underline}
+
+header{display:flex;align-items:center;gap:26px;padding:14px 22px 10px;flex-wrap:wrap}
+.logo{font-size:24px;transform:rotate(-1.5deg)}
+.lvl{min-width:280px}
+#lvlTxt{font-weight:700;font-size:18px}
+.xpbar{height:14px;margin:4px 0 2px;width:280px}
+.xpbar::before{border:2px solid var(--paper);background:transparent}
+.xpbar i{position:absolute;left:3px;top:3px;bottom:3px;background:var(--paper);border-radius:6px;filter:url(#rough2);transition:width .5s cubic-bezier(.2,.9,.3,1.2)}
+#xpTxt{font-size:13px}
+.hstat{display:flex;align-items:center;gap:8px;line-height:1.1}
+.hstat b{font-size:28px}
+.hstat span{font-size:13px;color:var(--imut)}
+#hCombo{transition:transform .15s;display:inline-block}
+#hCombo.pop{transform:scale(1.35) rotate(-4deg)}
+nav{margin-left:auto;display:flex;gap:8px}
+
+main{padding:6px 22px 30px;max-width:1300px;margin:auto}
+.warn{display:none;margin-bottom:12px}
+.row{display:flex;gap:22px;align-items:flex-start}
+.col{width:320px;flex:none;display:flex;flex-direction:column;gap:20px}
+.side{padding:16px 16px 18px}
+.sh{font-size:14px;color:var(--imut);margin:14px 0 6px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.toggles{display:flex;flex-wrap:wrap;gap:7px}
+.vol{display:block;margin-top:12px;font-size:14px;color:var(--imut)}
+.vol input{accent-color:var(--paper);vertical-align:middle;width:150px}
+
+.stage{flex:1;padding:18px 24px 22px;min-height:560px}
+.stagetop{display:flex;justify-content:space-between;align-items:center}
+#hero{display:block;width:100%;height:230px;cursor:pointer}
+.controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px;margin:22px 0 14px}
+.ans{min-height:84px;padding:12px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ans .nm{font-size:24px;font-weight:700}
+.ans small{font-size:12px;opacity:.65}
+.ans .k{position:absolute;top:4px;left:8px;font-size:11px;opacity:.5}
+.dots{font-size:9px;letter-spacing:2px;opacity:.75;margin-top:2px}
+.ans.ok{color:var(--paper);animation:pop .3s}
+.ans.ok::before{background:var(--ink);border-color:var(--ink)}
+.ans.ko{animation:shake .35s}
+.ans.ko::after{content:"";position:absolute;inset:6px;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'><path d='M6 8 C30 20 62 42 94 54' stroke='%23151311' stroke-width='5' fill='none' stroke-linecap='round'/><path d='M92 5 C68 22 36 40 8 56' stroke='%23151311' stroke-width='4' fill='none' stroke-linecap='round'/></svg>") center/100% 100% no-repeat}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.1) rotate(-2deg)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px) rotate(-1deg)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.fb{min-height:58px;font-size:20px;text-align:center}
+.fb .pmut{font-size:15px}
+.kbd{font-size:13px;text-align:center;margin-top:10px}
+
+.cyclebox{padding:16px}
+.cycle{margin-top:10px;padding:6px 12px;border-left:3px solid var(--paper);font-size:15px}
+.cycle+.cycle{opacity:.55}
+
+#fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:40}
+#lvlCap{position:fixed;left:50%;top:42%;z-index:45;pointer-events:none;font-size:34px;opacity:0;transform:translate(-50%,-50%) scale(.6) rotate(-3deg)}
+#lvlCap.show{animation:lvl 1.9s ease-out}
+@keyframes lvl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) rotate(-6deg)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(-2deg)}75%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-2deg)}100%{opacity:0;transform:translate(-50%,-60%) scale(1) rotate(-2deg)}}
+#toasts{position:fixed;right:22px;bottom:22px;z-index:45;display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:none}
+.toast{font-size:17px;max-width:340px;animation:tin .35s ease-out}
+.toast small{display:block;font-weight:400;font-size:14px}
+@keyframes tin{from{opacity:0;transform:translateY(20px) rotate(2deg)}to{opacity:1;transform:none}}
+
+/* progression */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}
+.card{padding:14px 18px}
+.card b{display:block;font-size:34px;line-height:1.1}
+.card span{font-size:14px}
+.box{padding:18px 22px;margin-bottom:22px}
+.box h2{font-size:22px;margin:0 0 10px}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:24px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+td,th{padding:3px 8px;text-align:right;white-space:nowrap;border-bottom:1.5px dashed rgba(21,19,17,.18)}
+th{font-weight:400;color:var(--pmut)}
+td:first-child,th:first-child{text-align:left}
+.bar{display:inline-block;width:100px;height:9px;border:1.5px solid var(--ink);border-radius:5px;vertical-align:middle;margin-right:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink)}
+.chip{display:inline-block;border:1.5px solid var(--ink);border-radius:12px;padding:0 10px;margin:3px 5px 3px 0;font-size:15px}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:10px;margin-bottom:16px}
+.cell{border:2px solid var(--ink);border-radius:10px;padding:4px 6px 6px;text-align:center;position:relative;overflow:hidden;isolation:isolate}
+.cell .fill{position:absolute;left:0;right:0;bottom:0;background:var(--ink);z-index:-1;opacity:.85}
+.cell b{display:block;font-size:19px}
+.cell span{font-size:12px}
+.cell.hi{color:var(--paper)}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.a{border:2px solid var(--ink);border-radius:10px;padding:8px 12px}
+.a b{display:block;font-size:17px}
+.a span{font-size:13px}
+.a.got{background:var(--ink);color:var(--paper)}
+.a.lock{border-style:dashed;opacity:.6}
+.legend{font-size:14px;color:var(--imut);margin-bottom:6px}
+.legend span{margin-right:18px}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:-2;pointer-events:none}
+.stage::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:14px;pointer-events:none;opacity:.06;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='130'><g fill='none' stroke='%23151311' stroke-width='1.3' stroke-linecap='round'><path d='M0 30 C80 27 160 33 320 30'/><path d='M0 40 C90 37 170 43 320 40'/><path d='M0 50 C70 47 180 53 320 50'/><path d='M0 60 C100 57 160 63 320 60'/><path d='M0 70 C80 67 170 73 320 70'/></g></svg>") repeat}
+#stagefx{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;border-radius:14px}
+.ilv{position:absolute;top:4px;right:8px;font-size:11px;opacity:.6}
+.ibar{display:block;width:62%;height:3px;margin-top:4px;border-radius:2px;background:rgba(21,19,17,.15);overflow:hidden}
+.ibar i{display:block;height:100%;background:currentColor}
+.ans.ok .ibar{background:rgba(236,230,214,.25)}
+#now{text-align:center;min-height:30px;font-size:16px;margin-top:-6px}
+.nc{display:inline-block;border:1.5px solid var(--ink);border-radius:8px;padding:0 9px;margin:0 3px;opacity:.45;transition:all .12s}
+.nc.on{background:var(--ink);color:var(--paper);opacity:1;transform:scale(1.15) rotate(-2deg)}
+#btnHelp{padding:0 10px;margin-left:6px;font-weight:700}
+.helpbox{position:absolute;left:24px;top:56px;width:min(520px,calc(100% - 48px));z-index:5;color:var(--ink);padding:16px 20px;font-size:15px;line-height:1.4}
+.helpbox::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--paper);border:2.5px solid var(--ink);border-radius:12px;filter:url(#rough2);box-shadow:6px 6px 0 rgba(21,19,17,.25)}
+.helpbox h3{margin:0 0 6px;font-size:19px}
+.helpbox ul{margin:6px 0;padding-left:18px}
+.helpbox b{font-weight:700}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="rough2"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="1" seed="9" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="4" xChannelSelector="R" yChannelSelector="G"/></filter>
+</svg>
+<header>
+  <span class="cap logo">oreille.</span>
+  <div class="lvl">
+    <div id="lvlTxt">niv. 1 — jour 0.</div>
+    <div class="xpbar rough"><i id="xpFill" style="width:0"></i></div>
+    <div id="xpTxt" class="mut"></div>
+  </div>
+  <div class="hstat"><b id="hCombo">×1</b><span>combo<br><span id="hStreak">série 0</span></span></div>
+  <div class="hstat"><canvas id="ring" width="112" height="112" style="width:56px;height:56px"></canvas><span id="ringTxt">0/25 min<br>aujourd'hui</span></div>
+  <div class="hstat"><b id="hDays">0</b><span>jour(s)<br>d'affilée</span></div>
+  <nav><button class="btn on tab" data-view="train">s'entraîner</button><button class="btn tab" data-view="stats">progression</button></nav>
+</header>
+<main>
+  <div class="cap warn" id="warn"></div>
+  <section id="v-train">
+    <div class="row">
+      <div class="col">
+        <div class="side rough inkp" id="side"></div>
+        <div class="cyclebox rough inkp" id="cycles" style="display:none"></div>
+      </div>
+      <div class="stage rough paper">
+        <canvas id="stagefx"></canvas>
+        <div class="stagetop"><span><span class="cap" id="stageCap">intervalles.</span> <button class="btn sm" id="btnHelp" title="comment ça marche">?</button></span><span class="pmut" id="sessTxt"></span></div>
+        <canvas id="hero" title="cliquer = réécouter"></canvas>
+        <div id="now"></div>
+        <div class="controls">
+          <button class="btn big on" id="btnNext">commencer.</button>
+          <button class="btn big" id="btnReplay">réécouter</button>
+          <button class="btn big" id="btnCad">cadence</button>
+        </div>
+        <div class="helpbox" id="help" style="display:none"></div>
+        <div class="answers" id="answers"></div>
+        <div class="fb" id="fb"></div>
+        <div class="kbd pmut">espace : réécouter · entrée : suivant (après avoir répondu) · c : cadence · 1…9 0 - = : réponses · après ta réponse, clique sur n'importe quelle réponse pour l'entendre</div>
+      </div>
+    </div>
+  </section>
+  <section id="v-stats" style="display:none"></section>
+</main>
+<canvas id="fx"></canvas>
+<div id="lvlCap" class="cap"></div>
+<div id="toasts"></div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const INK = '#151311', PAPER = '#ece6d6';
+const NN = ['Do','Do♯','Ré','Mi♭','Mi','Fa','Fa♯','Sol','La♭','La','Si♭','Si'];
+const nn = m => NN[((m % 12) + 12) % 12];
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const fold = (n, lo) => { while (n < lo) n += 12; while (n >= lo + 12) n -= 12; return n; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ================= audio : échantillons Rhodes, synthé en secours ================= */
+let AC = null, master = null, bus = null, dryIn = null, verbIn = null, padOut = null, pad = null;
+function makeIR(sec, decay) {   // réverb synthétique : bruit stéréo qui décroît
+  const rate = AC.sampleRate, len = Math.floor(rate * sec), buf = AC.createBuffer(2, len, rate);
+  for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
+  return buf;
+}
+function audio() {
+  if (!AC) {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = AC.createDynamicsCompressor();
+    master = AC.createGain(); master.gain.value = settings.volume;
+    master.connect(comp); comp.connect(AC.destination);
+    // réverb commune
+    const verb = AC.createConvolver(); verb.buffer = makeIR(4.5, 3.2);
+    const vlp = AC.createBiquadFilter(); vlp.type = 'lowpass'; vlp.frequency.value = 4500;
+    verbIn = AC.createGain(); verbIn.connect(verb); verb.connect(vlp); vlp.connect(master);
+    // chaîne Rhodes : chaleur + chorus stéréo + envoi réverb
+    dryIn = AC.createGain();
+    const warm = AC.createBiquadFilter(); warm.type = 'lowpass'; warm.frequency.value = 5200; warm.Q.value = 0.3;
+    dryIn.connect(warm);
+    const out = AC.createGain(); out.connect(master);
+    const send = AC.createGain(); send.gain.value = 0.35; out.connect(send); send.connect(verbIn);
+    const dry = AC.createGain(); dry.gain.value = 0.75; warm.connect(dry); dry.connect(out);
+    [-1, 1].forEach((side, i) => {
+      const dl = AC.createDelay(0.05); dl.delayTime.value = 0.012 + i * 0.006;
+      const lfo = AC.createOscillator(); lfo.frequency.value = 0.45 + i * 0.17;
+      const lg = AC.createGain(); lg.gain.value = 0.0022; lfo.connect(lg); lg.connect(dl.delayTime); lfo.start();
+      const pan = AC.createStereoPanner(); pan.pan.value = side * 0.8;
+      const g = AC.createGain(); g.gain.value = 0.45;
+      warm.connect(dl); dl.connect(g); g.connect(pan); pan.connect(out);
+    });
+    // nappe : sortie propre, très réverbérée
+    padOut = AC.createGain(); padOut.gain.value = settings.padVol;
+    const ps = AC.createGain(); ps.gain.value = 0.8;
+    padOut.connect(master); padOut.connect(ps); ps.connect(verbIn);
+  }
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function stopAll() {
+  if (bus) { const g = bus; g.gain.setTargetAtTime(0, AC.currentTime, 0.02); setTimeout(() => g.disconnect(), 400); }
+  bus = null;
+}
+const SAMPLES = {};
+function loadSamples() {
+  audio();
+  for (let m = 33; m <= 100; m++)
+    fetch('samples/rhodes/' + m + '.mp3').then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+      .then(b => AC.decodeAudioData(b)).then(buf => { SAMPLES[m] = buf; }).catch(() => {});
+}
+const HARM = [1, .55, .32, .2, .12, .08, .05];
+function note(out, m, t, dur, vel) {
+  const sm = SAMPLES[m] ? m : SAMPLES[m - 1] ? m - 1 : SAMPLES[m + 1] ? m + 1 : null;
+  if (sm !== null) {
+    const src = AC.createBufferSource(); src.buffer = SAMPLES[sm];
+    src.playbackRate.value = Math.pow(2, (m - sm) / 12);
+    const g = AC.createGain();
+    g.gain.setValueAtTime(vel * 2.6, t);
+    g.gain.setTargetAtTime(0, t + dur, 0.35);
+    src.connect(g); g.connect(out); src.start(t); src.stop(t + dur + 2.5);
+    return;
+  }
+  const f = 440 * Math.pow(2, (m - 69) / 12);
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + 0.008);
+  g.gain.setTargetAtTime(vel * 0.35, t + 0.01, 0.3); g.gain.setTargetAtTime(0, t + dur, 0.2);
+  g.connect(out);
+  HARM.forEach((a, i) => {
+    const o = AC.createOscillator(); o.frequency.value = f * (i + 1);
+    const og = AC.createGain(); og.gain.value = a / (1 + 0.15 * i);
+    o.connect(og); og.connect(g); o.start(t); o.stop(t + dur + 1.5);
+  });
+}
+// events : [{m: note ou [notes], t: début (s), d: durée (s)}] → durée totale ; la créature « chante » chaque attaque
+const pulseTimers = [];
+// indicateur de ce qui joue : cadence I IV V I puis « ? » (la question)
+function nowPlaying(events) {
+  const el = $('#now'), steps = [];
+  events.forEach(e => { const l = e.lab || '?'; if (!(l === '?' && steps.length && steps[steps.length - 1].l === '?')) steps.push({ l, t: e.t }); });
+  if (!steps.some(x => x.l !== '?')) { el.innerHTML = ''; return; }
+  el.innerHTML = '<span class="pmut">cadence</span> ' + steps.map((x, i) => (x.l === '?' && i ? '<span class="pmut"> → </span>' : '') + `<span class="nc" data-i="${i}">${x.l === '?' ? 'accord / note ?' : x.l}</span>`).join('');
+  steps.forEach((x, i) => pulseTimers.push(setTimeout(() => el.querySelectorAll('.nc').forEach(c => c.classList.toggle('on', +c.dataset.i === i)), (x.t + 0.05) * 1000)));
+}
+function play(events) {
+  audio(); stopAll();
+  pulseTimers.splice(0).forEach(clearTimeout);
+  bus = AC.createGain(); bus.connect(dryIn);
+  nowPlaying(events);
+  const t0 = AC.currentTime + 0.05; let end = 0;
+  for (const e of events) {
+    const ns = Array.isArray(e.m) ? e.m : [e.m];
+    const v = 0.2 / Math.sqrt(ns.length);
+    ns.forEach(m => note(bus, m, t0 + e.t, e.d, v));
+    pulseTimers.push(setTimeout(() => { hero.pulse = Math.max(hero.pulse, 0.7); bgBlip(); }, (e.t + 0.05) * 1000));
+    end = Math.max(end, e.t + e.d);
+  }
+  return end;
+}
+// nappe : les notes de la question tenues en fond (scies désaccordées filtrées + octave scintillante + sub)
+function padStart(notes, when) {
+  padStop(0.8);
+  if (!settings.pad || !notes || !notes.length) return;
+  audio();
+  const t = AC.currentTime + when, oscs = [];
+  const g = AC.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + 2.2);
+  const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = 0.7;
+  const lfo = AC.createOscillator(); lfo.frequency.value = 0.07;
+  const lg = AC.createGain(); lg.gain.value = 450; lfo.connect(lg); lg.connect(lp.frequency); lfo.start(t); oscs.push(lfo);
+  lp.connect(g); g.connect(padOut);
+  const v = 0.05 / Math.sqrt(notes.length);
+  notes.forEach(m => {
+    const f = 440 * Math.pow(2, (m - 69) / 12);
+    [-7, 0, 7].forEach((c, j) => {
+      const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = c + (Math.random() - .5) * 3;
+      const og = AC.createGain(); og.gain.value = v * (j === 1 ? 0.8 : 0.6);
+      const pan = AC.createStereoPanner(); pan.pan.value = (j - 1) * 0.6;
+      o.connect(og); og.connect(pan); pan.connect(lp); o.start(t); oscs.push(o);
+    });
+    const sh = AC.createOscillator(); sh.frequency.value = f * 2;
+    const vib = AC.createOscillator(); vib.frequency.value = 4.5 + Math.random();
+    const vg = AC.createGain(); vg.gain.value = f * 0.004; vib.connect(vg); vg.connect(sh.frequency);
+    const sg = AC.createGain(); sg.gain.value = v * 0.35; sh.connect(sg); sg.connect(g);
+    sh.start(t); vib.start(t); oscs.push(sh, vib);
+  });
+  const sub = AC.createOscillator(); sub.frequency.value = 440 * Math.pow(2, (Math.min(...notes) - 12 - 69) / 12);
+  const subg = AC.createGain(); subg.gain.value = 0.05; sub.connect(subg); subg.connect(g); sub.start(t); oscs.push(sub);
+  pad = { g, oscs };
+}
+function padStop(rel = 1.2) {
+  if (!pad || !AC) return;
+  const p = pad, now = AC.currentTime; pad = null;
+  p.g.gain.cancelScheduledValues(now); p.g.gain.setValueAtTime(p.g.gain.value, now); p.g.gain.setTargetAtTime(0, now, rel / 3);
+  p.oscs.forEach(o => { try { o.stop(now + rel * 2 + 0.1); } catch (e) {} });
+  setTimeout(() => p.g.disconnect(), (rel * 2 + 0.5) * 1000);
+}
+
+/* ================= contenu musical ================= */
+const MAJ = [0,4,7], MIN = [0,3,7], DIM = [0,3,6];
+function voice(key, root, q) {
+  const up = q.map(x => fold(key + root + x, 55)).sort((a, b) => a - b);
+  return [fold(key + root, 40), ...up];
+}
+const CAD = [[0, MAJ], [5, MAJ], [7, MAJ], [0, MAJ]];
+const cadence = key => CAD.map((c, i) => ({ m: voice(key, c[0], c[1]), t: i * 0.62, d: 0.6, lab: ['I', 'IV', 'V', 'I'][i] }));
+const CAD_LEN = 2.9;
+
+const IV = [['2m',1,'seconde min.'],['2M',2,'seconde maj.'],['3m',3,'tierce min.'],['3M',4,'tierce maj.'],['4J',5,'quarte'],['4+',6,'triton'],['5J',7,'quinte'],['6m',8,'sixte min.'],['6M',9,'sixte maj.'],['7m',10,'septième min.'],['7M',11,'septième maj.'],['8',12,'octave']];
+const CH = [['Maj',MAJ,'majeur'],['min',MIN,'mineur'],['dim',DIM,'diminué'],['aug',[0,4,8],'augmenté'],['sus2',[0,2,7],''],['sus4',[0,5,7],''],['7',[0,4,7,10],'dominante'],['Maj7',[0,4,7,11],'7e majeure'],['m7',[0,3,7,10],'mineur 7'],['m7♭5',[0,3,6,10],'demi-dim.'],['dim7',[0,3,6,9],'dim. 7'],['mMaj7',[0,3,7,11],'min. 7M']];
+const DG = [['1',0,'tonique'],['♭2',1,''],['2',2,''],['♭3',3,''],['3',4,''],['4',5,''],['♯4',6,''],['5',7,'dominante'],['♭6',8,''],['6',9,''],['♭7',10,''],['7',11,'sensible']];
+const FN = [['I',0,MAJ],['ii',2,MIN],['iii',4,MIN],['IV',5,MAJ],['V',7,MAJ],['vi',9,MIN],['vii°',11,DIM],['V7',7,[0,4,7,10]],['II',2,MAJ],['♭III',3,MAJ],['iv',5,MIN],['♭VI',8,MAJ],['♭VII',10,MAJ]];
+const TAGS = { asc: 'montant', desc: 'descendant', harm: 'harmonique', inv0: 'état fondamental', inv1: '1er renversement', inv2: '2e renversement' };
+
+function chordNotes(id, p) { const n = CH.find(x => x[0] === id)[1].map(x => p.root + x); for (let i = 0; i < p.inv; i++) n.push(n.shift() + 12); return n; }
+// degrés (en demi-tons depuis la tonique majeure) où chaque type d'accord appartient à la tonalité
+// (aug, dim7, mMaj7 : empruntés au mineur harmonique relatif)
+const CH_DEG = { Maj: [0, 5, 7], min: [2, 4, 9], dim: [11], aug: [0, 7], sus2: [0, 2, 5, 7, 9], sus4: [0, 2, 4, 7, 9],
+  '7': [7], Maj7: [0, 5], m7: [2, 4, 9], 'm7♭5': [11], dim7: [11], mMaj7: [9] };
+const dgTarget = (id, p) => fold(p.key + DG.find(x => x[0] === id)[1], p.oct);
+const MODES = {
+  iv: {
+    name: 'intervalles', dash: [],
+    items: IV.map(x => ({ id: x[0], sub: x[2] })), def: IV.map(x => x[0]),
+    opts: [['asc', 'montant', true], ['desc', 'descendant', true], ['harm', 'harmonique', false]],
+    params() { const dirs = ['asc', 'desc', 'harm'].filter(d => S().opts[d]); return { root: rnd(50, 67), dir: pick(dirs.length ? dirs : ['asc']) }; },
+    events(id, p) {
+      const a = p.root, b = p.root + IV.find(x => x[0] === id)[1];
+      if (p.dir === 'harm') return [{ m: [a, b], t: 0, d: 1.5 }];
+      if (p.dir === 'desc') return [{ m: b, t: 0, d: 0.5 }, { m: a, t: 0.5, d: 1.2 }];
+      return [{ m: a, t: 0, d: 0.5 }, { m: b, t: 0.5, d: 1.2 }];
+    },
+    tag: p => p.dir, info: p => 'départ ' + nn(p.root),
+    pad(id, p) { return [p.root, p.root + IV.find(x => x[0] === id)[1]]; },
+    notes(id, p) { const a = p.root, b = a + IV.find(x => x[0] === id)[1]; return p.dir === 'harm' ? [[a, b]] : p.dir === 'desc' ? [[b], [a]] : [[a], [b]]; },
+  },
+  ch: {
+    name: 'accords', dash: [12, 7],
+    items: CH.map(x => ({ id: x[0], sub: x[2] })), def: ['Maj', 'min', 'dim', 'aug'],
+    opts: [['arp', 'arpège avant', true], ['inv', 'renversements', false], ['pack', 'par tonalité (4 accords)', true]],
+    params(id) {
+      // groupés : 4 accords sur les degrés d'une même tonalité (cadence au début du paquet), puis on change
+      let key = null, packCad = false;
+      if (S().opts.pack) {
+        if (st.chKey == null || st.chLeft <= 0) { st.chKey = rnd(48, 59); st.chLeft = 4; packCad = true; }
+        st.chLeft--; key = st.chKey;
+      }
+      const root = key === null ? rnd(48, 60) : fold(key + pick(CH_DEG[id] || [0]), 48);
+      return { root, inv: S().opts.inv ? rnd(0, 2) : 0, key, packCad };
+    },
+    events(id, p, cad) {
+      const n = chordNotes(id, p);
+      const ev = cad && p.packCad ? cadence(p.key) : []; let t = ev.length ? CAD_LEN : 0;
+      if (S().opts.arp) { const t0 = t; n.forEach((m, i) => ev.push({ m, t: t0 + i * 0.3, d: 0.4 })); t = t0 + n.length * 0.3 + 0.25; }
+      ev.push({ m: n, t, d: 1.7 });
+      return ev;
+    },
+    tag: p => 'inv' + p.inv, info: p => (p.key != null ? 'tonalité ' + nn(p.key) + ' majeur · ' : '') + 'basse sur ' + nn(p.root),
+    pad: (id, p) => chordNotes(id, p), notes: (id, p) => [chordNotes(id, p)],
+  },
+  dg: {
+    name: 'degrés', dash: [3, 7], tonal: true,
+    items: DG.map(x => ({ id: x[0], sub: x[2] })), def: ['1', '2', '3', '4', '5', '6', '7'],
+    opts: [['cad', 'nouvelle tonalité à chaque question', true]],
+    params() { return { key: rnd(48, 59), oct: rnd(55, 64) }; },
+    events(id, p, cad) {
+      const ev = cad ? cadence(p.key) : [];
+      ev.push({ m: fold(p.key + DG.find(x => x[0] === id)[1], p.oct), t: cad ? CAD_LEN : 0, d: 1.5 });
+      return ev;
+    },
+    tag: () => '', info: p => 'tonalité ' + nn(p.key) + ' majeur',
+    pad(id, p) { const k = fold(p.key, 36); return [k, k + 7, dgTarget(id, p)]; },
+    notes(id, p) { const t = dgTarget(id, p); return [[t - ((t - p.key) % 12 + 12) % 12], [t]]; },
+  },
+  fn: {
+    name: 'fonctions', dash: [16, 5, 3, 5], tonal: true,
+    items: FN.map(x => ({ id: x[0], sub: '' })), def: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+    opts: [['cad', 'nouvelle tonalité à chaque question', true]],
+    params() { return { key: rnd(48, 59) }; },
+    events(id, p, cad) {
+      const f = FN.find(x => x[0] === id);
+      const ev = cad ? cadence(p.key) : [];
+      ev.push({ m: voice(p.key, f[1], f[2]), t: cad ? CAD_LEN : 0, d: 1.7 });
+      return ev;
+    },
+    tag: () => '', info: p => 'tonalité ' + nn(p.key) + ' majeur',
+    pad: (id, p) => voice(p.key, FN.find(x => x[0] === id)[1], FN.find(x => x[0] === id)[2]),
+    notes: (id, p) => [voice(p.key, FN.find(x => x[0] === id)[1], FN.find(x => x[0] === id)[2]).slice(1)],
+  },
+};
+const MODE_IDS = Object.keys(MODES);
+const HELP = {
+  dg: `<h3>degrés. comment ça marche</h3>
+    <p>Une <b>cadence</b> (I – IV – V – I) installe une tonalité : sa première note devient la <b>maison</b> (le degré 1). Puis <b>une seule note</b> est jouée : tu dis quelle place elle occupe dans la gamme, pas son nom.</p>
+    <ul><li><b>1</b> tonique : repos total, on est arrivé.</li>
+    <li><b>5</b> dominante : stable mais ouverte, solide.</li>
+    <li><b>3</b> : douce, c'est elle qui fait sonner « majeur ».</li>
+    <li><b>7</b> sensible : très tendue, elle veut monter d'un demi-ton vers 1.</li>
+    <li><b>4</b> : suspendue, elle veut descendre vers 3.</li>
+    <li><b>2</b> : en mouvement, elle veut aller vers 1 (ou 3).</li>
+    <li><b>6</b> : un peu nostalgique, elle retombe vers 5.</li></ul>
+    <p><b>Astuce</b> : chante intérieurement depuis la note jouée jusqu'à la maison (en descendant ou en montant par la gamme) : le nombre de pas te donne le degré.<br>
+    Les degrés <b>♭3, ♭7, ♭6, ♭2, ♯4</b> sont altérés : couleurs mineures ou étranges.<br>Touche <b>C</b> : réentendre la cadence.</p>`,
+  fn: `<h3>fonctions. comment ça marche</h3>
+    <p>Une <b>cadence</b> installe la tonalité, puis <b>un accord</b> est joué. Tu dis sa fonction : sur quel degré de la gamme il est construit.</p>
+    <p><b>Majuscule</b> = accord majeur (I, IV, V) · <b>minuscule</b> = mineur (ii, iii, vi) · <b>°</b> = diminué (vii°).</p>
+    <ul><li><b>I</b> : la maison, le repos.</li>
+    <li><b>IV</b> : on s'éloigne, ouvert et lumineux (le « amen » des églises).</li>
+    <li><b>V</b> : tension, il veut revenir sur I.</li>
+    <li><b>vi</b> : le relatif mineur, triste mais stable.</li>
+    <li><b>ii</b> : doux, il prépare le V (enchaînement ii – V – I).</li>
+    <li><b>iii</b> : flou, entre I et V.</li>
+    <li><b>vii°</b> : très tendu et instable.</li>
+    <li><b>V7</b> : le V avec une 7e, encore plus d'envie de résoudre.</li></ul>
+    <p><b>Astuce</b> : écoute d'abord la <b>basse</b>, chante-la et trouve son degré (comme dans l'exercice degrés), puis vérifie si l'accord sonne majeur ou mineur.<br>
+    <b>♭VII, iv, ♭VI, ♭III, II</b> : accords empruntés, couleurs rock, cinéma ou mélancolie.<br>Touche <b>C</b> : réentendre la cadence.</p>`,
+};
+const label = (mode, id) => { const it = MODES[mode].items.find(i => i.id === id); return it && it.sub ? `${id} (${it.sub})` : id; };
+
+/* ================= état + persistance ================= */
+let settings = { volume: 0.7, mode: 'iv', adaptive: true, autoNext: true, pad: true, padVol: 0.6, modes: {}, ach: {}, path: {} };
+let H = [];        // historique complet
+let XP = 0;        // xp totale
+let Q = null;      // question en cours
+let view = 'train';
+const st = { lastItem: null, key: null, keyLeft: 0, focus: {}, prevMiss: new Set(), fix: {} };
+const SESSION = Date.now().toString(36);
+const sess = { n: 0, ok: 0, streak: 0, best: 0, fast: 0, start: null };
+const S = () => settings.modes[settings.mode];
+
+function initModeSettings() {
+  for (const m of MODE_IDS) {
+    const M = MODES[m], cur = settings.modes[m] || {};
+    const opts = {}; M.opts.forEach(o => opts[o[0]] = cur.opts && o[0] in cur.opts ? cur.opts[o[0]] : o[2]);
+    settings.modes[m] = { items: Array.isArray(cur.items) ? cur.items.filter(id => M.items.some(i => i.id === id)) : M.def.slice(), opts };
+  }
+  if (!MODES[settings.mode]) settings.mode = 'iv';
+  if (!settings.ach) settings.ach = {};
+  // une fois : tous les intervalles cochés (chaque intervalle a son propre niveau)
+  if (!settings.allIv) { settings.modes.iv.items = MODES.iv.items.map(i => i.id); settings.allIv = true; saveSettings(); }
+  delete settings.path;
+}
+const WEB = !/^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k) || d); } catch (e) { return JSON.parse(d); } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+let saveT = null;
+function saveSettings() {
+  clearTimeout(saveT);
+  if (WEB) { lsSet('et_settings', settings); return; }
+  saveT = setTimeout(() => fetch('/api/settings', { method: 'POST', body: JSON.stringify(settings) }).catch(() => {}), 400);
+}
+function warn(msg) { const w = $('#warn'); w.textContent = msg || ''; w.style.display = msg ? 'inline-block' : 'none'; }
+function pending() { try { return JSON.parse(localStorage.getItem('et_pending') || '[]'); } catch (e) { return []; } }
+function setPending(a) { try { localStorage.setItem('et_pending', JSON.stringify(a)); } catch (e) {} }
+async function saveRec(rec) {
+  if (WEB) { const h = lsGet('et_hist', '[]'); h.push(rec); if (!lsSet('et_hist', h)) warn('stockage du navigateur plein : réponse non sauvegardée.'); return; }
+  const batch = pending().concat([rec]);
+  try {
+    const r = await fetch('/api/answer', { method: 'POST', body: JSON.stringify(batch) });
+    if (!r.ok) throw 0;
+    setPending([]); warn('');
+  } catch (e) {
+    setPending(batch);
+    warn(`serveur injoignable : ${batch.length} réponse(s) en attente, envoyées dès qu'il revient. relance le raccourci « Ear Training ».`);
+  }
+}
+
+/* ================= jeu : xp, niveaux, maîtrise, séries ================= */
+const TITLES = ['jour 0.', 'écouter. beaucoup.', 'se tromper. recommencer.', 'les intervalles prennent forme.', 'entendre la couleur.',
+  'la tonalité devient une maison.', 'les accords parlent.', "l'oreille s'ouvre.", 'tout résonne.', 'puis tout, partout.'];
+const title = L => TITLES[Math.min(L - 1, TITLES.length - 1)];
+const xpOf = h => h.xp !== undefined ? h.xp : (h.correct ? 10 : 0);
+function levelFrom(total) {
+  let L = 1, need = 120, x = total;
+  while (x >= need) { x -= need; L++; need = 120 + 45 * (L - 1); }
+  return { level: L, cur: x, need };
+}
+const comboMult = () => 1 + Math.min(4, Math.floor(sess.streak / 5)) * 0.5;
+function itemStats(mode, id, last) {
+  const a = []; for (let i = H.length - 1; i >= 0 && a.length < last; i--) { const h = H[i]; if (h.mode === mode && h.item === id) a.push(h); }
+  return a;
+}
+// maîtrise 0-5 « gouttes » : réussite sur les 20 dernières, pondérée par le nombre d'essais
+function mastery(mode, id) {
+  const r = itemStats(mode, id, 20); if (!r.length) return 0;
+  const p = r.filter(h => h.correct).length / r.length;
+  return Math.max(0, Math.min(5, Math.floor(p * 5 * Math.min(1, r.length / 15) + 1e-9)));
+}
+const IXP = {};   // xp cumulée par « mode|élément »
+const ITEM_NEED = L => 40 + 30 * (L - 1);
+function itemLevel(x) { let L = 1, need = ITEM_NEED(1); while (x >= need) { x -= need; L++; need = ITEM_NEED(L); } return { L, cur: x, need }; }
+const ilOf = (m, id) => itemLevel(IXP[m + '|' + id] || 0).L;
+const dots = n => '●'.repeat(n) + '○'.repeat(5 - n);
+function minutes(a) {
+  let t = 0;
+  for (let i = 1; i < a.length; i++) { const d = (Date.parse(a[i].ts) - Date.parse(a[i - 1].ts)) / 1000; if (d > 0 && d < 180) t += d; }
+  return Math.round(t / 60);
+}
+function dayStreak() {
+  const cnt = {}; H.forEach(h => cnt[h.day] = (cnt[h.day] || 0) + 1);
+  const d = new Date(); if (!(cnt[today(d)] >= 15)) d.setDate(d.getDate() - 1);
+  let n = 0; while (cnt[today(d)] >= 15) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+const todayMin = () => minutes(H.filter(h => h.day === today()));
+
+const ACH = [
+  ['first', 'jour 0.', 'première réponse.', () => H.length >= 1],
+  ['s10', "dix d'affilée.", '10 bonnes réponses de suite.', () => sess.streak >= 10],
+  ['s25', 'vingt-cinq sans trembler.', '25 de suite.', () => sess.streak >= 25],
+  ['s50', "l'oreille absolue ?", '50 de suite.', () => sess.streak >= 50],
+  ['fast', 'réflexe.', '10 bonnes réponses de suite en moins de 1,5 s.', () => sess.fast >= 10],
+  ['perfect', 'un cycle sans tache.', '20/20 sur un cycle.', c => c.perfect],
+  ['nohelp', 'sans filet.', 'un cycle parfait sans réécouter.', c => c.noHelp],
+  ['fix', 'corrigé.', "5 fois de suite juste sur un élément raté au cycle d'avant.", c => c.fixed],
+  ['c100', 'cent justes.', '100 bonnes réponses au total.', c => c.nOk >= 100],
+  ['c500', 'cinq cents.', '500 bonnes réponses.', c => c.nOk >= 500],
+  ['c1000', 'mille.', '1000 bonnes réponses.', c => c.nOk >= 1000],
+  ['goal', 'vingt-cinq minutes.', "objectif du jour atteint.", () => todayMin() >= 25],
+  ['d3', 'trois jours.', "3 jours d'affilée (15 questions min. par jour).", () => dayStreak() >= 3],
+  ['d7', "une semaine d'encre.", "7 jours d'affilée.", () => dayStreak() >= 7],
+  ['d11', 'onze jours.', "11 jours d'affilée.", () => dayStreak() >= 11],
+  ['triton', 'le diable apprivoisé.', 'triton à 5 gouttes.', () => mastery('iv', '4+') >= 5],
+  ['ivall', 'les intervalles parlent.', 'tous les intervalles à 4 gouttes ou plus.', () => IV.every(x => mastery('iv', x[0]) >= 4)],
+  ['ch4', 'quatre couleurs.', 'Maj, min, dim, aug à 4 gouttes.', () => ['Maj', 'min', 'dim', 'aug'].every(id => mastery('ch', id) >= 4)],
+  ['dg7', 'la maison.', 'les 7 degrés à 4 gouttes.', () => ['1', '2', '3', '4', '5', '6', '7'].every(id => mastery('dg', id) >= 4)],
+  ['fn7', 'les fonctions.', 'I à vii° à 4 gouttes.', () => ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'].every(id => mastery('fn', id) >= 4)],
+  ['l5', 'niveau 5.', 'atteindre le niveau 5.', c => c.level >= 5],
+  ['l10', 'niveau 10.', 'atteindre le niveau 10.', c => c.level >= 10],
+  ['l20', 'niveau 20.', 'atteindre le niveau 20.', c => c.level >= 20],
+  ['ivl3', 'tout le spectre.', 'les 12 intervalles au niveau 3.', () => IV.every(x => ilOf('iv', x[0]) >= 3)],
+  ['ivl6', 'maître des écarts.', 'les 12 intervalles au niveau 6.', () => IV.every(x => ilOf('iv', x[0]) >= 6)],
+  ['night', 'insomnie.', 'répondre entre minuit et 5 h.', () => new Date().getHours() < 5],
+];
+function checkAch(ctx) {
+  ctx.nOk = H.reduce((s, h) => s + (h.correct ? 1 : 0), 0);
+  ctx.level = levelFrom(XP).level;
+  let changed = false;
+  for (const [id, t, d, f] of ACH) {
+    if (settings.ach[id]) continue;
+    let got = false; try { got = !!f(ctx); } catch (e) {}
+    if (got) { settings.ach[id] = new Date().toISOString(); toast(t, d); changed = true; }
+  }
+  if (changed) saveSettings();
+}
+function toast(t, d) {
+  const el = document.createElement('div'); el.className = 'cap toast';
+  el.innerHTML = `✶ ${esc(t)}<small>${esc(d)}</small>`;
+  $('#toasts').appendChild(el);
+  setTimeout(() => { el.style.transition = 'opacity .5s'; el.style.opacity = 0; }, 3600);
+  setTimeout(() => el.remove(), 4200);
+}
+
+/* ================= cycles ================= */
+const CYCLE = 20;
+const cyc = { num: 1, recs: [], log: [] };
+function resetCycle() { cyc.num = 1; cyc.recs = []; cyc.log = []; st.focus = {}; st.prevMiss = new Set(); st.fix = {}; $('#cycles').style.display = 'none'; }
+function endCycle(ctx) {
+  const R = cyc.recs, ok = R.filter(r => r.correct).length, miss = {}, focus = {};
+  R.filter(r => !r.correct).forEach(r => {
+    miss[r.item] = (miss[r.item] || 0) + 1;
+    focus[r.item] = (focus[r.item] || 1) + 1.5;
+    if (S().items.includes(r.answer)) focus[r.answer] = Math.max(focus[r.answer] || 1, 1.6);
+  });
+  st.focus = focus; st.prevMiss = new Set(Object.keys(miss)); st.fix = {};
+  ctx.perfect = ok === R.length;
+  ctx.noHelp = ctx.perfect && R.every(r => !r.replays);
+  const missTxt = Object.entries(miss).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${esc(id)} ×${n}`).join(', ');
+  cyc.log.unshift(`<div class="cycle"><b>cycle ${cyc.num}. ${ok}/${R.length}.</b> ` + (missTxt
+    ? `raté : ${missTxt}<br><span class="mut">renforcé ensuite : ${esc(Object.keys(focus).join(', '))}</span>`
+    : 'sans tache.') + '</div>');
+  cyc.log.length = Math.min(cyc.log.length, 6);
+  const box = $('#cycles'); box.style.display = ''; box.innerHTML = '<span class="cap">bilan des cycles.</span>' + cyc.log.join('');
+  cyc.num++; cyc.recs = [];
+}
+
+/* ================= choix adaptatif ================= */
+function pickItem() {
+  const mode = settings.mode, en = S().items;
+  if (!en.length) return null;
+  const w = en.map(id => {
+    let x = 1;
+    if (settings.adaptive) {
+      const r = itemStats(mode, id, 15), c = r.filter(h => h.correct).length;
+      const p = (c + 1) / (r.length + 2);
+      x = Math.pow(1 - p, 1.5) + 0.08;
+      if (r.length < 4) x = Math.max(x, 0.5);
+      x *= st.focus[id] || 1;
+    }
+    if (id === st.lastItem && en.length > 1) x *= 0.25;
+    return x;
+  });
+  let s = w.reduce((a, b) => a + b, 0) * Math.random();
+  for (let i = 0; i < en.length; i++) { s -= w[i]; if (s <= 0) return en[i]; }
+  return en[en.length - 1];
+}
+
+/* ================= déroulé d'une question ================= */
+function next() {
+  if (Q && !Q.answered) { replay(); return; }   // impossible de passer sans répondre
+  const mode = settings.mode, M = MODES[mode];
+  const item = pickItem();
+  if (!item) { fb('choisis au moins un élément à gauche.'); return; }
+  let p = M.params(item), cad = true;
+  if (M.tonal) {
+    if (!S().opts.cad && st.key !== null && st.keyLeft > 0) { p.key = st.key; cad = false; st.keyLeft--; }
+    else { st.key = p.key; st.keyLeft = 3; }
+  }
+  Q = { mode, item, p, cad, replays: 0, answered: false, t0: 0 };
+  st.lastItem = item;
+  if (!sess.start) sess.start = Date.now();
+  renderAnswers();
+  if (p.packCad) fb(`<span class="pmut">nouvelle tonalité : ${nn(p.key)} majeur. 4 accords.</span>`);
+  else fb(M.tonal && !cad ? `<span class="pmut">même tonalité (${nn(p.key)} majeur). c pour la cadence.</span>` : '');
+  $('#btnNext').textContent = 'suivant.'; $('#btnNext').disabled = true;
+  const dur = play(M.events(item, p, cad));
+  Q.t0 = performance.now() + dur * 1000;
+  padStart(M.pad(item, p), Math.max(0.2, dur - 0.6));
+  renderSess();
+}
+function replay() {
+  if (!Q) return next();
+  if (!Q.answered) Q.replays++;
+  play(MODES[Q.mode].events(Q.item, Q.p, false));
+}
+function playCadence() {
+  const key = Q && Q.p.key !== undefined ? Q.p.key : st.key;
+  if (key === null || key === undefined) return;
+  if (Q && !Q.answered) Q.replays++;
+  play(cadence(key));
+}
+const ansBtn = id => [...document.querySelectorAll('.ans')].find(b => b.dataset.id === id);
+function answer(id) {
+  if (!Q) return;
+  const M = MODES[Q.mode];
+  if (Q.answered) { play(M.events(id, Q.p, false)); return; }   // comparer
+  Q.answered = true; $('#btnNext').disabled = false;
+  padStop(1.6); Q.revealT = performance.now();
+  const ok = id === Q.item;
+  const rt = Math.max(0, Math.round(performance.now() - Q.t0));
+  sess.n++;
+  if (ok) { sess.ok++; sess.streak++; sess.best = Math.max(sess.best, sess.streak); sess.fast = rt < 1500 ? sess.fast + 1 : 0; }
+  else { sess.streak = 0; sess.fast = 0; }
+  let xp = 0;
+  if (ok) {
+    const base = 6 + Math.min(12, S().items.length), speed = rt < 1500 ? 6 : rt < 3000 ? 3 : 0;
+    xp = Math.round((base + speed) * comboMult() * (Q.replays ? 0.7 : 1));
+  }
+  const rec = {
+    ts: new Date().toISOString(), day: today(), sess: SESSION, mode: Q.mode, item: Q.item, answer: id, correct: ok,
+    rt, replays: Q.replays, tag: M.tag(Q.p), root: Q.p.root !== undefined ? Q.p.root : Q.p.key, cad: M.tonal ? Q.cad : undefined, xp,
+  };
+  const lvBefore = levelFrom(XP).level;
+  const ik = Q.mode + '|' + Q.item, ilBefore = itemLevel(IXP[ik] || 0).L;
+  IXP[ik] = (IXP[ik] || 0) + xp;
+  XP += xp; H.push(rec); saveRec(rec);
+  cyc.recs.push(rec);
+  const ctx = {};
+  if (ok && st.prevMiss.has(Q.item)) { st.fix[Q.item] = (st.fix[Q.item] || 0) + 1; if (st.fix[Q.item] >= 5) ctx.fixed = true; }
+  if (!ok) st.fix[Q.item] = 0;
+
+  const bOk = ansBtn(Q.item), bMine = ansBtn(id);
+  if (bOk) bOk.classList.add('ok');
+  if (!ok && bMine) bMine.classList.add('ko');
+  const info = `<div class="pmut">${esc(M.info(Q.p))}${rec.tag && TAGS[rec.tag] ? ' · ' + TAGS[rec.tag] : ''} · ${(rt / 1000).toFixed(1)} s</div>`;
+  if (ok) {
+    fx.feed(bOk, xp);
+    fb(`<b>juste. ${esc(label(Q.mode, Q.item))}.</b> +${xp}${comboMult() > 1 ? ` <span class="pmut">(×${comboMult()})</span>` : ''}${info}`);
+    if (settings.autoNext) { const q = Q; setTimeout(() => { if (Q === q) next(); }, 300); }
+  } else {
+    fx.splat(bMine); hero.shake = 1;
+    fb(`<b>non. c'était ${esc(label(Q.mode, Q.item))}.</b> tu as dit ${esc(id)}. écoute les deux.${info}`);
+  }
+  if (cyc.recs.length >= CYCLE) endCycle(ctx);
+  const lvAfter = levelFrom(XP).level;
+  if (lvAfter > lvBefore) fx.levelUp(lvAfter);
+  checkAch(ctx);
+  const ilAfter = itemLevel(IXP[ik]).L;
+  if (ilAfter > ilBefore) {
+    toast(`${Q.item} passe niveau ${ilAfter}.`, label(Q.mode, Q.item));
+    if (bOk) { const b = bOk.getBoundingClientRect(); fx.floats.push({ x: b.left + b.width / 2, y: b.top - 24, txt: `niv. ${ilAfter} !`, t: -0.25 }); }
+  }
+  renderHeader(); renderSess();
+}
+function fb(html) { $('#fb').innerHTML = html; }
+
+/* ================= rendu entraînement ================= */
+function renderAnswers() {
+  const keys = '1234567890-=';
+  const en = new Set(S().items);
+  $('#answers').innerHTML = MODES[settings.mode].items.filter(i => en.has(i.id)).map((i, k) =>
+    `<button class="btn ans" data-id="${esc(i.id)}"><span class="k">${keys[k] || ''}</span><span class="nm">${esc(i.id)}</span>${i.sub ? `<small>${esc(i.sub)}</small>` : ''}<span class="dots">${dots(mastery(settings.mode, i.id))}</span>${(() => { const l = itemLevel(IXP[settings.mode + '|' + i.id] || 0); return `<span class="ilv">niv ${l.L}</span><span class="ibar"><i style="width:${Math.round(100 * l.cur / l.need)}%"></i></span>`; })()}</button>`).join('');
+}
+function renderSide() {
+  const M = MODES[settings.mode], s = S();
+  let h = '<span class="cap">exercice.</span><div class="modes">' + MODE_IDS.map(m => `<button class="btn ${m === settings.mode ? 'on' : ''}" data-mode="${m}">${MODES[m].name}</button>`).join('') + '</div>';
+  h += `<div class="sh">à travailler <button class="lnk" data-all="1">tout</button><button class="lnk" data-all="0">rien</button><button class="lnk" data-all="d">défaut</button></div><div class="toggles">`;
+  h += M.items.map(i => `<button class="btn sm ${s.items.includes(i.id) ? 'on' : ''}" data-item="${esc(i.id)}">${esc(i.id)}</button>`).join('') + '</div>';
+  h += '<div class="sh">options</div><div class="toggles">' + M.opts.map(o => `<button class="btn sm ${s.opts[o[0]] ? 'on' : ''}" data-opt="${o[0]}">${o[1]}</button>`).join('') + '</div>';
+  h += `<div class="sh">général</div><div class="toggles">
+    <button class="btn sm ${settings.adaptive ? 'on' : ''}" data-g="adaptive" title="pose plus souvent ce que tu rates">adaptatif</button>
+    <button class="btn sm ${settings.autoNext ? 'on' : ''}" data-g="autoNext">suite auto si juste</button>
+    <button class="btn sm ${settings.pad ? 'on' : ''}" data-g="pad" title="tient les notes de la question en fond">nappe</button></div>
+    <label class="vol">volume <input type="range" id="optVol" min="0" max="1" step="0.05" value="${settings.volume}"></label>
+    <label class="vol">nappe &nbsp;<input type="range" id="optPad" min="0" max="1.5" step="0.05" value="${settings.padVol}"></label>`;
+  $('#side').innerHTML = h;
+  $('#btnHelp').style.display = HELP[settings.mode] ? '' : 'none'; $('#help').style.display = 'none'; $('#help').innerHTML = HELP[settings.mode] || '';
+  $('#btnCad').style.display = M.tonal || (settings.mode === 'ch' && s.opts.pack) ? '' : 'none';
+}
+function resetQuestion() { Q = null; st.key = null; st.chKey = null; if (AC) stopAll(); padStop(0.4); fb(''); $('#btnNext').textContent = 'commencer.'; $('#btnNext').disabled = false; }
+$('#side').addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const d = t.dataset, s = S(), M = MODES[settings.mode];
+  if (d.mode) { settings.mode = d.mode; resetCycle(); resetQuestion(); }
+  else if (d.all !== undefined) { s.items = d.all === '1' ? M.items.map(i => i.id) : d.all === '0' ? [] : M.def.slice(); }
+  else if (d.item) {
+    const order = M.items.map(i => i.id);
+    s.items = s.items.includes(d.item) ? s.items.filter(id => id !== d.item) : order.filter(id => id === d.item || s.items.includes(id));
+  }
+  else if (d.opt) { s.opts[d.opt] = !s.opts[d.opt]; if (d.opt === 'cad') st.key = null; }
+  else if (d.g) { settings[d.g] = !settings[d.g]; if (d.g === 'pad' && !settings.pad) padStop(0.5); }
+  else return;
+  t.blur(); renderSide(); renderAnswers(); renderSess(); saveSettings();
+});
+$('#side').addEventListener('input', e => {
+  if (e.target.id === 'optVol') { settings.volume = +e.target.value; if (master) master.gain.value = settings.volume; saveSettings(); }
+  if (e.target.id === 'optPad') { settings.padVol = +e.target.value; if (padOut) padOut.gain.value = settings.padVol; saveSettings(); }
+});
+$('#answers').addEventListener('click', e => { const b = e.target.closest('.ans'); if (b) { b.blur(); answer(b.dataset.id); } });
+$('#btnNext').onclick = e => { e.currentTarget.blur(); next(); };
+$('#btnReplay').onclick = e => { e.currentTarget.blur(); replay(); };
+$('#btnCad').onclick = e => { e.currentTarget.blur(); playCadence(); };
+$('#btnHelp').onclick = e => { e.currentTarget.blur(); const h = $('#help'); h.style.display = h.style.display === 'none' ? '' : 'none'; };
+$('#help').onclick = () => { $('#help').style.display = 'none'; };
+$('#hero').onclick = () => replay();
+document.addEventListener('keydown', e => {
+  if (view !== 'train' || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  if (e.code === 'Space') { e.preventDefault(); replay(); }
+  else if (e.key === 'Enter') { e.preventDefault(); next(); }
+  else if (e.key === 'c' || e.key === 'C') playCadence();
+  else {
+    const k = '1234567890-='.indexOf(e.key);
+    const b = k >= 0 ? document.querySelectorAll('.ans')[k] : null;
+    if (b) { e.preventDefault(); answer(b.dataset.id); }
+  }
+});
+function renderSess() {
+  $('#stageCap').textContent = `${MODES[settings.mode].name}. cycle ${cyc.num}. ${cyc.recs.length}/${CYCLE}.`;
+  if (!sess.start) { $('#sessTxt').textContent = ''; return; }
+  const sec = Math.floor((Date.now() - sess.start) / 1000);
+  $('#sessTxt').textContent = `séance ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')} · ${sess.ok}/${sess.n}${sess.n ? ' · ' + Math.round(100 * sess.ok / sess.n) + ' %' : ''}`;
+}
+setInterval(() => { if (view === 'train') renderSess(); }, 1000);
+let lastMult = 1;
+function renderHeader() {
+  const L = levelFrom(XP);
+  $('#lvlTxt').textContent = `niv. ${L.level} — ${title(L.level)}`;
+  $('#xpFill').style.width = `calc(${(100 * L.cur / L.need).toFixed(1)}% - 6px)`;
+  $('#xpTxt').textContent = `${L.cur} / ${L.need} xp · ${XP} au total`;
+  const m = comboMult();
+  $('#hCombo').textContent = '×' + m;
+  if (m > lastMult) { const c = $('#hCombo'); c.classList.add('pop'); setTimeout(() => c.classList.remove('pop'), 180); }
+  lastMult = m;
+  $('#hStreak').textContent = `série ${sess.streak}`;
+  const mn = todayMin();
+  $('#ringTxt').innerHTML = `${mn}/25 min<br>aujourd'hui`;
+  drawRing(mn);
+  $('#hDays').textContent = dayStreak();
+}
+function drawRing(mn) {
+  const g = $('#ring').getContext('2d');
+  g.setTransform(2, 0, 0, 2, 0, 0); g.clearRect(0, 0, 56, 56); g.lineCap = 'round';
+  g.strokeStyle = 'rgba(236,230,214,.18)'; g.lineWidth = 4; g.beginPath(); g.arc(28, 28, 21, 0, 7); g.stroke();
+  const p = Math.min(1, mn / 25); if (p <= 0) return;
+  const r = mulberry(7); g.strokeStyle = PAPER;
+  for (let k = 0; k < 3; k++) { g.lineWidth = 2.5 + r() * 3; g.beginPath(); g.arc(28 + (r() - .5) * 1.5, 28 + (r() - .5) * 1.5, 21, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); g.stroke(); }
+}
+
+/* ================= dessin à l'encre ================= */
+// la créature : une tache d'encre étoilée qui grandit avec le niveau et se hérisse avec le combo
+function inkStar(g, cx, cy, R, spikes, seed, t, bristle) {
+  const r = mulberry(seed), pts = [];
+  for (let i = 0; i < spikes; i++) {
+    pts.push({ a: i / spikes * Math.PI * 2 + (r() - .5) * 0.3, len: R * (0.75 + 0.55 * r()), wid: 0.1 + 0.09 * r(), curl: (r() - .5) * 0.6, ph: r() * 6 });
+  }
+  const core = R * 0.42 * (1 + 0.03 * Math.sin(t * 3));
+  g.fillStyle = INK; g.beginPath();
+  pts.forEach((p, i) => {
+    const len = p.len * (1 + bristle) * (1 + 0.06 * Math.sin(t * 2.1 + p.ph));
+    const aL = p.a - p.wid, aR = p.a + p.wid, tipA = p.a + p.curl * 0.25 + 0.05 * Math.sin(t * 1.4 + p.ph);
+    if (i === 0) g.moveTo(cx + Math.cos(aL) * core, cy + Math.sin(aL) * core); else g.lineTo(cx + Math.cos(aL) * core, cy + Math.sin(aL) * core);
+    g.quadraticCurveTo(cx + Math.cos(aL + p.curl * 0.15) * len * 0.55, cy + Math.sin(aL + p.curl * 0.15) * len * 0.55, cx + Math.cos(tipA) * len, cy + Math.sin(tipA) * len);
+    g.quadraticCurveTo(cx + Math.cos(aR + p.curl * 0.15) * len * 0.55, cy + Math.sin(aR + p.curl * 0.15) * len * 0.55, cx + Math.cos(aR) * core, cy + Math.sin(aR) * core);
+  });
+  g.closePath(); g.fill();
+  g.beginPath(); g.arc(cx, cy, core * 1.08, 0, 7); g.fill();
+  g.strokeStyle = 'rgba(236,230,214,.33)'; g.lineWidth = Math.max(1, R / 50);   // traînées de pinceau sec
+  pts.forEach((p, i) => { if (i % 2) return; g.beginPath(); g.moveTo(cx + Math.cos(p.a) * core * 0.4, cy + Math.sin(p.a) * core * 0.4); g.lineTo(cx + Math.cos(p.a + 0.03) * p.len * 0.72, cy + Math.sin(p.a + 0.03) * p.len * 0.72); g.stroke(); });
+  g.fillStyle = INK;
+  for (let i = 0; i < 16; i++) {
+    const a = r() * Math.PI * 2, d = R * (1.05 + r() * 0.75), s = R / 60 + r() * R / 18;
+    g.beginPath(); g.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, s, 0, 7); g.fill();
+  }
+}
+function brushLine(g, pts, w, r) {   // polyligne tremblée, plusieurs passes
+  for (let k = 0; k < 2; k++) {
+    g.lineWidth = w * (0.6 + 0.6 * r()); g.beginPath();
+    pts.forEach((p, i) => { const x = p[0] + (r() - .5) * w, y = p[1] + (r() - .5) * w; i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.stroke();
+  }
+}
+// fond : un espace 3D de notation musicale qui vient vers nous (sprites pré-rendus, perspective).
+// Dessiné deux fois : couleur papier sur le fond sombre, couleur encre dans la feuille beige.
+const space = { objs: [], dust: [], warp: 0, mx: 0, my: 0 };
+const SPRITES = [];
+const KIND_W = [3, 3, 2, 3, 2, 1, 1.2, 0.6, 1, 1, 0.8, 3];
+function spr(w, h, fn) {
+  const out = { w, h };
+  for (const [k, col] of [['paper', PAPER], ['ink', INK]]) {
+    const c = document.createElement('canvas'); c.width = w * 2; c.height = h * 2;
+    const g = c.getContext('2d'); g.scale(2, 2); g.fillStyle = g.strokeStyle = col; g.lineCap = 'round'; g.lineJoin = 'round';
+    fn(g); out[k] = c;
+  }
+  return out;
+}
+const nHead = (g, x, y, s, hollow) => { g.save(); g.translate(x, y); g.rotate(-0.35); g.beginPath(); g.ellipse(0, 0, s * 0.7, s * 0.48, 0, 0, 7); if (hollow) { g.lineWidth = s * 0.22; g.stroke(); } else g.fill(); g.restore(); };
+const ln = (g, w, x1, y1, x2, y2) => { g.lineWidth = w; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); };
+const glyph = (g, ch, px, x, y) => { g.font = `${px}px "Segoe UI Symbol"`; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillText(ch, x, y); };
+function buildSprites() {
+  const s = 14;
+  SPRITES.push(spr(40, 80, g => { nHead(g, 16, 64, s); ln(g, 2.2, 25.5, 62, 25.5, 12); }));
+  SPRITES.push(spr(52, 80, g => { nHead(g, 16, 64, s); ln(g, 2.2, 25.5, 62, 25.5, 12); g.lineWidth = 3; g.beginPath(); g.moveTo(25.5, 12); g.quadraticCurveTo(44, 26, 38, 46); g.stroke(); }));
+  SPRITES.push(spr(40, 80, g => { nHead(g, 16, 64, s, true); ln(g, 2.2, 25.5, 62, 25.5, 12); }));
+  SPRITES.push(spr(80, 84, g => { nHead(g, 14, 66, s); nHead(g, 52, 58, s); ln(g, 2.2, 23.5, 64, 23.5, 14); ln(g, 2.2, 61.5, 56, 61.5, 10); ln(g, 7, 23.5, 14, 61.5, 10); }));
+  SPRITES.push(spr(150, 90, g => { [70, 62, 66, 54].forEach((y, i) => { nHead(g, 14 + i * 38, y, s); ln(g, 2.2, 23.5 + i * 38, y - 2, 23.5 + i * 38, 16 - i * 1.5); }); ln(g, 7, 23.5, 16, 137.5, 11.5); ln(g, 5, 23.5, 27, 137.5, 22.5); }));
+  SPRITES.push(spr(36, 30, g => nHead(g, 18, 15, s * 1.15, true)));
+  SPRITES.push(spr(70, 120, g => glyph(g, '𝄞', 96, 35, 66)));
+  SPRITES.push(spr(60, 70, g => glyph(g, '𝄢', 56, 30, 36)));
+  SPRITES.push(spr(36, 50, g => glyph(g, '♯', 40, 18, 26)));
+  SPRITES.push(spr(36, 50, g => glyph(g, '♭', 40, 18, 24)));
+  SPRITES.push(spr(36, 60, g => glyph(g, '𝄽', 46, 18, 30)));
+  SPRITES.push(spr(260, 80, g => {
+    for (let l = 0; l < 5; l++) { g.lineWidth = 1.3; g.beginPath(); g.moveTo(0, 20 + l * 10); g.bezierCurveTo(80, 18 + l * 10, 180, 23 + l * 10, 260, 20 + l * 10); g.stroke(); }
+    [[40, 55], [90, 45], [140, 35], [200, 50]].forEach(([x, y]) => { nHead(g, x, y, 10); ln(g, 1.8, x + 6.5, y - 1, x + 6.5, y - 30); });
+    const gr = g.createLinearGradient(0, 0, 260, 0);   // bords fondus
+    gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.22, '#000'); gr.addColorStop(.78, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.globalCompositeOperation = 'destination-in'; g.fillStyle = gr; g.fillRect(0, 0, 260, 80); g.globalCompositeOperation = 'source-over';
+  }));
+}
+function spawn(o, far) {
+  let r = Math.random() * KIND_W.reduce((a, b) => a + b, 0), k = 0;
+  while (r > KIND_W[k]) { r -= KIND_W[k]; k++; }
+  o.k = k; o.x = (Math.random() - .5) * 7; o.y = (Math.random() - .5) * 4.4;
+  o.z = far ? 7 + Math.random() * 0.5 : 0.6 + Math.random() * 6.6;
+  o.rot = (Math.random() - .5) * 0.8; o.vr = (Math.random() - .5) * 0.15; o.sc = 0.7 + Math.random() * 0.6; o.glow = 0;
+  return o;
+}
+addEventListener('mousemove', e => { space.mx = e.clientX / innerWidth - .5; space.my = e.clientY / innerHeight - .5; });
+function drawBg(dt) {
+  if (!SPRITES.length) { buildSprites(); for (let i = 0; i < 210; i++) space.objs.push(spawn({}, false)); for (let i = 0; i < 380; i++) space.dust.push({ x: (Math.random() - .5) * 9, y: (Math.random() - .5) * 6, z: 0.3 + Math.random() * 7 }); }
+  const W = innerWidth, H = innerHeight, cv = $('#bg');
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+  const sc2 = $('#stagefx'), sr = sc2.getBoundingClientRect();
+  let gs = null;
+  if (view === 'train' && sr.width > 0) {
+    const w = Math.round(sr.width), h = Math.round(sr.height);
+    if (sc2.width !== w || sc2.height !== h) { sc2.width = w; sc2.height = h; }
+    gs = sc2.getContext('2d'); gs.setTransform(1, 0, 0, 1, 0, 0); gs.clearRect(0, 0, w, h);
+  }
+  const t = performance.now() / 1000, F = Math.min(W, H) * 0.55;
+  const cx = W / 2 + Math.sin(t * 0.07) * W * 0.03 - space.mx * 36, cy = H * 0.45 + Math.cos(t * 0.05) * H * 0.03 - space.my * 24;
+  const speed = 0.32 + space.warp; space.warp *= Math.pow(0.12, dt);
+  for (const o of space.objs) { o.z -= speed * dt; o.rot += o.vr * dt; o.glow *= Math.pow(0.2, dt); if (o.z < 0.3) spawn(o, true); }
+  space.objs.sort((a, b) => b.z - a.z);
+  // poussière d'étoiles : petits points qui filent
+  g.fillStyle = PAPER; if (gs) gs.fillStyle = INK;
+  for (const d of space.dust) {
+    d.z -= speed * 1.3 * dt; if (d.z < 0.3) { d.z = 7.3; d.x = (Math.random() - .5) * 9; d.y = (Math.random() - .5) * 6; }
+    const x = cx + d.x / d.z * F, y = cy + d.y / d.z * F, r = Math.min(2.6, 1.6 / d.z), a = Math.min(1, (7.3 - d.z) / 1.5) * (1 - d.z / 8);
+    if (x < 0 || x > W || y < 0 || y > H) continue;
+    g.globalAlpha = a * 0.5; g.fillRect(x - r / 2, y - r / 2, r, r);
+    if (gs) { gs.globalAlpha = a * 0.22; gs.fillRect(x - sr.left - r / 2, y - sr.top - r / 2, r, r); }
+  }
+  for (const o of space.objs) {
+    const S = SPRITES[o.k], k = o.sc * (F / 520) / o.z, x = cx + o.x / o.z * F, y = cy + o.y / o.z * F;
+    const half = Math.max(S.w, S.h) * k / 2;
+    if (x + half < 0 || x - half > W || y + half < 0 || y - half > H) continue;
+    let a = Math.min(1, (7 - o.z) / 1.6) * Math.min(1, (o.z - 0.3) / 0.7);
+    if (a <= 0) continue;
+    a *= 0.3 + 0.7 * (1 - o.z / 7);
+    const c = Math.cos(o.rot) * k, sn = Math.sin(o.rot) * k;
+    g.globalAlpha = Math.min(1, a * (0.3 + o.glow * 0.6));
+    g.setTransform(c, sn, -sn, c, x, y); g.drawImage(S.paper, -S.w / 2, -S.h / 2, S.w, S.h);
+    if (gs) {
+      gs.globalAlpha = Math.min(1, a * (0.12 + o.glow * 0.3));
+      gs.setTransform(c, sn, -sn, c, x - sr.left, y - sr.top); gs.drawImage(S.ink, -S.w / 2, -S.h / 2, S.w, S.h);
+    }
+  }
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+  if (gs) { gs.setTransform(1, 0, 0, 1, 0, 0); gs.globalAlpha = 1; }
+}
+function bgBlip() {
+  const vis = space.objs.filter(o => o.z > 1 && o.z < 4);
+  if (vis.length) pick(vis).glow = 1;
+  space.warp += 0.12;
+}
+// après la réponse : les vraies notes sur une petite portée (clé de sol ou de fa selon la hauteur)
+const SPELL = [[0,0],[0,1],[1,0],[2,-1],[2,0],[3,0],[3,1],[4,0],[5,-1],[5,0],[6,-1],[6,0]];
+const diat = m => (Math.floor(m / 12) - 1) * 7 + SPELL[((m % 12) + 12) % 12][0];
+function drawReveal(g, Hh, a) {
+  const cols = MODES[Q.mode].notes(Q.item, Q.p), all = cols.flat();
+  const s = 11, x0 = 28, w = 96 + cols.length * 62, yb = Hh / 2 + 2 * s;
+  const bass = Math.max(...all) < 60, ref = bass ? 18 : 30;   // ligne du bas : sol2 / mi4
+  g.save(); g.globalAlpha = a; g.strokeStyle = INK; g.fillStyle = INK; g.lineCap = 'round';
+  const r = mulberry(5);
+  for (let l = 0; l < 5; l++) brushLine(g, [[x0, yb - l * s], [x0 + w, yb - l * s]], 1.3, r);
+  g.textBaseline = 'alphabetic';
+  g.font = `${bass ? s * 3.8 : s * 6.4}px "Segoe UI Symbol"`;
+  g.fillText(bass ? '𝄢' : '𝄞', x0 + 4, bass ? yb - s * 1.2 : yb + s * 1.2);
+  cols.forEach((col, i) => {
+    const cx = x0 + 72 + i * 62;
+    col.forEach(m => {
+      const acc = SPELL[((m % 12) + 12) % 12][1], step = diat(m) - ref, y = yb - step * s / 2;
+      g.lineWidth = 1.4;
+      for (let k = -2; k >= step; k -= 2) { g.beginPath(); g.moveTo(cx - s * 1.1, yb - k * s / 2); g.lineTo(cx + s * 1.1, yb - k * s / 2); g.stroke(); }
+      for (let k = 10; k <= step; k += 2) { g.beginPath(); g.moveTo(cx - s * 1.1, yb - k * s / 2); g.lineTo(cx + s * 1.1, yb - k * s / 2); g.stroke(); }
+      if (acc) { g.font = `${s * 2}px "Segoe UI Symbol"`; g.fillText(acc > 0 ? '♯' : '♭', cx - s * 2.4, y + s * 0.6); }
+      g.save(); g.translate(cx, y); g.rotate(-0.35); g.beginPath(); g.ellipse(0, 0, s * 0.72, s * 0.5, 0, 0, 7); g.fill(); g.restore();
+    });
+    const low = Math.min(...col.map(m => diat(m) - ref));
+    g.font = '14px Kalam, cursive'; g.textAlign = 'center'; g.fillStyle = '#6f685c';
+    g.fillText(col.map(nn).join(' · '), cx, Math.max(yb + s * 3.6, yb - low * s / 2 + s * 2.2));
+    g.fillStyle = INK; g.textAlign = 'left';
+  });
+  g.restore();
+}
+const hero = { pulse: 0, shake: 0 };
+const fx = {
+  parts: [], floats: [], lvl: null,
+  feed(btn, xp) {
+    space.warp += 0.5 + 0.25 * comboMult();
+    if (!btn) return;
+    const b = btn.getBoundingClientRect(), h = $('#hero').getBoundingClientRect();
+    const tx = h.left + h.width / 2, ty = h.top + h.height / 2;
+    for (let i = 0; i < 12 + Math.min(12, sess.streak); i++)
+      this.parts.push({ k: 'feed', x: b.left + b.width / 2 + (Math.random() - .5) * b.width * .7, y: b.top + b.height / 2, tx, ty,
+        cx: (Math.random() - .5) * 320, cy: -60 - Math.random() * 160, t: -Math.random() * 0.15, d: 0.45 + Math.random() * 0.3, s: 2 + Math.random() * 4 });
+    this.floats.push({ x: b.left + b.width / 2, y: b.top, txt: '+' + xp, t: 0 });
+  },
+  splat(btn) {
+    if (!btn) return;
+    const b = btn.getBoundingClientRect();
+    for (let i = 0; i < 16; i++) {
+      const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 220;
+      this.parts.push({ k: 'drop', x: b.left + b.width / 2, y: b.top + b.height / 2, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, t: 0, d: 0.6 + Math.random() * 0.4, s: 1.5 + Math.random() * 4 });
+    }
+  },
+  levelUp(L) {
+    space.warp += 4;
+    this.lvl = { t: 0, L };
+    const c = $('#lvlCap'); c.textContent = `niveau ${L}. ${title(L)}`;
+    c.classList.remove('show'); void c.offsetWidth; c.classList.add('show');
+  },
+};
+function sizeCanvas(cv, w, h) {
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); return g;
+}
+let lastTs = 0, fxDirty = false;
+function loop(ts) {
+  const dt = Math.min(0.05, (ts - lastTs) / 1000 || 0); lastTs = ts;
+  const t = ts / 1000;
+  drawBg(dt);
+  if (view === 'train') {
+    const cv = $('#hero'), W = cv.clientWidth, Hh = cv.clientHeight;
+    if (W) {
+      const g = sizeCanvas(cv, W, Hh); g.clearRect(0, 0, W, Hh);
+      const L = levelFrom(XP).level;
+      const R = (30 + Math.min(L, 30) * 1.2) * (1 + hero.pulse * 0.16);
+      const sx = hero.shake ? Math.sin(t * 60) * 8 * hero.shake : 0;
+      inkStar(g, W / 2 + sx, Hh / 2, R, 7 + Math.min(12, Math.floor(L / 2)), 4242 + L, t, Math.min(0.35, sess.streak * 0.025));
+      if (Q && Q.answered && Q.revealT) drawReveal(g, Hh, Math.min(1, (performance.now() - Q.revealT) / 350));
+      if (sess.streak >= 2) {
+        g.save(); g.fillStyle = INK; g.textAlign = 'right'; g.translate(W - 26, Hh / 2); g.rotate(-0.06);
+        g.font = '700 48px Kalam, cursive'; g.fillText('×' + comboMult(), 0, 4);
+        g.font = '16px Kalam, cursive'; g.fillStyle = '#6f685c'; g.fillText('série ' + sess.streak, 0, 30); g.restore();
+      }
+      hero.pulse *= Math.pow(0.04, dt); hero.shake = hero.shake > 0.02 ? hero.shake * Math.pow(0.02, dt) : 0;
+    }
+  }
+  const active = fx.parts.length || fx.floats.length || fx.lvl;
+  if (active || fxDirty) {
+    const cv = $('#fx'), W = innerWidth, Hh = innerHeight, g = sizeCanvas(cv, W, Hh);
+    g.clearRect(0, 0, W, Hh);
+    fxDirty = !!active;   // une dernière frame vide après la fin des effets
+    if (fx.lvl) {
+      fx.lvl.t += dt; const p = fx.lvl.t / 1.3;
+      if (p >= 1) fx.lvl = null;
+      else {
+        g.globalAlpha = p < 0.55 ? 1 : 1 - (p - 0.55) / 0.45;
+        inkStar(g, W / 2, Hh * 0.42, Math.max(W, Hh) * 0.36 * (1 - Math.pow(1 - p, 3)), 16, 99 + fx.lvl.L, t, 0);
+        g.globalAlpha = 1;
+      }
+    }
+    g.fillStyle = INK;
+    fx.parts = fx.parts.filter(q => {
+      q.t += dt; if (q.t < 0) return true;
+      const u = q.t / q.d; if (u >= 1) { if (q.k === 'feed') hero.pulse = Math.max(hero.pulse, 0.5); return false; }
+      let x, y;
+      if (q.k === 'feed') {
+        const e = u * u * (3 - 2 * u), mx = (q.x + q.tx) / 2 + q.cx, my = (q.y + q.ty) / 2 + q.cy;
+        x = (1 - e) * (1 - e) * q.x + 2 * (1 - e) * e * mx + e * e * q.tx; y = (1 - e) * (1 - e) * q.y + 2 * (1 - e) * e * my + e * e * q.ty;
+      } else { x = q.x + q.vx * q.t; y = q.y + q.vy * q.t + 400 * q.t * q.t; }
+      g.globalAlpha = q.k === 'drop' ? 1 - u : 1;
+      g.beginPath(); g.arc(x, y, q.s, 0, 7); g.fill();
+      return true;
+    });
+    g.globalAlpha = 1; g.font = '700 26px Kalam, cursive'; g.textAlign = 'center';
+    fx.floats = fx.floats.filter(f => {
+      f.t += dt; const u = f.t / 0.9; if (u >= 1) return false;
+      g.globalAlpha = 1 - u; g.fillText(f.txt, f.x, f.y - 10 - u * 50); return true;
+    });
+    g.globalAlpha = 1;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ================= progression ================= */
+const pct = a => a.length ? Math.round(100 * a.filter(h => h.correct).length / a.length) : null;
+const median = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+const bar = p => p === null ? '—' : `<span class="bar"><i style="width:${p}%"></i></span>${p} %`;
+function weakest(mode) {
+  return MODES[mode].items.map(i => { const r = itemStats(mode, i.id, 20); return { id: i.id, n: r.length, p: pct(r) }; })
+    .filter(x => x.n >= 5).sort((a, b) => a.p - b.p).filter(x => x.p < 85).slice(0, 3);
+}
+function confusions(a) {
+  const c = {};
+  a.filter(h => !h.correct).forEach(h => { const k = h.item + ' → ' + h.answer; c[k] = (c[k] || 0) + 1; });
+  return Object.entries(c).sort((x, y) => y[1] - x[1]);
+}
+function renderStats() {
+  const el = $('#v-stats');
+  const got = ACH.filter(a => settings.ach[a[0]]).length;
+  const achHtml = `<div class="box rough paper"><h2>hauts faits. <span class="pmut">${got}/${ACH.length}</span></h2><div class="ach">` +
+    ACH.map(([id, t, d]) => settings.ach[id] ? `<div class="a got"><b>✶ ${esc(t)}</b><span>${esc(d)}</span></div>` : `<div class="a lock"><b>? ? ?</b><span>${esc(d)}</span></div>`).join('') + '</div></div>';
+  if (!H.length) { el.innerHTML = '<div class="box rough paper">pas encore de données. fais quelques questions.</div>' + achHtml; return; }
+  const td = H.filter(h => h.day === today()), days = [...new Set(H.map(h => h.day))], L = levelFrom(XP);
+  let h = `<div class="cards">
+    <div class="card rough paper"><span>niveau</span><b>${L.level}</b><span>${esc(title(L.level))} · ${XP} xp</span></div>
+    <div class="card rough paper"><span>aujourd'hui</span><b>${td.length}</b><span>questions · ${pct(td) ?? '—'} % juste · ${todayMin()} min</span></div>
+    <div class="card rough paper"><span>au total</span><b>${H.length}</b><span>questions · ${pct(H)} % juste · ${minutes(H)} min</span></div>
+    <div class="card rough paper"><span>jours d'affilée</span><b>${dayStreak()}</b><span>${days.length} jours d'entraînement</span></div></div>`;
+  h += `<div class="box rough inkp"><h2>évolution.</h2><div class="legend">% de bonnes réponses par jour (min. 3 questions), taches = volume · ${MODE_IDS.map(m => `<span>${{ iv: '———', ch: '— —', dg: '· · ·', fn: '—·—' }[m]} ${MODES[m].name}</span>`).join('')}</div><canvas id="chart" style="width:100%;height:240px;display:block"></canvas></div>`;
+  h += `<div class="box rough paper"><h2>carte de l'oreille.</h2>` + MODE_IDS.map(m => {
+    const items = MODES[m].items.filter(i => itemStats(m, i.id, 1).length);
+    if (!items.length) return '';
+    return `<div class="pmut" style="margin:6px 0">${MODES[m].name}</div><div class="map">` + items.map(i => {
+      const ms = mastery(m, i.id), p = pct(itemStats(m, i.id, 20));
+      return `<div class="cell ${ms >= 3 ? 'hi' : ''}"><div class="fill" style="height:${ms * 20}%"></div><b>${esc(i.id)}</b><span>niv ${ilOf(m, i.id)} · ${dots(ms)}<br>${p} %</span></div>`;
+    }).join('') + '</div>';
+  }).join('') + '</div>';
+  h += achHtml;
+  for (const m of MODE_IDS) {
+    const M = MODES[m], A = H.filter(x => x.mode === m);
+    if (!A.length) continue;
+    const rows = M.items.map(i => {
+      const a = A.filter(x => x.item === i.id); if (!a.length) return '';
+      const r = a.slice(-20), prev = a.slice(-40, -20), pr = pct(r), pp = pct(prev);
+      const tr = pp === null ? '' : pr - pp >= 8 ? '▲' : pp - pr >= 8 ? '▼' : '=';
+      const rt = median(r.filter(x => x.correct).map(x => x.rt));
+      return `<tr><td>${esc(label(m, i.id))}</td><td>${a.length}</td><td>${pct(a)} %</td><td>${bar(pr)}</td><td>${tr}</td><td>${rt === null ? '—' : (rt / 1000).toFixed(1) + ' s'}</td></tr>`;
+    }).join('');
+    const conf = confusions(A.slice(-200)).slice(0, 8);
+    const tags = {}; A.forEach(x => { if (x.tag) (tags[x.tag] = tags[x.tag] || []).push(x); });
+    const weak = weakest(m);
+    h += `<div class="box rough paper"><h2>${M.name}. <span class="pmut">${A.length} questions · ${pct(A.slice(-50))} % sur les 50 dernières</span></h2><div class="grid2"><div>
+      <table><tr><th>élément</th><th>n</th><th>global</th><th>20 derniers</th><th>tend.</th><th>temps médian</th></tr>${rows}</table></div><div>
+      <div class="pmut">confusions fréquentes</div>${conf.length ? conf.map(c => `<span class="chip">${esc(c[0])} ×${c[1]}</span>`).join('') : '<span class="pmut">aucune</span>'}
+      ${Object.keys(tags).length > 1 ? '<div class="pmut" style="margin-top:12px">par variante</div><table>' + Object.entries(tags).map(([k, a]) => `<tr><td>${TAGS[k] || k}</td><td>${a.length}</td><td>${bar(pct(a.slice(-40)))}</td></tr>`).join('') + '</table>' : ''}
+      <div class="pmut" style="margin-top:12px">points faibles</div>${weak.length ? weak.map(w => `<span class="chip">${esc(w.id)} · ${w.p} %</span>`).join('') + `<div style="margin-top:10px"><button class="btn on" data-focus="${m}">travailler ces points.</button></div>` : '<span class="pmut">rien sous 85 % (min. 5 essais)</span>'}
+      </div></div></div>`;
+  }
+  el.innerHTML = h;
+  drawChart();
+}
+$('#v-stats').addEventListener('click', e => {
+  const b = e.target.closest('[data-focus]'); if (!b) return;
+  const m = b.dataset.focus;
+  const ids = new Set(weakest(m).map(w => w.id));
+  confusions(H.filter(x => x.mode === m).slice(-200)).forEach(([k]) => { const [a, c] = k.split(' → '); if (ids.has(a)) ids.add(c); });
+  settings.mode = m; S().items = MODES[m].items.map(i => i.id).filter(id => ids.has(id));
+  if (S().items.length < 2) S().items = MODES[m].def.slice();
+  settings.adaptive = true; saveSettings();
+  setView('train'); resetCycle(); resetQuestion(); renderSide(); renderAnswers(); renderSess();
+  fb('mode ciblé : tes points faibles et ce avec quoi tu les confonds. entrée pour commencer.');
+});
+function drawChart() {
+  const cv = $('#chart'); if (!cv) return;
+  const W = cv.clientWidth, Hh = 240, g = sizeCanvas(cv, W, Hh);
+  g.clearRect(0, 0, W, Hh);
+  const days = [...new Set(H.map(h => h.day))].slice(-30);
+  const L = 40, R = 14, T = 12, B = 26, w = W - L - R, hh = Hh - T - B;
+  const x = i => L + (days.length === 1 ? w / 2 : i * w / (days.length - 1));
+  const y = p => T + hh * (1 - p / 100);
+  const r = mulberry(11);
+  g.lineCap = 'round'; g.lineJoin = 'round'; g.font = '13px Kalam, cursive'; g.fillStyle = '#9b9485'; g.strokeStyle = 'rgba(236,230,214,.14)';
+  [0, 50, 100].forEach(p => { brushLine(g, [[L, y(p)], [W - R, y(p)]], 1.2, r); g.fillText(p + '%', 4, y(p) + 4); });
+  const counts = days.map(d => H.filter(h => h.day === d).length), mx = Math.max(...counts);
+  g.fillStyle = 'rgba(236,230,214,.13)';
+  counts.forEach((c, i) => { const rad = 3 + 14 * Math.sqrt(c / mx); g.beginPath(); g.arc(x(i), T + hh - rad, rad, 0, 7); g.fill(); });
+  g.fillStyle = '#9b9485'; g.textAlign = 'center';
+  const step = Math.ceil(days.length / 10);
+  days.forEach((d, i) => { if (i % step === 0) g.fillText(d.slice(8) + '/' + d.slice(5, 7), x(i), Hh - 6); });
+  g.textAlign = 'left';
+  for (const m of MODE_IDS) {
+    const pts = days.map((d, i) => { const a = H.filter(h => h.day === d && h.mode === m); return a.length >= 3 ? [x(i), y(pct(a))] : null; }).filter(Boolean);
+    if (!pts.length) continue;
+    g.strokeStyle = PAPER; g.fillStyle = PAPER; g.setLineDash(MODES[m].dash);
+    brushLine(g, pts, 2.6, r); g.setLineDash([]);
+    pts.forEach(p => { g.beginPath(); g.arc(p[0], p[1], 3.5, 0, 7); g.fill(); });
+  }
+}
+window.addEventListener('resize', () => { if (view === 'stats') drawChart(); });
+
+/* ================= navigation + démarrage ================= */
+function setView(v) {
+  view = v;
+  if (v !== 'train') padStop(0.5);
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.view === v));
+  $('#v-train').style.display = v === 'train' ? '' : 'none';
+  $('#v-stats').style.display = v === 'stats' ? '' : 'none';
+  if (v === 'stats') renderStats();
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => { t.blur(); setView(t.dataset.view); });
+if (!WEB) setInterval(() => fetch('/api/ping').catch(() => {}), 30000);
+
+(async () => {
+  if (WEB) { H = lsGet('et_hist', '[]'); Object.assign(settings, lsGet('et_settings', 'null') || {}); } else try {
+    const [hs, ss] = await Promise.all([fetch('/api/history').then(r => r.json()), fetch('/api/settings').then(r => r.json())]);
+    H = hs || [];
+    if (ss) settings = Object.assign(settings, ss);
+  } catch (e) {
+    warn('serveur injoignable : lance le raccourci « Ear Training », sinon rien ne sera sauvegardé.');
+  }
+  const p = pending(); H = H.concat(p.filter(r => !H.some(h => h.ts === r.ts)));
+  if (p.length && !WEB) fetch('/api/answer', { method: 'POST', body: JSON.stringify(p) }).then(r => { if (r.ok) setPending([]); }).catch(() => {});
+  XP = H.reduce((s, h) => s + xpOf(h), 0);
+  H.forEach(h => { const k = h.mode + '|' + h.item; IXP[k] = (IXP[k] || 0) + xpOf(h); });
+  initModeSettings(); loadSamples();
+  renderSide(); renderAnswers(); renderHeader(); renderSess();
+  if (location.hash === '#demo') { Q = { mode: settings.mode, item: S().items[S().items.length - 1], p: MODES[settings.mode].params(), cad: true, replays: 0, answered: true, t0: 0, revealT: 1 }; sess.streak = 7; }
+})();
+</script>
+</body>
+</html>
