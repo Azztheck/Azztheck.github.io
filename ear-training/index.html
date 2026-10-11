@@ -270,6 +270,7 @@ function audio() {
 function stopAll() {
   if (bus) { const g = bus; g.gain.setTargetAtTime(0, AC.currentTime, 0.02); setTimeout(() => g.disconnect(), 400); }
   bus = null;
+  songStop();
 }
 const SAMPLES = {};
 function loadSamples() {
@@ -308,7 +309,8 @@ function nowPlaying(events) {
   const el = $('#now'), steps = [];
   events.forEach(e => { const l = e.lab || '?'; if (!(l === '?' && steps.length && steps[steps.length - 1].l === '?')) steps.push({ l, t: e.t }); });
   if (!steps.some(x => x.l !== '?')) { el.innerHTML = ''; return; }
-  el.innerHTML = '<span class="pmut">cadence</span> ' + steps.map((x, i) => (x.l === '?' && i ? '<span class="pmut"> → </span>' : '') + `<span class="nc" data-i="${i}">${x.l === '?' ? 'accord / note ?' : x.l}</span>`).join('');
+  const pre = events[0] && events[0].pre !== undefined ? events[0].pre : 'cadence';
+  el.innerHTML = (pre ? `<span class="pmut">${pre}</span> ` : '') + steps.map((x, i) => (x.l === '?' && i ? '<span class="pmut"> → </span>' : '') + `<span class="nc" data-i="${i}">${x.l === '?' ? (MODES[settings.mode].mu ? 'là : ?' : 'accord / note ?') : esc(x.l)}</span>`).join('');
   steps.forEach((x, i) => pulseTimers.push(setTimeout(() => el.querySelectorAll('.nc').forEach(c => c.classList.toggle('on', +c.dataset.i === i)), (x.t + 0.05) * 1000)));
 }
 function play(events) {
@@ -318,6 +320,8 @@ function play(events) {
   nowPlaying(events);
   const t0 = AC.currentTime + 0.05; let end = 0;
   for (const e of events) {
+    if (e.song) { playSong(e, t0); end = Math.max(end, e.t + e.d); continue; }
+    if (e.m == null) { end = Math.max(end, e.t + (e.d || 0)); continue; }
     const ns = Array.isArray(e.m) ? e.m : [e.m];
     const v = 0.2 / Math.sqrt(ns.length);
     ns.forEach(m => note(bus, m, t0 + e.t, e.d, v));
@@ -371,7 +375,8 @@ function voice(key, root, q) {
   return [fold(key + root, 40), ...up];
 }
 const CAD = [[0, MAJ], [5, MAJ], [7, MAJ], [0, MAJ]];
-const cadence = key => CAD.map((c, i) => ({ m: voice(key, c[0], c[1]), t: i * 0.62, d: 0.6, lab: ['I', 'IV', 'V', 'I'][i] }));
+const CADm = [[0, MIN], [5, MIN], [7, MAJ], [0, MIN]];
+const cadence = (key, minor) => (minor ? CADm : CAD).map((c, i) => ({ m: voice(key, c[0], c[1]), t: i * 0.62, d: 0.6, lab: (minor ? ['i', 'iv', 'V', 'i'] : ['I', 'IV', 'V', 'I'])[i] }));
 const CAD_LEN = 2.9;
 
 const IV = [['2m',1,'seconde min.'],['2M',2,'seconde maj.'],['3m',3,'tierce min.'],['3M',4,'tierce maj.'],['4J',5,'quarte'],['4+',6,'triton'],['5J',7,'quinte'],['6m',8,'sixte min.'],['6M',9,'sixte maj.'],['7m',10,'septième min.'],['7M',11,'septième maj.'],['8',12,'octave']];
@@ -456,8 +461,137 @@ const MODES = {
     notes: (id, p) => [voice(p.key, FN.find(x => x[0] === id)[1], FN.find(x => x[0] === id)[2]).slice(1)],
   },
 };
-const MODE_IDS = Object.keys(MODES);
+let MODE_IDS = Object.keys(MODES);
+
+/* ================= dans tes morceaux (extraits réels, analysés par musique/construire.py) ================= */
+// mb : degré de la note de basse · ma : accord en chiffres romains · mc : type de cadence
+const MU = { songs: [], data: {}, bufs: new Map() };
+let decCtx = null, songSrcs = [];
+function muBuf(sid, kind) {
+  const k = sid + '|' + kind;
+  if (MU.bufs.has(k)) { const b = MU.bufs.get(k); MU.bufs.delete(k); MU.bufs.set(k, b); return b; }
+  if (!decCtx) decCtx = new OfflineAudioContext(2, 1, 22050);   // décodage à 22 kHz : 4 morceaux en mémoire max
+  const pr = fetch(`musique/${sid}/${kind}.mp3`).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(a => decCtx.decodeAudioData(a));
+  pr.catch(() => MU.bufs.delete(k));
+  MU.bufs.set(k, pr);
+  while (MU.bufs.size > 4) MU.bufs.delete(MU.bufs.keys().next().value);
+  return pr;
+}
+function playSong(e, t0) {
+  const b0 = bus;
+  muBuf(e.song, e.kind).then(b => {
+    if (bus !== b0 || !bus) return;
+    const src = AC.createBufferSource(); src.buffer = b;
+    const g = AC.createGain(), at = Math.max(AC.currentTime + 0.02, t0 + e.t), v = 0.9;
+    g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(v, at + 0.04);
+    g.gain.setValueAtTime(v, at + e.d - 0.15); g.gain.linearRampToValueAtTime(0, at + e.d);
+    src.connect(g); g.connect(master); src.start(at, e.off, e.d + 0.05);
+    songSrcs.push({ src, g });
+  });
+}
+function songStop() {
+  songSrcs.splice(0).forEach(({ src, g }) => { try { g.gain.cancelScheduledValues(AC.currentTime); g.gain.setTargetAtTime(0, AC.currentTime, 0.03); src.stop(AC.currentTime + 0.2); } catch (e) {} });
+}
+const MU_DEG = DG.map(x => x[0]);
+const ROM_ORDER = ['I', '♭II', 'II', '♭III', 'III', 'IV', '♯IV', 'V', '♭VI', 'VI', '♭VII', 'VII'];
+const romDeg = rn => ROM_ORDER.indexOf(rn.replace(/°|\+|sus|M7|7|6/g, '').toUpperCase());
+const CAD_TYPES = [['parfaite', 'V → I'], ['ii-V-I', 'ii → V → I'], ['plagale', 'IV → I'], ['rompue', 'V → vi'], ['demi-cadence', '… → V'], ['modale', '♭VII → I']];
+const CAD_EX = { parfaite: [[7, MAJ], [0]], 'ii-V-I': [[2, MIN], [7, MAJ], [0]], plagale: [[5], [0]], rompue: [[7, MAJ], [9, MIN]], rompueMin: [[7, MAJ], [8, MAJ]], 'demi-cadence': [[0], [5], [7, MAJ]], modale: [[10, MAJ], [0]] };
+const mmss = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+const muSongsOn = () => MU.songs.filter(x => S().opts[x.id] !== false);
+const muBadKey = (sid, kind, t) => `${sid}|${kind}|${t}`;
+function muList(sid, kind, item) {
+  const d = MU.data[sid]; if (!d) return [];
+  const bad = new Set(settings.muBad || []);
+  const ok = x => !bad.has(muBadKey(sid, kind, x.t));
+  if (kind === 'b') return d.bass.filter(x => x.deg === item && x.t > 3 && x.e - x.t >= 0.14 && ok(x));
+  if (kind === 'a') return d.chords.filter(x => x.rn === item && x.t > 2 && ok(x));
+  return d.cad.filter(x => x.type === item && x.t > 1 && ok(x));
+}
+function muParams(kind, item) {
+  const on = muSongsOn().filter(x => muList(x.id, kind, item).length);
+  if (!on.length) return null;
+  let sid = st.muSong, fresh = false;
+  if (!sid || st.muLeft <= 0 || st.muKind !== kind || !on.some(x => x.id === sid)) { sid = pick(on).id; st.muLeft = 5; fresh = true; }
+  st.muSong = sid; st.muKind = kind; st.muLeft--;
+  const d = MU.data[sid];
+  return { sid, kind, item, key: d.key, minor: d.mode === 'min', occ: pick(muList(sid, kind, item)), fresh };
+}
+function muChordNotes(key, deg, minorish) { return voice(key, deg, minorish ? MIN : MAJ); }
+function muEvents(p, id) {
+  const d = MU.data[p.sid], o = p.occ, name = '♪ ' + d.name;
+  if (id !== p.item) {   // comparer : la réponse cliquée jouée au Rhodes dans la tonalité du morceau
+    if (p.kind === 'b') return [{ m: fold(p.key, 40), t: 0, d: 0.6 }, { m: fold(p.key + DG.find(x => x[0] === id)[1], 40), t: 0.6, d: 1.2 }];
+    if (p.kind === 'a') { const g = romDeg(id), c = id.replace(/[♭♯]/, ''); return g < 0 ? [] : [{ m: muChordNotes(p.key, g, c[0] === c[0].toLowerCase()), t: 0, d: 1.6 }]; }
+    return (CAD_EX[id === 'rompue' && p.minor ? 'rompueMin' : id] || []).map((c, i) => ({ m: voice(p.key, c[0], c[1] || (p.minor ? MIN : MAJ)), t: i * 0.7, d: 0.68 }));
+  }
+  let a, e, q;
+  if (p.kind === 'b') { a = Math.max(0, o.t - 3); e = o.t + Math.min(o.e - o.t, 1.2); q = o.t; }
+  else if (p.kind === 'a') { a = Math.max(0, o.t - 3); e = Math.min(o.e, o.t + 2.5); q = o.t; }
+  else { a = Math.max(0, o.t - 1); e = o.e; q = o.c; }
+  const kind = p.kind === 'b' && S().opts.iso ? 'basse' : 'audio';
+  return [{ song: p.sid, kind, off: a, d: e - a, t: 0, lab: name, pre: '' }, { t: q - a, lab: '?', d: e - q }];
+}
+function muMode(kind, name) {
+  return {
+    name, dash: kind === 'b' ? [2, 4] : kind === 'a' ? [10, 3, 2, 3] : [6, 6], mu: kind,
+    items: [], def: [], opts: [],
+    params: item => muParams(kind, item),
+    prepare: p => muBuf(p.sid, kind === 'b' && S().opts.iso ? 'basse' : 'audio'),
+    events: (id, p) => muEvents(p, id),
+    tag: p => p.sid,
+    info: p => { const d = MU.data[p.sid]; return `${d.name} — ${d.artist} · ${mmss(p.occ.t)} · tonalité ${nn(d.key)} ${d.mode === 'min' ? 'mineur' : 'majeur'}`; },
+    pad: () => [],
+    notes(id, p) {
+      if (kind === 'b') { const m = p.occ.m; return [[m - ((m - p.key) % 12 + 12) % 12], [m]]; }
+      const c = kind === 'a' ? p.occ : MU.data[p.sid].chords.find(x => Math.abs(x.t - p.occ.c) < 0.01);
+      return c ? [voice(c.root, 0, ['m', 'm7', 'm9'].includes(c.q) ? MIN : MAJ)] : [[p.key + 48]];
+    },
+  };
+}
+async function muLoad() {
+  try {
+    MU.songs = await fetch('musique/index.json').then(r => r.ok ? r.json() : []);
+    await Promise.all(MU.songs.map(x => fetch(`musique/${x.id}/data.json`).then(r => r.json()).then(d => MU.data[x.id] = d)));
+  } catch (e) { MU.songs = []; }
+  if (!MU.songs.length) return;
+  const songOpts = MU.songs.map(x => [x.id, MU.data[x.id].name.replace(/ \(.*\)/, ''), true]);
+  const count = (kind, item) => MU.songs.reduce((n, x) => n + muList(x.id, kind, item).length, 0);
+  const mb = muMode('b', '♪ basse');
+  mb.items = DG.map(x => ({ id: x[0], sub: x[2] })).filter(i => count('b', i.id) >= 3); mb.def = mb.items.map(i => i.id);
+  mb.opts = [['iso', 'basse isolée (plus facile)', false], ...songOpts];
+  const rns = [...new Set(MU.songs.flatMap(x => MU.data[x.id].chords.map(c => c.rn)))].filter(rn => count('a', rn) >= 2)
+    .sort((a, b) => romDeg(a) - romDeg(b) || a.localeCompare(b));
+  const ma = muMode('a', '♪ accords');
+  ma.items = rns.map(rn => ({ id: rn, sub: '' })); ma.def = rns.slice();
+  ma.opts = songOpts.filter(o => MU.data[o[0]].chords.length);
+  const mc = muMode('c', '♪ cadences');
+  mc.items = CAD_TYPES.filter(c => count('c', c[0]) >= 1).map(c => ({ id: c[0], sub: c[1] })); mc.def = mc.items.map(i => i.id);
+  mc.opts = songOpts.filter(o => MU.data[o[0]].cad.length);
+  if (mb.items.length) MODES.mb = mb;
+  if (ma.items.length) MODES.ma = ma;
+  if (mc.items.length) MODES.mc = mc;
+  MODE_IDS = Object.keys(MODES);
+}
+
 const HELP = {
+  mb: `<b>la basse dans tes morceaux.</b> un extrait de 3 s se joue et s'arrête sur une note de basse (l'étiquette « là : ? » s'allume quand elle arrive). donne son degré dans la tonalité du morceau.
+  <ul><li><b>tonique</b> (touche c) : joue la cadence du morceau au Rhodes pour te recaler.</li>
+  <li>chante la tonique dans ta tête, puis monte ou descends jusqu'à la note : combien de marches ?</li>
+  <li>option <b>basse isolée</b> : on n'entend que la piste basse (séparée par le Transcripteur), plus facile.</li>
+  <li>5 extraits par morceau, puis on change. après ta réponse, clique une autre réponse pour l'entendre au Rhodes.</li>
+  <li>si l'extrait te semble faux, <b>⚑ extrait douteux</b> : il ne reviendra plus (l'analyse est automatique).</li></ul>`,
+  ma: `<b>les accords dans tes morceaux.</b> l'extrait s'arrête sur un accord : donne son chiffre romain dans la tonalité du morceau (majuscule = majeur, minuscule = mineur, 7 = septième de dominante, M7 = septième majeure, 6 = renversé).
+  <ul><li>seulement sur les morceaux dont une grille faite par des musiciens existe (Hooktheory, Ultimate Guitar) : l'audio sert à placer ces accords dans le temps.</li>
+  <li>écoute d'abord la basse (le degré), puis la couleur (majeur / mineur).</li></ul>`,
+  mc: `<b>les cadences dans tes morceaux.</b> l'extrait joue un enchaînement qui finit sur l'accord marqué « là ». de quel type ?
+  <ul><li><b>parfaite</b> V → I : tension qui se résout, la fin de phrase « point final ».</li>
+  <li><b>ii-V-I</b> : la même, préparée par le ii (très jazz).</li>
+  <li><b>plagale</b> IV → I : la fin « amen », douce.</li>
+  <li><b>rompue</b> V → vi : on attendait la maison, on arrive à côté.</li>
+  <li><b>demi-cadence</b> : la phrase s'arrête sur V, en suspens.</li>
+  <li><b>modale</b> ♭VII → I : retour à la maison sans sensible, très rock / folk.</li></ul>`,
+
   dg: `<h3>degrés. comment ça marche</h3>
     <p>Une <b>cadence</b> (I – IV – V – I) installe une tonalité : sa première note devient la <b>maison</b> (le degré 1). Puis <b>une seule note</b> est jouée : tu dis quelle place elle occupe dans la gamme, pas son nom.</p>
     <ul><li><b>1</b> tonique : repos total, on est arrivé.</li>
@@ -684,6 +818,7 @@ function next() {
   const item = pickItem();
   if (!item) { fb('choisis au moins un élément à gauche.'); return; }
   let p = M.params(item), cad = true;
+  if (!p) { fb('aucun extrait pour ça dans les morceaux cochés.'); return; }
   if (M.tonal) {
     if (!S().opts.cad && st.key !== null && st.keyLeft > 0) { p.key = st.key; cad = false; st.keyLeft--; }
     else { st.key = p.key; st.keyLeft = 3; }
@@ -692,13 +827,20 @@ function next() {
   st.lastItem = item;
   if (!sess.start) sess.start = Date.now();
   renderAnswers();
-  if (p.packCad) fb(`<span class="pmut">nouvelle tonalité : ${nn(p.key)} majeur. 4 accords.</span>`);
+  if (M.mu) { const d = MU.data[p.sid]; fb(p.fresh ? `<span class="pmut">morceau : ${esc(d.name)} — ${esc(d.artist)} (${nn(d.key)} ${d.mode === 'min' ? 'mineur' : 'majeur'}). 5 extraits. c = tonique + cadence.</span>` : ''); }
+  else if (p.packCad) fb(`<span class="pmut">nouvelle tonalité : ${nn(p.key)} majeur. 4 accords.</span>`);
   else fb(M.tonal && !cad ? `<span class="pmut">même tonalité (${nn(p.key)} majeur). c pour la cadence.</span>` : '');
   $('#btnNext').textContent = 'suivant.'; $('#btnNext').disabled = true;
-  const dur = play(M.events(item, p, cad));
-  Q.t0 = performance.now() + dur * 1000;
-  padStart(M.pad(item, p), Math.max(0.2, dur - 0.6));
-  renderSess();
+  const go = () => {
+    const dur = play(M.events(item, p, cad));
+    Q.t0 = performance.now() + dur * 1000;
+    padStart(M.pad(item, p), Math.max(0.2, dur - 0.6));
+    renderSess();
+  };
+  if (M.prepare) {
+    const q = Q; $('#now').innerHTML = '<span class="pmut">chargement du morceau…</span>';
+    M.prepare(p).then(() => { if (Q === q && !paused) go(); }, () => fb('morceau introuvable (musique/' + p.sid + ').'));
+  } else go();
 }
 function replay() {
   if (paused) return togglePause();
@@ -710,7 +852,7 @@ function playCadence() {
   const key = Q && Q.p.key !== undefined ? Q.p.key : st.key;
   if (paused || key === null || key === undefined) return;
   if (Q && !Q.answered) Q.replays++;
-  play(cadence(key));
+  play(cadence(key, Q && Q.p.minor));
 }
 const ansBtn = id => [...document.querySelectorAll('.ans')].find(b => b.dataset.id === id);
 function answer(id) {
@@ -755,6 +897,7 @@ function answer(id) {
     fx.splat(bMine); hero.shake = 1;
     fb(`<b>non. c'était ${esc(label(Q.mode, Q.item))}.</b> tu as dit ${esc(id)}. écoute les deux.${info}`);
   }
+  if (M.mu) $('#fb').insertAdjacentHTML('beforeend', ' <button class="lnk" id="muBad" title="l\'analyse automatique s\'est trompée : cet extrait ne sera plus proposé">⚑ extrait douteux</button>');
   if (cyc.recs.length >= CYCLE) endCycle(ctx);
   const lvAfter = levelFrom(XP).level;
   if (lvAfter > lvBefore) fx.levelUp(lvAfter);
@@ -777,7 +920,10 @@ function renderAnswers() {
 }
 function renderSide() {
   const M = MODES[settings.mode], s = S();
-  let h = '<span class="cap">exercice.</span><div class="modes">' + MODE_IDS.map(m => `<button class="btn ${m === settings.mode ? 'on' : ''}" data-mode="${m}">${MODES[m].name}</button>`).join('') + '</div>';
+  const mbtn = m => `<button class="btn ${m === settings.mode ? 'on' : ''}" data-mode="${m}">${MODES[m].name}</button>`;
+  const base = MODE_IDS.filter(m => !MODES[m].mu), mus = MODE_IDS.filter(m => MODES[m].mu);
+  let h = '<span class="cap">exercice.</span><div class="modes">' + base.map(mbtn).join('') + '</div>'
+    + (mus.length ? '<div class="sh">dans tes morceaux</div><div class="modes">' + mus.map(mbtn).join('') + '</div>' : '');
   h += `<div class="sh">à travailler <button class="lnk" data-all="1">tout</button><button class="lnk" data-all="0">rien</button><button class="lnk" data-all="d">défaut</button></div><div class="toggles">`;
   h += M.items.map(i => `<button class="btn sm ${s.items.includes(i.id) ? 'on' : ''}" data-item="${esc(i.id)}">${esc(i.id)}</button>`).join('') + '</div>';
   h += '<div class="sh">options</div><div class="toggles">' + M.opts.map(o => `<button class="btn sm ${s.opts[o[0]] ? 'on' : ''}" data-opt="${o[0]}">${o[1]}</button>`).join('') + '</div>';
@@ -789,13 +935,14 @@ function renderSide() {
     <label class="vol">nappe &nbsp;<input type="range" id="optPad" min="0" max="1.5" step="0.05" value="${settings.padVol}"></label>`;
   $('#side').innerHTML = h;
   $('#btnHelp').style.display = HELP[settings.mode] ? '' : 'none'; $('#help').style.display = 'none'; $('#help').innerHTML = HELP[settings.mode] || '';
-  $('#btnCad').style.display = M.tonal || (settings.mode === 'ch' && s.opts.pack) ? '' : 'none';
+  $('#btnCad').style.display = M.tonal || M.mu || (settings.mode === 'ch' && s.opts.pack) ? '' : 'none';
+  $('#btnCad').textContent = M.mu ? 'tonique' : 'cadence';
 }
 function resetQuestion() { Q = null; st.key = null; st.chKey = null; if (AC) stopAll(); padStop(0.4); fb(''); $('#btnNext').textContent = 'commencer.'; $('#btnNext').disabled = false; }
 $('#side').addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
   const d = t.dataset, s = S(), M = MODES[settings.mode];
-  if (d.mode) { settings.mode = d.mode; resetCycle(); resetQuestion(); }
+  if (d.mode) { settings.mode = d.mode; st.muSong = null; resetCycle(); resetQuestion(); }
   else if (d.all !== undefined) { s.items = d.all === '1' ? M.items.map(i => i.id) : d.all === '0' ? [] : M.def.slice(); }
   else if (d.item) {
     const order = M.items.map(i => i.id);
@@ -815,6 +962,11 @@ $('#btnNext').onclick = e => { e.currentTarget.blur(); next(); };
 $('#btnReplay').onclick = e => { e.currentTarget.blur(); replay(); };
 $('#btnCad').onclick = e => { e.currentTarget.blur(); playCadence(); };
 $('#btnPause').onclick = e => { e.currentTarget.blur(); togglePause(); };
+$('#fb').addEventListener('click', e => {
+  if (e.target.id !== 'muBad' || !Q || !Q.p.occ) return;
+  (settings.muBad = settings.muBad || []).push(muBadKey(Q.p.sid, Q.p.kind, Q.p.occ.t)); saveSettings();
+  e.target.outerHTML = '<span class="pmut">noté, il ne reviendra plus.</span>';
+});
 $('#pauseOv').onclick = () => togglePause();
 $('#btnHelp').onclick = e => { e.currentTarget.blur(); const h = $('#help'); h.style.display = h.style.display === 'none' ? '' : 'none'; };
 $('#help').onclick = () => { $('#help').style.display = 'none'; };
@@ -1143,7 +1295,7 @@ function renderStats() {
     <div class="card rough paper"><span>aujourd'hui</span><b>${td.length}</b><span>questions · ${pct(td) ?? '—'} % juste · ${todayMin()} min</span></div>
     <div class="card rough paper"><span>au total</span><b>${H.length}</b><span>questions · ${pct(H)} % juste · ${minutes(H)} min</span></div>
     <div class="card rough paper"><span>jours d'affilée</span><b>${dayStreak()}</b><span>${days.length} jours d'entraînement</span></div></div>`;
-  h += `<div class="box rough inkp"><h2>évolution.</h2><div class="legend">% de bonnes réponses par jour (min. 3 questions), taches = volume · ${MODE_IDS.map(m => `<span>${{ iv: '———', ch: '— —', dg: '· · ·', fn: '—·—' }[m]} ${MODES[m].name}</span>`).join('')}</div><canvas id="chart" style="width:100%;height:240px;display:block"></canvas></div>`;
+  h += `<div class="box rough inkp"><h2>évolution.</h2><div class="legend">% de bonnes réponses par jour (min. 3 questions), taches = volume · ${MODE_IDS.map(m => `<span>${({ iv: '———', ch: '— —', dg: '· · ·', fn: '—·—', mb: '·  ·', ma: '—··', mc: '- -' }[m] || '')} ${MODES[m].name}</span>`).join('')}</div><canvas id="chart" style="width:100%;height:240px;display:block"></canvas></div>`;
   h += `<div class="box rough paper"><h2>carte de l'oreille.</h2>` + MODE_IDS.map(m => {
     const items = MODES[m].items.filter(i => itemStats(m, i.id, 1).length);
     if (!items.length) return '';
@@ -1239,6 +1391,7 @@ if (!WEB) setInterval(() => fetch('/api/ping').catch(() => {}), 30000);
   if (p.length && !WEB) fetch('/api/answer', { method: 'POST', body: JSON.stringify(p) }).then(r => { if (r.ok) setPending([]); }).catch(() => {});
   XP = H.reduce((s, h) => s + xpOf(h), 0);
   H.forEach(h => { const k = h.mode + '|' + h.item; IXP[k] = (IXP[k] || 0) + xpOf(h); });
+  await muLoad();
   initModeSettings(); loadSamples();
   renderSide(); renderAnswers(); renderHeader(); renderSess();
   if (location.hash === '#demo') { Q = { mode: settings.mode, item: S().items[S().items.length - 1], p: MODES[settings.mode].params(), cad: true, replays: 0, answered: true, t0: 0, revealT: 1 }; sess.streak = 7; }
