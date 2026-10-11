@@ -62,6 +62,9 @@ main{padding:6px 22px 30px;max-width:1300px;margin:auto}
 .vol input{accent-color:var(--paper);vertical-align:middle;width:150px}
 
 .stage{flex:1;padding:18px 24px 22px;min-height:560px}
+#pauseOv{display:none;position:absolute;inset:0;z-index:20;border-radius:14px;background:rgba(236,228,210,.86);backdrop-filter:blur(3px);flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--ink)}
+#pauseOv b{font-size:54px;transform:rotate(-3deg)}#pauseOv span{color:var(--pmut)}
+.stage.paused #pauseOv{display:flex}
 .stagetop{display:flex;justify-content:space-between;align-items:center}
 #hero{display:block;width:100%;height:230px;cursor:pointer}
 .controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
@@ -164,8 +167,8 @@ header .hstat span{display:none}
 <body>
 <canvas id="bg"></canvas>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter>
-  <filter id="rough2"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="1" seed="9" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="4" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="rough" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="7" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="0.55"/></filter>
+  <filter id="rough2" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="1" seed="9" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="4" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="0.45"/></filter>
 </svg>
 <header>
   <span class="cap logo">oreille.</span>
@@ -188,6 +191,7 @@ header .hstat span{display:none}
         <div class="cyclebox rough inkp" id="cycles" style="display:none"></div>
       </div>
       <div class="stage rough paper">
+        <div id="pauseOv"><b>pause.</b><span>touche p ou clique pour reprendre</span></div>
         <canvas id="stagefx"></canvas>
         <div class="stagetop"><span><span class="cap" id="stageCap">intervalles.</span> <button class="btn sm" id="btnHelp" title="comment ça marche">?</button></span><span class="pmut" id="sessTxt"></span></div>
         <canvas id="hero" title="cliquer = réécouter"></canvas>
@@ -196,6 +200,7 @@ header .hstat span{display:none}
           <button class="btn big on" id="btnNext">commencer.</button>
           <button class="btn big" id="btnReplay">réécouter</button>
           <button class="btn big" id="btnCad">cadence</button>
+          <button class="btn big" id="btnPause" title="pause (p)">pause</button>
         </div>
         <div class="helpbox" id="help" style="display:none"></div>
         <div class="answers" id="answers"></div>
@@ -556,7 +561,7 @@ const ilOf = (m, id) => itemLevel(IXP[m + '|' + id] || 0).L;
 const dots = n => '●'.repeat(n) + '○'.repeat(5 - n);
 function minutes(a) {
   let t = 0;
-  for (let i = 1; i < a.length; i++) { const d = (Date.parse(a[i].ts) - Date.parse(a[i - 1].ts)) / 1000; if (d > 0 && d < 180) t += d; }
+  for (let i = 1; i < a.length; i++) { const d = (Date.parse(a[i].ts) - Date.parse(a[i - 1].ts) - (a[i].pz || 0)) / 1000; if (d > 0 && d < 180) t += d; }
   return Math.round(t / 60);
 }
 function dayStreak() {
@@ -659,7 +664,21 @@ function pickItem() {
 }
 
 /* ================= déroulé d'une question ================= */
+let paused = null, pzAcc = 0;
+function togglePause() {
+  const st = document.querySelector('.stage');
+  if (!paused) {
+    paused = Date.now(); stopAll(); if (typeof padStop === 'function') padStop(0.6);
+    st.classList.add('paused'); $('#btnPause').textContent = 'reprendre'; $('#btnPause').classList.add('on');
+    return;
+  }
+  const dt = Date.now() - paused; paused = null; pzAcc += dt;
+  if (sess.start) sess.start += dt;
+  st.classList.remove('paused'); $('#btnPause').textContent = 'pause'; $('#btnPause').classList.remove('on');
+  if (Q && !Q.answered) { const dur = play(MODES[Q.mode].events(Q.item, Q.p, Q.cad)); Q.t0 = performance.now() + dur * 1000; }
+}
 function next() {
+  if (paused) return togglePause();
   if (Q && !Q.answered) { replay(); return; }   // impossible de passer sans répondre
   const mode = settings.mode, M = MODES[mode];
   const item = pickItem();
@@ -682,19 +701,20 @@ function next() {
   renderSess();
 }
 function replay() {
+  if (paused) return togglePause();
   if (!Q) return next();
   if (!Q.answered) Q.replays++;
   play(MODES[Q.mode].events(Q.item, Q.p, false));
 }
 function playCadence() {
   const key = Q && Q.p.key !== undefined ? Q.p.key : st.key;
-  if (key === null || key === undefined) return;
+  if (paused || key === null || key === undefined) return;
   if (Q && !Q.answered) Q.replays++;
   play(cadence(key));
 }
 const ansBtn = id => [...document.querySelectorAll('.ans')].find(b => b.dataset.id === id);
 function answer(id) {
-  if (!Q) return;
+  if (!Q || paused) return;
   const M = MODES[Q.mode];
   if (Q.answered) { play(M.events(id, Q.p, false)); return; }   // comparer
   Q.answered = true; $('#btnNext').disabled = false;
@@ -713,6 +733,7 @@ function answer(id) {
     ts: new Date().toISOString(), day: today(), sess: SESSION, mode: Q.mode, item: Q.item, answer: id, correct: ok,
     rt, replays: Q.replays, tag: M.tag(Q.p), root: Q.p.root !== undefined ? Q.p.root : Q.p.key, cad: M.tonal ? Q.cad : undefined, xp,
   };
+  if (pzAcc) { rec.pz = pzAcc; pzAcc = 0; }
   const lvBefore = levelFrom(XP).level;
   const ik = Q.mode + '|' + Q.item, ilBefore = itemLevel(IXP[ik] || 0).L;
   IXP[ik] = (IXP[ik] || 0) + xp;
@@ -729,7 +750,7 @@ function answer(id) {
   if (ok) {
     fx.feed(bOk, xp);
     fb(`<b>juste. ${esc(label(Q.mode, Q.item))}.</b> +${xp}${comboMult() > 1 ? ` <span class="pmut">(×${comboMult()})</span>` : ''}${info}`);
-    if (settings.autoNext) { const q = Q; setTimeout(() => { if (Q === q) next(); }, 300); }
+    if (settings.autoNext) { const q = Q; setTimeout(() => { if (Q === q && !paused) next(); }, 300); }
   } else {
     fx.splat(bMine); hero.shake = 1;
     fb(`<b>non. c'était ${esc(label(Q.mode, Q.item))}.</b> tu as dit ${esc(id)}. écoute les deux.${info}`);
@@ -793,6 +814,8 @@ $('#answers').addEventListener('click', e => { const b = e.target.closest('.ans'
 $('#btnNext').onclick = e => { e.currentTarget.blur(); next(); };
 $('#btnReplay').onclick = e => { e.currentTarget.blur(); replay(); };
 $('#btnCad').onclick = e => { e.currentTarget.blur(); playCadence(); };
+$('#btnPause').onclick = e => { e.currentTarget.blur(); togglePause(); };
+$('#pauseOv').onclick = () => togglePause();
 $('#btnHelp').onclick = e => { e.currentTarget.blur(); const h = $('#help'); h.style.display = h.style.display === 'none' ? '' : 'none'; };
 $('#help').onclick = () => { $('#help').style.display = 'none'; };
 $('#hero').onclick = () => replay();
@@ -800,6 +823,8 @@ document.addEventListener('keydown', e => {
   if (view !== 'train' || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') { togglePause(); return; }
+  if (paused) return;
   if (e.code === 'Space') { e.preventDefault(); replay(); }
   else if (e.key === 'Enter') { e.preventDefault(); next(); }
   else if (e.key === 'c' || e.key === 'C') playCadence();
@@ -812,7 +837,7 @@ document.addEventListener('keydown', e => {
 function renderSess() {
   $('#stageCap').textContent = `${MODES[settings.mode].name}. cycle ${cyc.num}. ${cyc.recs.length}/${CYCLE}.`;
   if (!sess.start) { $('#sessTxt').textContent = ''; return; }
-  const sec = Math.floor((Date.now() - sess.start) / 1000);
+  const sec = Math.floor(((paused || Date.now()) - sess.start) / 1000);
   $('#sessTxt').textContent = `séance ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')} · ${sess.ok}/${sess.n}${sess.n ? ' · ' + Math.round(100 * sess.ok / sess.n) + ' %' : ''}`;
 }
 setInterval(() => { if (view === 'train') renderSess(); }, 1000);
