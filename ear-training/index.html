@@ -142,7 +142,7 @@ td:first-child,th:first-child{text-align:left}
 .helpbox h3{margin:0 0 6px;font-size:19px}
 .helpbox ul{margin:6px 0;padding-left:18px}
 .helpbox b{font-weight:700}
-.refbox{max-height:min(560px,70vh);overflow-y:auto;overflow-x:hidden}.refs{border-collapse:collapse;width:100%}.refs td{padding:4px 6px;vertical-align:top;text-align:left;white-space:normal;border-bottom:1.5px dashed rgba(21,19,17,.15)}.refs td:first-child{font-size:20px;width:40px}.refs td:last-child{width:44px;text-align:right}.refs .btn{padding:2px 10px}
+.refbox{max-height:min(560px,70vh);overflow-y:auto;overflow-x:hidden}.refs{border-collapse:collapse;width:100%}.refs td{padding:4px 6px;vertical-align:top;text-align:left;white-space:normal;border-bottom:1.5px dashed rgba(21,19,17,.15)}.refs td:first-child{font-size:20px;width:40px}.refs td:last-child{width:44px;text-align:right}.refs .btn{padding:2px 10px}.reftag{font-size:12px;border:1.5px solid var(--ink);border-radius:8px;padding:0 6px;margin-left:4px;white-space:nowrap}
 button,.chip,canvas{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @media (max-width:760px){
 header{gap:10px 14px;padding:10px 12px 6px}
@@ -929,10 +929,18 @@ function fb(html) { $('#fb').innerHTML = html; }
 // extraits repérés automatiquement (Demucs + détection des notes, voir refs/notes.py) : l'intervalle y est vérifié
 const REFS = [
   ['2m', 'Les Dents de la mer', 'la basse : mi → fa, en boucle, de plus en plus vite', '2m', [[40, .5], [41, .5], [40, .5], [41, .5], [40, .25], [41, .25], [40, .25], [41, .25]]],
+  ['2M', 'Mystery of Love (Sufjan Stevens)', '« oh, TO see without my eyes » : les deux premières notes du couplet', '2M', [[64, 1], [66, 1.5]], 'ton top'],
+  ['3m', 'Somewhere Only We Know (Keane)', '« i WALKED across an empty land » : la 1re phrase', '3m', [[71, 1], [74, 2]], 'ton top'],
+  ['3M', '5e symphonie (Beethoven) ↓', 'pom pom pom POM : la tierce descend (version Karajan, un demi-ton plus haut)', '3M', [[67, .33], [67, .33], [67, .33], [63, 2]], 'à écouter'],
   ['4J', 'La Marseillaise', '« al-lons EN-fants » : de « lons » à « en »', '4J', [[62, .75], [62, .25], [67, 1], [67, 1], [69, 1], [69, 1], [74, 1.5], [71, .5], [67, 1.5]]],
   ['4+', 'Les Simpson', 'le chœur du générique : « the… SIMP-sons », do → fa♯ (un mi bref au passage)', '4plus', [[60, 2.5], [64, .3], [66, 1.5]]],
   ['5J', 'Star Wars', 'le thème : après les 3 notes d’appel, si♭ long → fa', '5J', [[62, .33], [62, .33], [62, .33], [67, 2], [74, 2]]],
+  ['6m', 'Manhã de Carnaval ↓', 'le motif à la guitare : si → ré♯ en dessous', '6m', [[71, 1], [63, 2]], 'à écouter'],
+  ['6M', 'Colors (Black Pumas)', 'l’intro chantée : fa♯ → la, puis le saut la → fa♯ aigu (c’est lui)', '6M', [[66, .5], [69, .5], [78, 1.5]], 'ton top'],
+  ['7m', 'Star Trek (série originale)', 'la fanfare : mi♭ → ré♭ au-dessus, les deux premières notes', '7m-startrek', [[63, .5], [73, 1.5]], 'à écouter'],
+  ['7m', 'Watermelon Man (Herbie Hancock)', 'le riff : fa grave → mi♭', '7m-watermelon', [[53, 1], [63, 1.5]], 'à écouter'],
   ['7M', 'Take On Me (a-ha)', 'le refrain : « take ON me » — saut de la grave à la note juste sous l’octave, puis « me » retombe sur l’octave', '7M', [[57, 1], [68, 1], [69, 2]]],
+  ['8', 'Mystery of Love (Sufjan Stevens)', 'do → do aigu, en début de phrase', '8', [[48, 1], [60, 1.5]], 'ton top'],
 ];
 const refBufs = {};
 function playRef(r) {
@@ -951,8 +959,8 @@ function refEvents(r) {
   let t = 0; return r[4].map(([m, d]) => { const e = { m, t, d: d * k * 0.95 }; t += d * k; return e; });
 }
 function renderRefs() {
-  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">un vrai extrait par intervalle. clique ▶.</div><table class="refs">` +
-    REFS.map((r, i) => `<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}<br><span class="pmut">${esc(r[2])}</span></td><td><button class="btn sm" data-ref="${i}">▶</button></td></tr>`).join('') + '</table>';
+  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">un vrai extrait par intervalle (repéré et vérifié sur les notes). clique ▶.</div><table class="refs">` +
+    REFS.map((r, i) => `<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}${r[5] ? ` <span class="reftag">${r[5]}</span>` : ''}<br><span class="pmut">${esc(r[2])}</span></td><td><button class="btn sm" data-ref="${i}">▶</button></td></tr>`).join('') + '</table>';
 }
 
 function renderAnswers() {
