@@ -142,6 +142,7 @@ td:first-child,th:first-child{text-align:left}
 .helpbox h3{margin:0 0 6px;font-size:19px}
 .helpbox ul{margin:6px 0;padding-left:18px}
 .helpbox b{font-weight:700}
+.refbox{max-height:min(560px,70vh);overflow-y:auto;overflow-x:hidden}.refs{border-collapse:collapse;width:100%}.refs td{padding:4px 6px;vertical-align:top;text-align:left;white-space:normal;border-bottom:1.5px dashed rgba(21,19,17,.15)}.refs td:first-child{font-size:20px;width:40px}.refs td:nth-child(2){width:22px}.refs td:last-child{width:44px;text-align:right}.refs .btn{padding:2px 10px}
 button,.chip,canvas{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @media (max-width:760px){
 header{gap:10px 14px;padding:10px 12px 6px}
@@ -193,7 +194,7 @@ header .hstat span{display:none}
       <div class="stage rough paper">
         <div id="pauseOv"><b>pause.</b><span>touche p ou clique pour reprendre</span></div>
         <canvas id="stagefx"></canvas>
-        <div class="stagetop"><span><span class="cap" id="stageCap">intervalles.</span> <button class="btn sm" id="btnHelp" title="comment ça marche">?</button></span><span class="pmut" id="sessTxt"></span></div>
+        <div class="stagetop"><span><span class="cap" id="stageCap">intervalles.</span> <button class="btn sm" id="btnHelp" title="comment ça marche">?</button> <button class="btn sm" id="btnRef" title="les intervalles dans des airs connus">♫</button></span><span class="pmut" id="sessTxt"></span></div>
         <canvas id="hero" title="cliquer = réécouter"></canvas>
         <div id="now"></div>
         <div class="controls">
@@ -203,6 +204,7 @@ header .hstat span{display:none}
           <button class="btn big" id="btnPause" title="pause (p)">pause</button>
         </div>
         <div class="helpbox" id="help" style="display:none"></div>
+        <div class="helpbox refbox" id="refbox" style="display:none"></div>
         <div class="answers" id="answers"></div>
         <div class="fb" id="fb"></div>
         <div class="kbd pmut">espace : réécouter · entrée : suivant (après avoir répondu) · c : cadence · 1…9 0 - = : réponses · après ta réponse, clique sur n'importe quelle réponse pour l'entendre</div>
@@ -921,6 +923,45 @@ function demoWrong(M, id) {
 function fb(html) { $('#fb').innerHTML = html; }
 
 /* ================= rendu entraînement ================= */
+
+/* ================= intervalles dans des airs connus (menu ♫) ================= */
+// [intervalle, sens, titre, où l'entendre, mélodie [midi, temps]] ; sans mélodie : l'intervalle seul
+const REFS = [
+  ['2m', '↑', 'Les Dents de la mer', 'les deux notes de la basse', [[40, .5], [41, .5], [40, .5], [41, .5], [40, .25], [41, .25], [40, .25], [41, .25], [40, .25], [41, .25]]],
+  ['2m', '↓', 'La Lettre à Élise', 'les deux premières notes', [[76, .5], [75, .5], [76, .5], [75, .5], [76, .5], [71, .5], [74, .5], [72, .5], [69, 1.5]]],
+  ['2M', '↑', 'Joyeux anniversaire', '« joy-EUX »', [[67, .75], [67, .25], [69, 1], [67, 1], [72, 1], [71, 2]]],
+  ['2M', '↑', 'Frère Jacques', '« frè-re »', [[60, 1], [62, 1], [64, 1], [60, 1], [60, 1], [62, 1], [64, 1], [60, 1]]],
+  ['2M', '↓', 'Yesterday (Beatles)', '« yes-ter »', [[67, .5], [65, .5], [65, 2]]],
+  ['3m', '↑', 'Smoke on the Water', 'le riff', [[55, 1], [58, 1], [60, 1.5], [55, 1], [58, 1], [61, .5], [60, 2]]],
+  ['3m', '↓', 'Hey Jude (Beatles)', '« hey jude »', [[72, 1], [69, 1.5], [69, .5], [72, .5], [74, .5], [67, 2]]],
+  ['3M', '↑', 'Oh When the Saints', '« oh when »', [[60, 1], [64, 1], [65, 1], [67, 4]]],
+  ['3M', '↓', '5e symphonie (Beethoven)', 'pom pom pom POM', [[67, .33], [67, .33], [67, .33], [63, 2], [65, .33], [65, .33], [65, .33], [62, 2.5]]],
+  ['4J', '↑', 'La Marseillaise', '« al-lons EN-fants »', [[62, .75], [62, .25], [67, 1], [67, 1], [69, 1], [69, 1], [74, 1.5], [71, .5], [67, 1.5]]],
+  ['4J', '↑', 'Marche nuptiale (Wagner)', 'le début', [[60, 1], [65, .75], [65, .25], [65, 2]]],
+  ['4J', '↓', 'Une petite musique de nuit (Mozart)', 'les deux premières notes', [[67, 1], [62, .5], [67, 1], [62, .5], [67, .5], [62, .5], [67, .5], [71, .5], [74, 1.5]]],
+  ['4+', '↑', 'Maria (West Side Story)', '« ma-RI-a »', [[60, 1], [66, .5], [67, 2.5]]],
+  ['4+', '↑', 'Les Simpson', 'entre la 1re et la 3e note', [[60, 1.5], [64, 1], [66, 1], [69, .5], [67, 1.5], [64, 1], [60, 1], [57, .5]]],
+  ['5J', '↑', 'Star Wars', 'après les 3 notes d\'appel', [[62, .33], [62, .33], [62, .33], [67, 2], [74, 2], [72, .33], [71, .33], [69, .33], [79, 2], [74, 1]]],
+  ['5J', '↑', 'Ah ! vous dirai-je, maman', '« ah ! VOUS »', [[60, 1], [60, 1], [67, 1], [67, 1], [69, 1], [69, 1], [67, 2]]],
+  ['6m', '↑', 'The Entertainer', 'le saut après le petit départ', [[62, .25], [63, .25], [64, .25], [72, .5], [64, .25], [72, .5], [64, .25], [72, 1.25]]],
+  ['6M', '↑', 'My Bonnie', '« my BON-nie »', [[67, 1], [76, 1.5], [74, .5], [72, 1], [74, 1], [72, 1], [69, 1], [67, 1], [64, 2]]],
+  ['6M', '↑', 'le carillon NBC', 'les deux premières notes', [[67, 1], [76, 1], [72, 2]]],
+  ['7m', '↑', 'Somewhere (West Side Story)', '« there\'s a »', [[60, 1], [70, 1.5], [69, 1.5]]],
+  ['7M', '↑', 'Take On Me (a-ha)', 'le refrain, « take ON me »', null],
+  ['8', '↑', 'Over the Rainbow', '« some-WHERE »', [[60, 2], [72, 2], [71, 1], [67, .5], [69, .5], [71, 1], [72, 1]]],
+];
+function refEvents(r) {
+  const k = 0.42;   // secondes par temps
+  if (!r[4]) { const a = 60, b = a + IV.find(x => x[0] === r[0])[1]; return [{ m: a, t: 0, d: 0.6 }, { m: b, t: 0.6, d: 1.2 }]; }
+  let t = 0; return r[4].map(([m, d]) => { const e = { m, t, d: d * k * 0.95 }; t += d * k; return e; });
+}
+function renderRefs() {
+  const ivs = IV.map(x => x[0]);
+  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">clique ▶ pour entendre le début. ↑ = montant, ↓ = descendant.</div><table class="refs">` +
+    ivs.map(iv => { const rs = REFS.map((r, i) => [r, i]).filter(([r]) => r[0] === iv); if (!rs.length) return '';
+      return rs.map(([r, i], j) => `<tr>${j ? '' : `<td rowspan="${rs.length}"><b>${iv}</b></td>`}<td>${r[1]}</td><td>${esc(r[2])}${r[4] ? '' : ' <span class="pmut">(intervalle seul)</span>'}<br><span class="pmut">${esc(r[3])}</span></td><td><button class="btn sm" data-ref="${i}">▶</button></td></tr>`).join(''); }).join('') + '</table>';
+}
+
 function renderAnswers() {
   const keys = '1234567890-=';
   const en = new Set(S().items);
@@ -943,6 +984,7 @@ function renderSide() {
     <label class="vol">volume <input type="range" id="optVol" min="0" max="1" step="0.05" value="${settings.volume}"></label>
     <label class="vol">nappe &nbsp;<input type="range" id="optPad" min="0" max="1.5" step="0.05" value="${settings.padVol}"></label>`;
   $('#side').innerHTML = h;
+  $('#btnRef').style.display = settings.mode === 'iv' ? '' : 'none'; $('#refbox').style.display = 'none';
   $('#btnHelp').style.display = HELP[settings.mode] ? '' : 'none'; $('#help').style.display = 'none'; $('#help').innerHTML = HELP[settings.mode] || '';
   $('#btnCad').style.display = M.tonal || M.mu || (settings.mode === 'ch' && s.opts.pack) ? '' : 'none';
   $('#btnCad').textContent = M.mu ? 'tonique' : 'cadence';
@@ -977,6 +1019,13 @@ $('#fb').addEventListener('click', e => {
   e.target.outerHTML = '<span class="pmut">noté, il ne reviendra plus.</span>';
 });
 $('#pauseOv').onclick = () => togglePause();
+$('#btnRef').onclick = e => { e.currentTarget.blur(); const h = $('#refbox'); if (h.style.display === 'none') { renderRefs(); h.style.display = ''; $('#help').style.display = 'none'; } else h.style.display = 'none'; };
+$('#refbox').addEventListener('click', e => {
+  const b = e.target.closest('[data-ref]');
+  if (!b) { $('#refbox').style.display = 'none'; return; }
+  b.blur(); if (Q && !Q.answered) Q.replays++;   // aide pendant une question = comme une réécoute
+  play(refEvents(REFS[+b.dataset.ref]));
+});
 $('#btnHelp').onclick = e => { e.currentTarget.blur(); const h = $('#help'); h.style.display = h.style.display === 'none' ? '' : 'none'; };
 $('#help').onclick = () => { $('#help').style.display = 'none'; };
 $('#hero').onclick = () => replay();
