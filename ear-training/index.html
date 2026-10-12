@@ -927,7 +927,7 @@ function fb(html) { $('#fb').innerHTML = html; }
 /* ================= intervalles dans des airs connus (menu ♫) ================= */
 // un air par intervalle : [intervalle, titre, contexte, extrait réel (refs/clips, PC seulement), reprise {instrument, notes [midi, début s, durée s]}, étiquette]
 // extraits repérés automatiquement (Demucs + détection des notes, voir refs/notes.py) : l'intervalle y est vérifié.
-// sur le site : notre propre reprise, jouée tout de suite (échantillons MusyngKite, samples/gm)
+// extraits hébergés aussi sur le site (refs/clips) ; reprise (échantillons MusyngKite, samples/gm) seulement si un extrait manque
 const REFS = [
   ['2m', 'Les Dents de la mer', 'la basse : mi → fa, en boucle, de plus en plus vite', '2m', { ins: 'contrabass', n: [[40, 0, .8], [41, .9, .8], [40, 1.8, .8], [41, 2.7, .8], [40, 3.6, .4], [41, 4.05, .4], [40, 4.5, .2], [41, 4.75, .2], [40, 5, .2], [41, 5.25, .2], [40, 5.5, .2], [41, 5.75, .3]] }],
   ['2M', 'Mystery of Love (Sufjan Stevens)', '« oh, TO see without my eyes » : les deux premières notes du couplet', '2M', { ins: 'voice_oohs', n: [[52, 0, .55], [54, .6, 1.2]] }, 'ton top'],
@@ -961,7 +961,6 @@ function playCover(r) {
   });
 }
 function playRef(r) {
-  if (WEB) return playCover(r);
   audio(); stopAll(); bus = AC.createGain(); bus.connect(dryIn);
   const b0 = bus, url = `refs/clips/${r[3]}.mp3`;
   (refBufs[url] = refBufs[url] || fetch(url).then(x => x.ok ? x.arrayBuffer() : Promise.reject()).then(a => AC.decodeAudioData(a)))
@@ -973,7 +972,7 @@ function playRef(r) {
     }, () => { delete refBufs[url]; playCover(r); });
 }
 function renderRefs() {
-  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">${WEB ? 'un air par intervalle, rejoué ici (reprise). sur le PC : le vrai extrait.' : 'un vrai extrait par intervalle (repéré et vérifié sur les notes).'} clique ▶.</div><table class="refs">` +
+  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">un vrai extrait par intervalle (repéré et vérifié sur les notes). clique ▶.</div><table class="refs">` +
     REFS.map((r, i) => `<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}${r[5] ? ` <span class="reftag">${r[5]}</span>` : ''}<br><span class="pmut">${esc(r[2])}</span></td><td><button class="btn sm" data-ref="${i}">▶</button></td></tr>`).join('') + '</table>';
 }
 
