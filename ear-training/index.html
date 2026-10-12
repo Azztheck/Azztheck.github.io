@@ -925,44 +925,43 @@ function fb(html) { $('#fb').innerHTML = html; }
 /* ================= rendu entraînement ================= */
 
 /* ================= intervalles dans des airs connus (menu ♫) ================= */
-// un air par intervalle : [intervalle, titre, contexte, extrait réel (refs/clips, PC seulement), mélodie de secours au Rhodes [midi, temps]]
-// extraits repérés automatiquement (Demucs + détection des notes, voir refs/notes.py) : l'intervalle y est vérifié
+// un air par intervalle : [intervalle, titre, contexte, extrait réel (refs/clips, PC seulement), reprise {instrument, notes [midi, début s, durée s]}, étiquette]
+// extraits repérés automatiquement (Demucs + détection des notes, voir refs/notes.py) : l'intervalle y est vérifié.
+// sur le site : notre propre reprise, jouée tout de suite (échantillons MusyngKite, samples/gm)
 const REFS = [
-  ['2m', 'Les Dents de la mer', 'la basse : mi → fa, en boucle, de plus en plus vite', '2m', [[40, .5], [41, .5], [40, .5], [41, .5], [40, .25], [41, .25], [40, .25], [41, .25]], null, ['BePfzCOMRZQ', 4.6, 12.0]],
-  ['2M', 'Mystery of Love (Sufjan Stevens)', '« oh, TO see without my eyes » : les deux premières notes du couplet', '2M', [[64, 1], [66, 1.5]], 'ton top', ['gVVhHjyC04k', 33.6, 37.2]],
-  ['3m', 'Somewhere Only We Know (Keane)', '« i WALKED across an empty land » : la 1re phrase', '3m', [[71, 1], [74, 2]], 'ton top', ['Oextk-If8HQ', 33.6, 37.2]],
-  ['3M', '5e symphonie (Beethoven) ↓', 'pom pom pom POM : la tierce descend (version Karajan, un demi-ton plus haut)', '3M', [[67, .33], [67, .33], [67, .33], [63, 2]], 'à écouter', ['LibOP5yt0TY', 0, 7.5]],
-  ['4J', 'La Marseillaise', '« al-lons EN-fants » : de « lons » à « en »', '4J', [[62, .75], [62, .25], [67, 1], [67, 1], [69, 1], [69, 1], [74, 1.5], [71, .5], [67, 1.5]], null, ['SRl7AzeWwOo', 6.9, 12.6]],
-  ['4+', 'Les Simpson', 'le chœur du générique : « the… SIMP-sons », do → fa♯ (un mi bref au passage)', '4plus', [[60, 2.5], [64, .3], [66, 1.5]], null, ['aPzS3QYb868', 8.8, 13.4]],
-  ['5J', 'Star Wars', 'le thème : après les 3 notes d’appel, si♭ long → fa', '5J', [[62, .33], [62, .33], [62, .33], [67, 2], [74, 2]], null, ['54hoKbTWon4', 8.0, 13.4]],
-  ['6m', 'Manhã de Carnaval ↓', 'le motif à la guitare : si → ré♯ en dessous', '6m', [[71, 1], [63, 2]], 'à écouter', null],
-  ['6M', 'Colors (Black Pumas)', 'l’intro chantée : fa♯ → la, puis le saut la → fa♯ aigu (c’est lui)', '6M', [[66, .5], [69, .5], [78, 1.5]], 'ton top', ['B7PnQBn5k_E', 0, 2.4]],
-  ['7m', 'Star Trek (série originale)', 'la fanfare : mi♭ → ré♭ au-dessus, les deux premières notes', '7m-startrek', [[63, .5], [73, 1.5]], 'à écouter', ['LIQsrvW6Ji4', 8.6, 13.2]],
-  ['7m', 'Watermelon Man (Herbie Hancock)', 'le riff : fa grave → mi♭', '7m-watermelon', [[53, 1], [63, 1.5]], 'à écouter', ['_QkGAaYtXA0', 0, 5.5]],
-  ['7M', 'Take On Me (a-ha)', 'le refrain : « take ON me » — saut de la grave à la note juste sous l’octave, puis « me » retombe sur l’octave', '7M', [[57, 1], [68, 1], [69, 2]], null, ['MIgK3zOk0zg', 51.3, 55.9]],
-  ['8', 'Mystery of Love (Sufjan Stevens)', 'do → do aigu, en début de phrase', '8', [[48, 1], [60, 1.5]], 'ton top', ['gVVhHjyC04k', 167.2, 170.6]],
+  ['2m', 'Les Dents de la mer', 'la basse : mi → fa, en boucle, de plus en plus vite', '2m', { ins: 'contrabass', n: [[40, 0, .8], [41, .9, .8], [40, 1.8, .8], [41, 2.7, .8], [40, 3.6, .4], [41, 4.05, .4], [40, 4.5, .2], [41, 4.75, .2], [40, 5, .2], [41, 5.25, .2], [40, 5.5, .2], [41, 5.75, .3]] }],
+  ['2M', 'Mystery of Love (Sufjan Stevens)', '« oh, TO see without my eyes » : les deux premières notes du couplet', '2M', { ins: 'voice_oohs', n: [[52, 0, .55], [54, .6, 1.2]] }, 'ton top'],
+  ['3m', 'Somewhere Only We Know (Keane)', '« i WALKED across an empty land » : la 1re phrase', '3m', { ins: 'acoustic_grand_piano', n: [[59, 0, .4], [62, .45, 1.4]] }, 'ton top'],
+  ['3M', '5e symphonie (Beethoven) ↓', 'pom pom pom POM : la tierce descend', '3M', { ins: 'string_ensemble_1', n: [[67, 0, .15], [67, .18, .15], [67, .36, .15], [63, .54, 1.6], [65, 2.3, .15], [65, 2.48, .15], [65, 2.66, .15], [62, 2.84, 1.8]] }, 'à écouter'],
+  ['4J', 'La Marseillaise', '« al-lons EN-fants » : de « lons » à « en »', '4J', { ins: 'trumpet', n: [[62, 0, .33], [62, .37, .12], [67, .5, .45], [67, 1, .45], [69, 1.5, .45], [69, 2, .45], [74, 2.5, .7], [71, 3.25, .22], [67, 3.5, 1]] }],
+  ['4+', 'Les Simpson', 'le chœur du générique : « the… SIMP-sons », do → fa♯ (un mi bref au passage)', '4plus', { ins: 'choir_aahs', n: [[60, 0, 1.5], [64, 1.55, .3], [66, 1.9, 1.3]] }],
+  ['5J', 'Star Wars', 'le thème : après les 3 notes d’appel, si♭ long → fa', '5J', { ins: 'brass_section', n: [[65, 0, .17], [65, .2, .17], [65, .4, .17], [70, .6, .95], [77, 1.6, .95], [75, 2.6, .17], [74, 2.8, .17], [72, 3, .17], [82, 3.2, .95], [77, 4.2, .8]] }],
+  ['6m', 'Manhã de Carnaval ↓', 'le motif à la guitare : si → ré♯ en dessous', '6m', { ins: 'acoustic_guitar_nylon', n: [[59, 0, .7], [51, .75, 1.5]] }, 'à écouter'],
+  ['6M', 'Colors (Black Pumas)', 'l’intro chantée : fa♯ → la, puis le saut la → fa♯ aigu (c’est lui)', '6M', { ins: 'voice_oohs', n: [[66, 0, .55], [69, .6, .35], [78, 1, 1.1]] }, 'ton top'],
+  ['7m', 'Star Trek (série originale)', 'la fanfare : mi♭ → ré♭ au-dessus, les deux premières notes', '7m-startrek', { ins: 'french_horn', n: [[51, 0, .4], [61, .45, 1.4]] }, 'à écouter'],
+  ['7m', 'Watermelon Man (Herbie Hancock)', 'le riff : fa grave → mi♭', '7m-watermelon', { ins: 'acoustic_grand_piano', n: [[53, 0, .35], [63, .45, .8], [53, 1.5, .35], [63, 1.95, .9]] }, 'à écouter'],
+  ['7M', 'Take On Me (a-ha)', 'le refrain : « take ON me » — saut de la grave à la note juste sous l’octave, puis « me » retombe sur l’octave', '7M', { ins: 'lead_2_sawtooth', n: [[45, 0, .6], [56, .7, 1], [57, 1.8, 1.2]] }],
+  ['8', 'Mystery of Love (Sufjan Stevens)', 'do → do aigu, en début de phrase', '8', { ins: 'voice_oohs', n: [[48, 0, .85], [60, .9, 1.1]] }, 'ton top'],
 ];
-const refBufs = {};
-// site web : pas d'extraits hébergés (droits) → lecteur YouTube intégré, calé sur le même passage
-let ytP = null, ytReady = null;
-function ytLoad() {
-  if (ytReady) return ytReady;
-  ytReady = new Promise(res => {
-    window.onYouTubeIframeAPIReady = () => {
-      ytP = new YT.Player('ytref', { width: 200, height: 113, playerVars: { controls: 0, playsinline: 1, rel: 0 }, events: { onReady: () => res() } });
-    };
-    const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc);
+const refBufs = {}, gmBufs = {};
+const gmBuf = (ins, m) => (gmBufs[ins + m] = gmBufs[ins + m] || fetch(`samples/gm/${ins}/${m}.mp3`).then(x => x.arrayBuffer()).then(a => AC.decodeAudioData(a)));
+function playCover(r) {
+  audio(); stopAll(); bus = AC.createGain(); bus.connect(dryIn);
+  const b0 = bus, c = r[4];
+  Promise.all(c.n.map(([m]) => gmBuf(c.ins, m))).then(bufs => {
+    if (bus !== b0) return;
+    const t0 = AC.currentTime + 0.03;
+    c.n.forEach(([m, t, d], i) => {
+      const src = AC.createBufferSource(); src.buffer = bufs[i]; const g = AC.createGain();
+      g.gain.setValueAtTime(0, t0 + t); g.gain.linearRampToValueAtTime(0.8, t0 + t + 0.01);
+      g.gain.setValueAtTime(0.8, t0 + t + d); g.gain.linearRampToValueAtTime(0, t0 + t + d + 0.18);
+      src.connect(g); g.connect(bus); src.start(t0 + t); src.stop(t0 + t + d + 0.25);
+    });
+    $('#now').innerHTML = `<span class="nc on">♪ ${esc(r[1])} (reprise)</span>`;
   });
-  return ytReady;
-}
-function playYt(r) {
-  const [id, a, b] = r[6];
-  $('#ytwrap').style.display = '';
-  ytLoad().then(() => { ytP.setVolume(Math.round(settings.volume * 100)); ytP.loadVideoById({ videoId: id, startSeconds: a, endSeconds: b }); });
-  $('#now').innerHTML = `<span class="nc on">♪ ${esc(r[1])}</span>`;
 }
 function playRef(r) {
-  if (WEB && r[6]) { stopAll(); playYt(r); return; }
+  if (WEB) return playCover(r);
   audio(); stopAll(); bus = AC.createGain(); bus.connect(dryIn);
   const b0 = bus, url = `refs/clips/${r[3]}.mp3`;
   (refBufs[url] = refBufs[url] || fetch(url).then(x => x.ok ? x.arrayBuffer() : Promise.reject()).then(a => AC.decodeAudioData(a)))
@@ -971,14 +970,10 @@ function playRef(r) {
       const src = AC.createBufferSource(); src.buffer = buf; const g = AC.createGain(); g.gain.value = 0.9;
       src.connect(g); g.connect(master); src.start(); songSrcs.push({ src, g });
       $('#now').innerHTML = `<span class="nc on">♪ ${esc(r[1])}</span>`;
-    }, () => { delete refBufs[url]; play(refEvents(r)); });   // site web : pas d'extraits (droits), mélodie au Rhodes
-}
-function refEvents(r) {
-  const k = 0.42;   // secondes par temps
-  let t = 0; return r[4].map(([m, d]) => { const e = { m, t, d: d * k * 0.95 }; t += d * k; return e; });
+    }, () => { delete refBufs[url]; playCover(r); });
 }
 function renderRefs() {
-  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">un vrai extrait par intervalle (repéré et vérifié sur les notes). clique ▶.</div><div id="ytwrap" style="display:none;margin-bottom:8px"><div id="ytref"></div></div><table class="refs">` +
+  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">${WEB ? 'un air par intervalle, rejoué ici (reprise). sur le PC : le vrai extrait.' : 'un vrai extrait par intervalle (repéré et vérifié sur les notes).'} clique ▶.</div><table class="refs">` +
     REFS.map((r, i) => `<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}${r[5] ? ` <span class="reftag">${r[5]}</span>` : ''}<br><span class="pmut">${esc(r[2])}</span></td><td><button class="btn sm" data-ref="${i}">▶</button></td></tr>`).join('') + '</table>';
 }
 
@@ -1041,6 +1036,7 @@ $('#fb').addEventListener('click', e => {
 $('#pauseOv').onclick = () => togglePause();
 $('#btnRef').onclick = e => { e.currentTarget.blur(); const h = $('#refbox'); if (h.style.display === 'none') { renderRefs(); h.style.display = ''; $('#help').style.display = 'none'; } else h.style.display = 'none'; };
 $('#refbox').addEventListener('click', e => {
+  if (e.target.closest('a')) return;
   const b = e.target.closest('[data-ref]');
   if (!b) { $('#refbox').style.display = 'none'; return; }
   b.blur(); if (Q && !Q.answered) Q.replays++;   // aide pendant une question = comme une réécoute
