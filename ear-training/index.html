@@ -928,22 +928,41 @@ function fb(html) { $('#fb').innerHTML = html; }
 // un air par intervalle : [intervalle, titre, contexte, extrait réel (refs/clips, PC seulement), mélodie de secours au Rhodes [midi, temps]]
 // extraits repérés automatiquement (Demucs + détection des notes, voir refs/notes.py) : l'intervalle y est vérifié
 const REFS = [
-  ['2m', 'Les Dents de la mer', 'la basse : mi → fa, en boucle, de plus en plus vite', '2m', [[40, .5], [41, .5], [40, .5], [41, .5], [40, .25], [41, .25], [40, .25], [41, .25]]],
-  ['2M', 'Mystery of Love (Sufjan Stevens)', '« oh, TO see without my eyes » : les deux premières notes du couplet', '2M', [[64, 1], [66, 1.5]], 'ton top'],
-  ['3m', 'Somewhere Only We Know (Keane)', '« i WALKED across an empty land » : la 1re phrase', '3m', [[71, 1], [74, 2]], 'ton top'],
-  ['3M', '5e symphonie (Beethoven) ↓', 'pom pom pom POM : la tierce descend (version Karajan, un demi-ton plus haut)', '3M', [[67, .33], [67, .33], [67, .33], [63, 2]], 'à écouter'],
-  ['4J', 'La Marseillaise', '« al-lons EN-fants » : de « lons » à « en »', '4J', [[62, .75], [62, .25], [67, 1], [67, 1], [69, 1], [69, 1], [74, 1.5], [71, .5], [67, 1.5]]],
-  ['4+', 'Les Simpson', 'le chœur du générique : « the… SIMP-sons », do → fa♯ (un mi bref au passage)', '4plus', [[60, 2.5], [64, .3], [66, 1.5]]],
-  ['5J', 'Star Wars', 'le thème : après les 3 notes d’appel, si♭ long → fa', '5J', [[62, .33], [62, .33], [62, .33], [67, 2], [74, 2]]],
-  ['6m', 'Manhã de Carnaval ↓', 'le motif à la guitare : si → ré♯ en dessous', '6m', [[71, 1], [63, 2]], 'à écouter'],
-  ['6M', 'Colors (Black Pumas)', 'l’intro chantée : fa♯ → la, puis le saut la → fa♯ aigu (c’est lui)', '6M', [[66, .5], [69, .5], [78, 1.5]], 'ton top'],
-  ['7m', 'Star Trek (série originale)', 'la fanfare : mi♭ → ré♭ au-dessus, les deux premières notes', '7m-startrek', [[63, .5], [73, 1.5]], 'à écouter'],
-  ['7m', 'Watermelon Man (Herbie Hancock)', 'le riff : fa grave → mi♭', '7m-watermelon', [[53, 1], [63, 1.5]], 'à écouter'],
-  ['7M', 'Take On Me (a-ha)', 'le refrain : « take ON me » — saut de la grave à la note juste sous l’octave, puis « me » retombe sur l’octave', '7M', [[57, 1], [68, 1], [69, 2]]],
-  ['8', 'Mystery of Love (Sufjan Stevens)', 'do → do aigu, en début de phrase', '8', [[48, 1], [60, 1.5]], 'ton top'],
+  ['2m', 'Les Dents de la mer', 'la basse : mi → fa, en boucle, de plus en plus vite', '2m', [[40, .5], [41, .5], [40, .5], [41, .5], [40, .25], [41, .25], [40, .25], [41, .25]], null, ['BePfzCOMRZQ', 4.6, 12.0]],
+  ['2M', 'Mystery of Love (Sufjan Stevens)', '« oh, TO see without my eyes » : les deux premières notes du couplet', '2M', [[64, 1], [66, 1.5]], 'ton top', ['gVVhHjyC04k', 33.6, 37.2]],
+  ['3m', 'Somewhere Only We Know (Keane)', '« i WALKED across an empty land » : la 1re phrase', '3m', [[71, 1], [74, 2]], 'ton top', ['Oextk-If8HQ', 33.6, 37.2]],
+  ['3M', '5e symphonie (Beethoven) ↓', 'pom pom pom POM : la tierce descend (version Karajan, un demi-ton plus haut)', '3M', [[67, .33], [67, .33], [67, .33], [63, 2]], 'à écouter', ['LibOP5yt0TY', 0, 7.5]],
+  ['4J', 'La Marseillaise', '« al-lons EN-fants » : de « lons » à « en »', '4J', [[62, .75], [62, .25], [67, 1], [67, 1], [69, 1], [69, 1], [74, 1.5], [71, .5], [67, 1.5]], null, ['SRl7AzeWwOo', 6.9, 12.6]],
+  ['4+', 'Les Simpson', 'le chœur du générique : « the… SIMP-sons », do → fa♯ (un mi bref au passage)', '4plus', [[60, 2.5], [64, .3], [66, 1.5]], null, ['aPzS3QYb868', 8.8, 13.4]],
+  ['5J', 'Star Wars', 'le thème : après les 3 notes d’appel, si♭ long → fa', '5J', [[62, .33], [62, .33], [62, .33], [67, 2], [74, 2]], null, ['54hoKbTWon4', 8.0, 13.4]],
+  ['6m', 'Manhã de Carnaval ↓', 'le motif à la guitare : si → ré♯ en dessous', '6m', [[71, 1], [63, 2]], 'à écouter', null],
+  ['6M', 'Colors (Black Pumas)', 'l’intro chantée : fa♯ → la, puis le saut la → fa♯ aigu (c’est lui)', '6M', [[66, .5], [69, .5], [78, 1.5]], 'ton top', ['B7PnQBn5k_E', 0, 2.4]],
+  ['7m', 'Star Trek (série originale)', 'la fanfare : mi♭ → ré♭ au-dessus, les deux premières notes', '7m-startrek', [[63, .5], [73, 1.5]], 'à écouter', ['LIQsrvW6Ji4', 8.6, 13.2]],
+  ['7m', 'Watermelon Man (Herbie Hancock)', 'le riff : fa grave → mi♭', '7m-watermelon', [[53, 1], [63, 1.5]], 'à écouter', ['_QkGAaYtXA0', 0, 5.5]],
+  ['7M', 'Take On Me (a-ha)', 'le refrain : « take ON me » — saut de la grave à la note juste sous l’octave, puis « me » retombe sur l’octave', '7M', [[57, 1], [68, 1], [69, 2]], null, ['MIgK3zOk0zg', 51.3, 55.9]],
+  ['8', 'Mystery of Love (Sufjan Stevens)', 'do → do aigu, en début de phrase', '8', [[48, 1], [60, 1.5]], 'ton top', ['gVVhHjyC04k', 167.2, 170.6]],
 ];
 const refBufs = {};
+// site web : pas d'extraits hébergés (droits) → lecteur YouTube intégré, calé sur le même passage
+let ytP = null, ytReady = null;
+function ytLoad() {
+  if (ytReady) return ytReady;
+  ytReady = new Promise(res => {
+    window.onYouTubeIframeAPIReady = () => {
+      ytP = new YT.Player('ytref', { width: 200, height: 113, playerVars: { controls: 0, playsinline: 1, rel: 0 }, events: { onReady: () => res() } });
+    };
+    const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc);
+  });
+  return ytReady;
+}
+function playYt(r) {
+  const [id, a, b] = r[6];
+  $('#ytwrap').style.display = '';
+  ytLoad().then(() => { ytP.setVolume(Math.round(settings.volume * 100)); ytP.loadVideoById({ videoId: id, startSeconds: a, endSeconds: b }); });
+  $('#now').innerHTML = `<span class="nc on">♪ ${esc(r[1])}</span>`;
+}
 function playRef(r) {
+  if (WEB && r[6]) { stopAll(); playYt(r); return; }
   audio(); stopAll(); bus = AC.createGain(); bus.connect(dryIn);
   const b0 = bus, url = `refs/clips/${r[3]}.mp3`;
   (refBufs[url] = refBufs[url] || fetch(url).then(x => x.ok ? x.arrayBuffer() : Promise.reject()).then(a => AC.decodeAudioData(a)))
@@ -959,7 +978,7 @@ function refEvents(r) {
   let t = 0; return r[4].map(([m, d]) => { const e = { m, t, d: d * k * 0.95 }; t += d * k; return e; });
 }
 function renderRefs() {
-  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">un vrai extrait par intervalle (repéré et vérifié sur les notes). clique ▶.</div><table class="refs">` +
+  $('#refbox').innerHTML = `<h3>les intervalles dans des airs connus.</h3><div class="pmut" style="margin-bottom:8px">un vrai extrait par intervalle (repéré et vérifié sur les notes). clique ▶.</div><div id="ytwrap" style="display:none;margin-bottom:8px"><div id="ytref"></div></div><table class="refs">` +
     REFS.map((r, i) => `<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}${r[5] ? ` <span class="reftag">${r[5]}</span>` : ''}<br><span class="pmut">${esc(r[2])}</span></td><td><button class="btn sm" data-ref="${i}">▶</button></td></tr>`).join('') + '</table>';
 }
 
