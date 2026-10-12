@@ -307,10 +307,10 @@ const pulseTimers = [];
 // indicateur de ce qui joue : cadence I IV V I puis « ? » (la question)
 function nowPlaying(events) {
   const el = $('#now'), steps = [];
-  events.forEach(e => { const l = e.lab || '?'; if (!(l === '?' && steps.length && steps[steps.length - 1].l === '?')) steps.push({ l, t: e.t }); });
+  events.forEach(e => { const l = e.lab || '?'; if (!(steps.length && steps[steps.length - 1].l === l)) steps.push({ l, t: e.t }); });
   if (!steps.some(x => x.l !== '?')) { el.innerHTML = ''; return; }
   const pre = events[0] && events[0].pre !== undefined ? events[0].pre : 'cadence';
-  el.innerHTML = (pre ? `<span class="pmut">${pre}</span> ` : '') + steps.map((x, i) => (x.l === '?' && i ? '<span class="pmut"> → </span>' : '') + `<span class="nc" data-i="${i}">${x.l === '?' ? (MODES[settings.mode].mu ? 'là : ?' : 'accord / note ?') : esc(x.l)}</span>`).join('');
+  el.innerHTML = (pre ? `<span class="pmut">${pre}</span> ` : '') + steps.map((x, i) => ((x.l === '?' || x.l.startsWith('juste')) && i ? '<span class="pmut"> → </span>' : '') + `<span class="nc" data-i="${i}">${x.l === '?' ? (MODES[settings.mode].mu ? 'là : ?' : 'accord / note ?') : esc(x.l)}</span>`).join('');
   steps.forEach((x, i) => pulseTimers.push(setTimeout(() => el.querySelectorAll('.nc').forEach(c => c.classList.toggle('on', +c.dataset.i === i)), (x.t + 0.05) * 1000)));
 }
 function play(events) {
@@ -858,7 +858,7 @@ const ansBtn = id => [...document.querySelectorAll('.ans')].find(b => b.dataset.
 function answer(id) {
   if (!Q || paused) return;
   const M = MODES[Q.mode];
-  if (Q.answered) { play(M.events(id, Q.p, false)); return; }   // comparer
+  if (Q.answered) { play(M.events(id, Q.p, false)); if (!M.mu) padStart(M.pad(id, Q.p), 0.05); return; }   // comparer (la nappe suit)
   Q.answered = true; $('#btnNext').disabled = false;
   padStop(1.6); Q.revealT = performance.now();
   const ok = id === Q.item;
@@ -896,6 +896,7 @@ function answer(id) {
   } else {
     fx.splat(bMine); hero.shake = 1;
     fb(`<b>non. c'était ${esc(label(Q.mode, Q.item))}.</b> tu as dit ${esc(id)}. écoute les deux.${info}`);
+    if (!M.mu) demoWrong(M, id);
   }
   if (M.mu) $('#fb').insertAdjacentHTML('beforeend', ' <button class="lnk" id="muBad" title="l\'analyse automatique s\'est trompée : cet extrait ne sera plus proposé">⚑ extrait douteux</button>');
   if (cyc.recs.length >= CYCLE) endCycle(ctx);
@@ -908,6 +909,14 @@ function answer(id) {
     if (bOk) { const b = bOk.getBoundingClientRect(); fx.floats.push({ x: b.left + b.width / 2, y: b.top - 24, txt: `niv. ${ilAfter} !`, t: -0.25 }); }
   }
   renderHeader(); renderSess();
+}
+// erreur : ta réponse, puis la bonne, chacune avec sa nappe
+function demoWrong(M, id) {
+  const q = Q, a = M.events(id, q.p, false), b = M.events(q.item, q.p, false);
+  const d1 = Math.max(...a.map(e => e.t + e.d)) + 0.45;
+  play([...a.map(e => ({ ...e, lab: 'toi : ' + id, pre: '' })), ...b.map(e => ({ ...e, t: e.t + d1, lab: 'juste : ' + q.item }))]);
+  padStart(M.pad(id, q.p), 0.05);
+  setTimeout(() => { if (Q === q && !paused) padStart(M.pad(q.item, q.p), 0); }, d1 * 1000);
 }
 function fb(html) { $('#fb').innerHTML = html; }
 
