@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Noé vu par vous</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap">
+<style>
+body{margin:0}
+/* Layout : une colonne, une affirmation par bloc, réponses en pastilles d'un tap, barre de progression collante */
+:root{
+  --bg:#f3f6f7; --card:#ffffff; --fg:#1d2a30; --muted:#5f7078; --line:#d5dfe3;
+  --accent:#1f6f78; --accent-soft:#dcecee; --ok:#2f7a4a;
+  --display:"Young Serif",Georgia,serif; --body:"Figtree",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12191c; --card:#1a2428; --fg:#e4ecef; --muted:#93a5ac; --line:#2c3a40;
+  --accent:#5fb7bf; --accent-soft:#1f3438; --ok:#6cc48c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12191c; --card:#1a2428; --fg:#e4ecef; --muted:#93a5ac; --line:#2c3a40;
+  --accent:#5fb7bf; --accent-soft:#1f3438; --ok:#6cc48c; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--display);font-weight:400;font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:8px 0 0}
+.intro{color:var(--muted);margin:0}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding-block:8px;display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.track{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.fill{height:100%;width:0;background:var(--accent)}
+.list{display:flex;flex-direction:column;gap:14px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.item p{margin:0;font-weight:500}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opts label{cursor:pointer}
+.opts input{position:absolute;opacity:0;pointer-events:none}
+.opts span{display:inline-block;padding:7px 11px;border-radius:999px;border:1px solid var(--line);font-size:.9rem;color:var(--muted)}
+.opts input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:600}
+.opts input:focus-visible+span,button:focus-visible,input[type=text]:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{color:var(--muted);font-size:.9rem;margin:0}
+input[type=text],textarea{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;box-sizing:border-box}
+textarea{min-height:70px;resize:vertical}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+button{font:inherit;font-weight:600;border-radius:8px;padding:12px 18px;cursor:pointer;border:1px solid var(--accent)}
+.primary{background:var(--accent);color:var(--card)}
+.secondary{background:transparent;color:var(--accent)}
+.status{margin:0;color:var(--muted)}
+.status.ok{color:var(--ok)}
+#copyBox{min-height:140px;font-size:.85rem}
+</style>
+
+</head><body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Noé vu par vous</h1>
+    <p class="intro">Noé essaie de mieux se connaître pour progresser. Pour chaque phrase, dis à quel point elle lui ressemble. C'est rapide, environ 5 minutes. Réponds franchement : les points moins flatteurs sont les plus utiles.</p>
+  </header>
+  <div class="q" style="display:flex;flex-direction:column;gap:6px"><label for="qui" style="font-weight:600">Ton prénom</label><input type="text" id="qui" placeholder="ex. Marie"></div>
+  <div style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:600">Tu es, pour Noé…</span><div class="opts" id="lienBox" role="radiogroup" aria-label="Lien avec Noé"></div></div>
+  <div class="bar"><div class="track"><div class="fill" id="fill"></div></div><span id="count">0 / 0</span></div>
+  <form id="f" novalidate></form>
+  <div class="q" style="display:flex;flex-direction:column;gap:6px"><label for="autre" style="font-weight:600">Un mot à lui dire ? <span class="hint" style="display:inline">(facultatif)</span></label><textarea id="autre"></textarea></div>
+  <div class="actions">
+    <button class="primary" id="wa" type="button">Envoyer par WhatsApp</button>
+    <button class="secondary" id="send" type="button">Envoyer par mail</button>
+    <button class="secondary" id="copy" type="button">Copier mes réponses</button>
+  </div>
+  <p class="status" id="status">Tes réponses sont gardées sur cet appareil si tu t'arrêtes en route.</p>
+  <textarea id="copyBox" hidden readonly aria-label="Réponses à copier"></textarea>
+</div>
+
+<script>
+const SCALE=["Pas du tout","Un peu","Moyen","Assez","Tout à fait","Je sais pas"];
+const PARTS=[
+ ["Avec les autres",[
+  ["ecoute","Il écoute vraiment quand on lui parle."],
+  ["nouvelles","Il pense à prendre des nouvelles."],
+  ["ressent","Il dit ce qu'il ressent."],
+  ["blesse","Il peut blesser sans s'en rendre compte."],
+  ["critiques","Il accepte bien les critiques."],
+  ["conflit","Il se ferme ou fuit quand il y a un conflit."],
+  ["present","Il est là quand quelqu'un va mal."],
+  ["famille","On peut compter sur lui en famille."]]],
+ ["Organisation",[
+  ["engagements","Il tient ses engagements (horaires, promesses)."],
+  ["projets","Il lance beaucoup de projets sans les finir."],
+  ["argent","Il gère bien son argent."],
+  ["anticipe","Il prévoit les choses à l'avance."],
+  ["retard","Il est souvent en retard."]]],
+ ["Énergie et moral",[
+  ["bien","Il a l'air bien dans sa peau en ce moment."],
+  ["sante","Il prend soin de lui (sommeil, alimentation)."],
+  ["hautsbas","Il a des hauts et des bas marqués."],
+  ["dur","Il est dur avec lui-même."],
+  ["stress","Il stresse facilement."],
+  ["ralentir","Il sait se poser et ralentir."]]],
+ ["Caractère",[
+  ["bout","Il va au bout de ce qu'il entreprend."],
+  ["risques","Il ose prendre des risques."],
+  ["compare","Il se compare beaucoup aux autres."],
+  ["confiance","Il a confiance en lui."],
+  ["aide","Il sait demander de l'aide."],
+  ["mieux","Il a changé en mieux ces dernières années."]]],
+];
+const FORCES=["Créatif","Drôle","Courageux","Généreux","Physique, sportif","Curieux","Débrouillard","Sensible","Loyal","Enthousiaste","Persévérant","Ouvert d'esprit"];
+const AXES=["Organisation","Écoute","Patience","Gérer ses émotions","Finir ce qu'il commence","Prendre soin de lui","Argent","Communiquer","Confiance en lui","Ralentir","Fiabilité"];
+const ITEMS=PARTS.flatMap(p=>p[1]);
+const LIENS=["Sa mère","Son père","Sa sœur","Son frère","Sa copine","Un·e ami·e","Famille (autre)","Collègue","Autre"];
+document.getElementById('lienBox').innerHTML=LIENS.map((s,i)=>`<label><input type="radio" name="lien" id="lien_${i}" value="${s}"><span>${s}</span></label>`).join('');
+document.getElementById('lienBox').addEventListener('change',save);
+const TOTAL=ITEMS.length+2;
+const f=document.getElementById('f');
+let html='';
+for(const [titre,items] of PARTS){
+  html+=`<h2>${titre}</h2><div class="list">`;
+  for(const [id,q] of items){
+    html+=`<div class="item" role="radiogroup" aria-label="${q}"><p>${q}</p><div class="opts">${
+      SCALE.map((s,i)=>`<label><input type="radio" name="${id}" id="${id}_${i}" value="${i}"><span>${s}</span></label>`).join('')}</div></div>`;
+  }
+  html+='</div>';
+}
+const multi=(id,titre,list)=>`<h2>${titre}</h2><p class="hint">Choisis jusqu'à 3.</p><div class="item"><div class="opts">${
+  list.map((s,i)=>`<label><input type="checkbox" name="${id}" id="${id}_${i}" value="${s}"><span>${s}</span></label>`).join('')}</div></div>`;
+html+=multi('forces','Ses 3 plus grandes forces',FORCES)+multi('axes','Les 3 points où il gagnerait le plus à progresser',AXES);
+f.innerHTML=html;
+
+f.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.type==='checkbox'){const on=f.querySelectorAll(`input[name="${t.name}"]:checked`);if(on.length>3)t.checked=false}
+  save();progress();
+});
+f.addEventListener('submit',e=>e.preventDefault());
+document.getElementById('qui').addEventListener('input',save);
+document.getElementById('autre').addEventListener('input',save);
+
+function collect(){
+  const lc=document.querySelector('input[name="lien"]:checked');
+  const a={qui:document.getElementById('qui').value.trim(),lien:lc?lc.value:'',autre:document.getElementById('autre').value.trim(),notes:{}};
+  for(const [id] of ITEMS){const c=f.querySelector(`input[name="${id}"]:checked`);if(c)a.notes[id]=+c.value}
+  for(const k of ['forces','axes'])a[k]=[...f.querySelectorAll(`input[name="${k}"]:checked`)].map(x=>x.value);
+  return a;
+}
+function progress(){
+  const a=collect();const n=Object.keys(a.notes).length+(a.forces.length?1:0)+(a.axes.length?1:0);
+  document.getElementById('count').textContent=`${n} / ${TOTAL}`;
+  document.getElementById('fill').style.width=(100*n/TOTAL)+'%';
+}
+const KEY='noe-vu-par-vous-v2';
+function save(){try{localStorage.setItem(KEY,JSON.stringify(collect()))}catch(e){}}
+try{const a=JSON.parse(localStorage.getItem(KEY));if(a){
+  document.getElementById('qui').value=a.qui||'';document.getElementById('autre').value=a.autre||'';
+  if(a.lien){const r=[...document.querySelectorAll('input[name="lien"]')].find(x=>x.value===a.lien);if(r)r.checked=true}
+  for(const k in a.notes||{}){const r=document.getElementById(k+'_'+a.notes[k]);if(r)r.checked=true}
+  for(const k of ['forces','axes'])for(const v of a[k]||[]){const r=[...f.querySelectorAll(`input[name="${k}"]`)].find(x=>x.value===v);if(r)r.checked=true}
+}}catch(e){}
+progress();
+
+function asText(a){
+  let t=`Noé vu par : ${a.qui||'?'} (${a.lien||'lien ?'})\n\n`;
+  for(const [titre,items] of PARTS){
+    t+=`${titre}\n`;
+    for(const [id,q] of items) t+=`- ${q} ${a.notes[id]!=null?SCALE[a.notes[id]]:'(pas répondu)'}\n`;
+    t+='\n';
+  }
+  t+=`Forces : ${a.forces.join(', ')||'-'}\nÀ travailler : ${a.axes.join(', ')||'-'}\n`;
+  if(a.autre)t+=`\nMot : ${a.autre}\n`;
+  return t.trim();
+}
+const st=document.getElementById('status'),box=document.getElementById('copyBox');
+function say(m,ok){st.textContent=m;st.className='status'+(ok?' ok':'')}
+function ready(){const a=collect();if(!a.qui||!a.lien){say('Indique ton prénom et ton lien avec Noé en haut avant d’envoyer.');document.getElementById('qui').focus();return null}return a}
+document.getElementById('wa').addEventListener('click',()=>{const a=ready();if(!a)return;
+  location.href='https://wa.me/?text='+encodeURIComponent(asText(a));say('WhatsApp s’ouvre : choisis Noé et envoie.',true)});
+document.getElementById('send').addEventListener('click',()=>{const a=ready();if(!a)return;
+  location.href='mailto:dagonet.noe@gmail.com?subject='+encodeURIComponent('Noé vu par '+a.qui)+'&body='+encodeURIComponent(asText(a));say('Ton appli mail s’ouvre : il reste à appuyer sur Envoyer.',true)});
+document.getElementById('copy').addEventListener('click',async()=>{
+  const t=asText(collect());box.value=t;
+  try{await navigator.clipboard.writeText(t);box.hidden=true;say('Copié. Colle-le dans WhatsApp pour Noé.',true)}
+  catch(e){box.hidden=false;box.focus();box.select();say('Copie le texte ci-dessous et envoie-le à Noé.')}
+});
+</script>
+
+</body></html>
